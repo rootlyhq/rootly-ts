@@ -7,7 +7,9 @@ generate:
 	@echo "Generating TypeScript types from Rootly OpenAPI spec..."
 	@mkdir -p src/generated
 	npx openapi-typescript "$(SPEC_URL)" -o "$(SCHEMA_OUTPUT)"
-	@echo "Done! Types written to $(SCHEMA_OUTPUT)"
+	@echo "Generating convenience type aliases..."
+	npx tsx scripts/generate-types.ts
+	@echo "Done!"
 
 build:
 	npx tsup

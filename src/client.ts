@@ -1,6 +1,10 @@
 import createClient, { type Client } from "openapi-fetch";
 import type { paths } from "./generated/schema.js";
-import { createAuthMiddleware } from "./middleware.js";
+import {
+  createAuthMiddleware,
+  createRateLimitMiddleware,
+  type RateLimitOptions,
+} from "./middleware.js";
 
 export interface RootlyClientOptions {
   /** Rootly API token (Bearer token) */
@@ -9,6 +13,8 @@ export interface RootlyClientOptions {
   baseUrl?: string;
   /** Custom fetch implementation (e.g., for testing) */
   fetch?: typeof globalThis.fetch;
+  /** Rate limit retry options. Set to false to disable. Defaults to enabled with 3 retries. */
+  rateLimit?: RateLimitOptions | false;
 }
 
 export class RootlyClient {
@@ -20,6 +26,7 @@ export class RootlyClient {
       token,
       baseUrl = "https://api.rootly.com",
       fetch: customFetch,
+      rateLimit,
     } = options;
 
     this.client = createClient<paths>({
@@ -28,5 +35,13 @@ export class RootlyClient {
     });
 
     this.client.use(createAuthMiddleware(token));
+
+    if (rateLimit !== false) {
+      this.client.use(
+        createRateLimitMiddleware(
+          typeof rateLimit === "object" ? rateLimit : undefined,
+        ),
+      );
+    }
   }
 }
