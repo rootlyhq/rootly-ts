@@ -1,0 +1,55 @@
+{
+  "name": "rootly-ts",
+  "version": "0.1.0",
+  "description": "Type-safe TypeScript SDK for the Rootly API",
+  "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      },
+      "require": {
+        "types": "./dist/index.d.cts",
+        "default": "./dist/index.cjs"
+      }
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "generate": "make generate",
+    "build": "make build",
+    "typecheck": "make typecheck",
+    "test": "make test",
+    "prepublishOnly": "make build"
+  },
+  "dependencies": {
+    "openapi-fetch": "^0.13.5"
+  },
+  "devDependencies": {
+    "openapi-typescript": "^7.6.1",
+    "tsup": "^8.4.0",
+    "typescript": "^5.8.3",
+    "vitest": "^3.1.1"
+  },
+  "keywords": [
+    "rootly",
+    "incident-management",
+    "api-client",
+    "typescript",
+    "openapi"
+  ],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/rootlyhq/rootly-ts"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
