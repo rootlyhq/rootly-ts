@@ -26,10 +26,11 @@
     "build": "make build",
     "typecheck": "make typecheck",
     "test": "make test",
+    "prepare": "npx tsup",
     "prepublishOnly": "make build"
   },
   "dependencies": {
-    "openapi-fetch": "^0.13.5"
+    "openapi-fetch": "^0.17.0"
   },
   "devDependencies": {
     "openapi-typescript": "^7.6.1",
