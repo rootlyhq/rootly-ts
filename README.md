@@ -1,4 +1,4 @@
-# rootly-ts
+# @rootly/ts
 
 Type-safe TypeScript SDK for the [Rootly](https://rootly.com) API, powered by [openapi-typescript](https://github.com/openapi-ts/openapi-typescript) and [openapi-fetch](https://openapi-ts.dev/openapi-fetch/).
 
@@ -10,13 +10,13 @@ Type-safe TypeScript SDK for the [Rootly](https://rootly.com) API, powered by [o
 ## Installation
 
 ```bash
-npm install rootly-ts
+npm install @rootly/ts
 ```
 
 ## Quick Start
 
 ```typescript
-import { RootlyClient } from "rootly-ts";
+import { RootlyClient } from "@rootly/ts";
 
 const rootly = new RootlyClient({
   token: process.env.ROOTLY_API_TOKEN!,
@@ -99,7 +99,7 @@ console.log(data);
 ## Using Types
 
 ```typescript
-import type { components } from "rootly-ts";
+import type { components } from "@rootly/ts";
 
 type Incident = components["schemas"]["incident"];
 type IncidentResponse = components["schemas"]["incident_response"];
@@ -133,8 +133,8 @@ const rootly = new RootlyClient({
 For direct access to the underlying openapi-fetch client with full type inference:
 
 ```typescript
-import { createClient, type paths } from "rootly-ts";
-import { createAuthMiddleware } from "rootly-ts";
+import { createClient, type paths } from "@rootly/ts";
+import { createAuthMiddleware } from "@rootly/ts";
 
 const client = createClient<paths>({
   baseUrl: "https://api.rootly.com",
@@ -145,7 +145,7 @@ client.use(createAuthMiddleware("your-token"));
 
 ## Requirements
 
-- Node.js >= 18 (native `fetch` required)
+- Node.js >= 20 (native `fetch` required)
 
 ## Development
 
