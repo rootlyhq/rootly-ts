@@ -52,6 +52,6 @@
     "url": "https://github.com/rootlyhq/rootly-ts"
   },
   "engines": {
-    "node": ">=18"
+    "node": ">=20"
   }
 }
