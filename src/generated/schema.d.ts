@@ -4317,6 +4317,154 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/incidents/{incident_id}/meeting_recordings": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List meeting recordings
+         * @description List all meeting recording sessions for an incident. Returns recordings sorted by session number. Each recording represents one bot session with its own transcript, status, and metadata.
+         */
+        get: operations["listMeetingRecordings"];
+        put?: never;
+        /**
+         * Create meeting recording
+         * @description Invite a recording bot to the incident's meeting. If no previous recordings exist for the platform, a new bot is invited (session 1). If previous sessions exist, a new session is created (re-invite). The bot joins the meeting, records audio/video, and generates a transcript when the session ends.
+         */
+        post: operations["createMeetingRecording"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/meeting_recordings/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get a meeting recording
+         * @description Retrieve a single meeting recording session including its status, duration, speaker count, word count, and transcript summary.
+         */
+        get: operations["getMeetingRecording"];
+        put?: never;
+        post?: never;
+        /**
+         * Delete a meeting recording
+         * @description Delete a meeting recording. Only completed or failed recordings can be deleted. Active recordings (pending, recording, paused) must be stopped first.
+         */
+        delete: operations["deleteMeetingRecording"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/meeting_recordings/{id}/delete_video": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /**
+         * Delete video from a meeting recording
+         * @description Delete only the video file from a meeting recording. The transcript, summary, and all metadata are preserved. Only non-active recordings with an attached video can have their video deleted.
+         */
+        delete: operations["deleteMeetingRecordingVideo"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/meeting_recordings/{id}/pause": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Pause a meeting recording
+         * @description Pause an active recording session. The bot remains in the meeting but stops capturing audio/video. Use the resume endpoint to continue recording.
+         */
+        post: operations["pauseMeetingRecording"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/meeting_recordings/{id}/resume": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Resume a meeting recording
+         * @description Resume a paused recording session. The bot continues capturing audio/video from the meeting.
+         */
+        post: operations["resumeMeetingRecording"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/meeting_recordings/{id}/stop": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Stop a meeting recording
+         * @description Stop an active or paused recording. The bot finishes processing, generates a transcript, and the session status transitions to completed. This is irreversible — to record again, create a new session.
+         */
+        post: operations["stopMeetingRecording"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/meeting_recordings/{id}/leave": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Leave a meeting call
+         * @description Remove the recording bot from the meeting entirely. Unlike stop, this immediately disconnects the bot. The session will transition to analyzing and then completed once transcript processing finishes.
+         */
+        post: operations["leaveMeetingRecording"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/on_call_pay_reports": {
         parameters: {
             query?: never;
@@ -4491,7 +4639,7 @@ export interface paths {
         post?: never;
         /**
          * Delete an on call shadow configuration
-         * @description Delete a specific on call shadow configuration by id
+         * @description Delete a specific on call shadow configuration by id. Future shadows are hard-deleted. Active shadows (started in the past) have their end time truncated to preserve historical data.
          */
         delete: operations["deleteOnCallShadow"];
         options?: never;
@@ -8234,7 +8382,7 @@ export interface components {
              * @description Describes the object in which the action was taken on
              * @enum {string|null}
              */
-            item_type?: "ApiKey" | "Catalog" | "CatalogEntity" | "CatalogEntityProperty" | "CatalogField" | "Cause" | "CustomField" | "CustomFieldOption" | "CustomForm" | "Dashboard" | "EdgeConnector" | "EdgeConnector::Action" | "Environment" | "EscalationPolicy" | "EscalationPolicyPath" | "ExportJob" | "FormField" | "Functionality" | "GeniusWorkflow" | "GeniusWorkflowGroup" | "GeniusWorkflowRun" | "Group" | "Heartbeat" | "Incident" | "IncidentActionItem" | "IncidentEvent" | "IncidentFormFieldSelection" | "IncidentFormFieldSelectionUser" | "IncidentPostMortem" | "IncidentRoleAssignment" | "IncidentRoleTask" | "IncidentStatusPageEvent" | "IncidentTask" | "IncidentType" | "LiveCallRouter" | "OnCallRole" | "Playbook" | "PlaybookTask" | "Role" | "Schedule" | "Service" | "Severity" | "StatusPage" | null;
+            item_type?: "Alerts::Source" | "ApiKey" | "Catalog" | "CatalogEntity" | "CatalogEntityProperty" | "CatalogField" | "Cause" | "CustomField" | "CustomFieldOption" | "CustomForm" | "Dashboard" | "EdgeConnector" | "EdgeConnector::Action" | "Environment" | "EscalationPolicy" | "EscalationPolicyPath" | "ExportJob" | "FormField" | "Functionality" | "GeniusWorkflow" | "GeniusWorkflowGroup" | "GeniusWorkflowRun" | "Group" | "Heartbeat" | "Incident" | "IncidentActionItem" | "IncidentEvent" | "IncidentFormFieldSelection" | "IncidentFormFieldSelectionUser" | "IncidentPostMortem" | "IncidentRoleAssignment" | "IncidentRoleTask" | "IncidentStatusPageEvent" | "IncidentTask" | "IncidentType" | "LiveCallRouter" | "OnCallRole" | "Playbook" | "PlaybookTask" | "Role" | "Schedule" | "Service" | "Severity" | "StatusPage" | null;
             /** @description The object in which the action was taken on */
             object?: Record<string, never> | null;
             /** @description The changes that occurred on the object */
@@ -9744,7 +9892,7 @@ export interface components {
                             }[];
                             group_by?: (string | null) | ({
                                 /** @enum {string} */
-                                key: "custom_field" | "incident_role";
+                                key: "custom_field" | "incident_role" | "alert_field";
                                 value: string;
                             } | null);
                             aggregate?: {
@@ -9804,7 +9952,7 @@ export interface components {
                             }[];
                             group_by?: (string | null) | ({
                                 /** @enum {string} */
-                                key: "custom_field" | "incident_role";
+                                key: "custom_field" | "incident_role" | "alert_field";
                                 value: string;
                             } | null);
                             aggregate?: {
@@ -9862,7 +10010,7 @@ export interface components {
                     }[];
                     group_by?: (string | null) | ({
                         /** @enum {string} */
-                        key: "custom_field" | "incident_role";
+                        key: "custom_field" | "incident_role" | "alert_field";
                         value: string;
                     } | null);
                     aggregate?: {
@@ -10336,7 +10484,7 @@ export interface components {
                          * @description Time zone for business hours
                          * @enum {string|null}
                          */
-                        time_zone?: "International Date Line West" | "Etc/GMT+12" | "American Samoa" | "Pacific/Pago_Pago" | "Midway Island" | "Pacific/Midway" | "Hawaii" | "Pacific/Honolulu" | "Alaska" | "America/Juneau" | "Pacific Time (US & Canada)" | "America/Los_Angeles" | "Tijuana" | "America/Tijuana" | "Arizona" | "America/Phoenix" | "Mazatlan" | "America/Mazatlan" | "Mountain Time (US & Canada)" | "America/Denver" | "Central America" | "America/Guatemala" | "Central Time (US & Canada)" | "America/Chicago" | "Chihuahua" | "America/Chihuahua" | "Guadalajara" | "America/Mexico_City" | "Mexico City" | "America/Mexico_City" | "Monterrey" | "America/Monterrey" | "Saskatchewan" | "America/Regina" | "Bogota" | "America/Bogota" | "Eastern Time (US & Canada)" | "America/New_York" | "Indiana (East)" | "America/Indiana/Indianapolis" | "Lima" | "America/Lima" | "Quito" | "America/Lima" | "Atlantic Time (Canada)" | "America/Halifax" | "Caracas" | "America/Caracas" | "Georgetown" | "America/Guyana" | "La Paz" | "America/La_Paz" | "Puerto Rico" | "America/Puerto_Rico" | "Santiago" | "America/Santiago" | "Newfoundland" | "America/St_Johns" | "Asuncion" | "America/Asuncion" | "Brasilia" | "America/Sao_Paulo" | "Buenos Aires" | "America/Argentina/Buenos_Aires" | "Montevideo" | "America/Montevideo" | "Greenland" | "America/Nuuk" | "Mid-Atlantic" | "Atlantic/South_Georgia" | "Azores" | "Atlantic/Azores" | "Cape Verde Is." | "Atlantic/Cape_Verde" | "Casablanca" | "Africa/Casablanca" | "Dublin" | "Europe/Dublin" | "Edinburgh" | "Europe/London" | "Lisbon" | "Europe/Lisbon" | "London" | "Europe/London" | "Monrovia" | "Africa/Monrovia" | "UTC" | "Etc/UTC" | "Amsterdam" | "Europe/Amsterdam" | "Belgrade" | "Europe/Belgrade" | "Berlin" | "Europe/Berlin" | "Bern" | "Europe/Zurich" | "Bratislava" | "Europe/Bratislava" | "Brussels" | "Europe/Brussels" | "Budapest" | "Europe/Budapest" | "Copenhagen" | "Europe/Copenhagen" | "Ljubljana" | "Europe/Ljubljana" | "Madrid" | "Europe/Madrid" | "Paris" | "Europe/Paris" | "Prague" | "Europe/Prague" | "Rome" | "Europe/Rome" | "Sarajevo" | "Europe/Sarajevo" | "Skopje" | "Europe/Skopje" | "Stockholm" | "Europe/Stockholm" | "Vienna" | "Europe/Vienna" | "Warsaw" | "Europe/Warsaw" | "West Central Africa" | "Africa/Algiers" | "Zagreb" | "Europe/Zagreb" | "Zurich" | "Europe/Zurich" | "Athens" | "Europe/Athens" | "Bucharest" | "Europe/Bucharest" | "Cairo" | "Africa/Cairo" | "Harare" | "Africa/Harare" | "Helsinki" | "Europe/Helsinki" | "Jerusalem" | "Asia/Jerusalem" | "Kaliningrad" | "Europe/Kaliningrad" | "Pretoria" | "Africa/Johannesburg" | "Riga" | "Europe/Riga" | "Sofia" | "Europe/Sofia" | "Tallinn" | "Europe/Tallinn" | "Vilnius" | "Europe/Vilnius" | "Baghdad" | "Asia/Baghdad" | "Istanbul" | "Europe/Istanbul" | "Kuwait" | "Asia/Kuwait" | "Minsk" | "Europe/Minsk" | "Moscow" | "Europe/Moscow" | "Nairobi" | "Africa/Nairobi" | "Riyadh" | "Asia/Riyadh" | "St. Petersburg" | "Europe/Moscow" | "Volgograd" | "Europe/Volgograd" | "Tehran" | "Asia/Tehran" | "Abu Dhabi" | "Asia/Muscat" | "Baku" | "Asia/Baku" | "Muscat" | "Asia/Muscat" | "Samara" | "Europe/Samara" | "Tbilisi" | "Asia/Tbilisi" | "Yerevan" | "Asia/Yerevan" | "Kabul" | "Asia/Kabul" | "Almaty" | "Asia/Almaty" | "Astana" | "Asia/Almaty" | "Ekaterinburg" | "Asia/Yekaterinburg" | "Islamabad" | "Asia/Karachi" | "Karachi" | "Asia/Karachi" | "Tashkent" | "Asia/Tashkent" | "Chennai" | "Asia/Kolkata" | "Kolkata" | "Asia/Kolkata" | "Mumbai" | "Asia/Kolkata" | "New Delhi" | "Asia/Kolkata" | "Sri Jayawardenepura" | "Asia/Colombo" | "Kathmandu" | "Asia/Kathmandu" | "Dhaka" | "Asia/Dhaka" | "Urumqi" | "Asia/Urumqi" | "Bangkok" | "Asia/Bangkok" | "Hanoi" | "Asia/Bangkok" | "Jakarta" | "Asia/Jakarta" | "Krasnoyarsk" | "Asia/Krasnoyarsk" | "Novosibirsk" | "Asia/Novosibirsk" | "Beijing" | "Asia/Shanghai" | "Chongqing" | "Asia/Chongqing" | "Hong Kong" | "Asia/Hong_Kong" | "Irkutsk" | "Asia/Irkutsk" | "Kuala Lumpur" | "Asia/Kuala_Lumpur" | "Perth" | "Australia/Perth" | "Singapore" | "Asia/Singapore" | "Taipei" | "Asia/Taipei" | "Ulaanbaatar" | "Asia/Ulaanbaatar" | "Osaka" | "Asia/Tokyo" | "Sapporo" | "Asia/Tokyo" | "Seoul" | "Asia/Seoul" | "Tokyo" | "Asia/Tokyo" | "Yakutsk" | "Asia/Yakutsk" | "Adelaide" | "Australia/Adelaide" | "Darwin" | "Australia/Darwin" | "Brisbane" | "Australia/Brisbane" | "Canberra" | "Australia/Canberra" | "Guam" | "Pacific/Guam" | "Hobart" | "Australia/Hobart" | "Melbourne" | "Australia/Melbourne" | "Port Moresby" | "Pacific/Port_Moresby" | "Sydney" | "Australia/Sydney" | "Vladivostok" | "Asia/Vladivostok" | "Magadan" | "Asia/Magadan" | "New Caledonia" | "Pacific/Noumea" | "Solomon Is." | "Pacific/Guadalcanal" | "Srednekolymsk" | "Asia/Srednekolymsk" | "Auckland" | "Pacific/Auckland" | "Fiji" | "Pacific/Fiji" | "Kamchatka" | "Asia/Kamchatka" | "Marshall Is." | "Pacific/Majuro" | "Wellington" | "Pacific/Auckland" | "Chatham Is." | "Pacific/Chatham" | "Nuku'alofa" | "Pacific/Tongatapu" | "Samoa" | "Pacific/Apia" | "Tokelau Is." | "Pacific/Fakaofo" | null;
+                        time_zone?: "International Date Line West" | "Etc/GMT+12" | "American Samoa" | "Pacific/Pago_Pago" | "Midway Island" | "Pacific/Midway" | "Hawaii" | "Pacific/Honolulu" | "Alaska" | "America/Juneau" | "Pacific Time (US & Canada)" | "America/Los_Angeles" | "Tijuana" | "America/Tijuana" | "Arizona" | "America/Phoenix" | "Mazatlan" | "America/Mazatlan" | "Mountain Time (US & Canada)" | "America/Denver" | "Central America" | "America/Guatemala" | "Central Time (US & Canada)" | "America/Chicago" | "Chihuahua" | "America/Chihuahua" | "Guadalajara" | "America/Mexico_City" | "Mexico City" | "America/Mexico_City" | "Monterrey" | "America/Monterrey" | "Saskatchewan" | "America/Regina" | "Bogota" | "America/Bogota" | "Eastern Time (US & Canada)" | "America/New_York" | "Indiana (East)" | "America/Indiana/Indianapolis" | "Lima" | "America/Lima" | "Quito" | "America/Lima" | "Atlantic Time (Canada)" | "America/Halifax" | "Caracas" | "America/Caracas" | "Georgetown" | "America/Guyana" | "La Paz" | "America/La_Paz" | "Puerto Rico" | "America/Puerto_Rico" | "Santiago" | "America/Santiago" | "Newfoundland" | "America/St_Johns" | "Asuncion" | "America/Asuncion" | "Brasilia" | "America/Sao_Paulo" | "Buenos Aires" | "America/Argentina/Buenos_Aires" | "Montevideo" | "America/Montevideo" | "Greenland" | "America/Nuuk" | "Mid-Atlantic" | "Atlantic/South_Georgia" | "Azores" | "Atlantic/Azores" | "Cape Verde Is." | "Atlantic/Cape_Verde" | "Edinburgh" | "Europe/London" | "Lisbon" | "Europe/Lisbon" | "London" | "Europe/London" | "Monrovia" | "Africa/Monrovia" | "UTC" | "Etc/UTC" | "Amsterdam" | "Europe/Amsterdam" | "Belgrade" | "Europe/Belgrade" | "Berlin" | "Europe/Berlin" | "Bern" | "Europe/Zurich" | "Bratislava" | "Europe/Bratislava" | "Brussels" | "Europe/Brussels" | "Budapest" | "Europe/Budapest" | "Casablanca" | "Africa/Casablanca" | "Copenhagen" | "Europe/Copenhagen" | "Dublin" | "Europe/Dublin" | "Ljubljana" | "Europe/Ljubljana" | "Madrid" | "Europe/Madrid" | "Paris" | "Europe/Paris" | "Prague" | "Europe/Prague" | "Rome" | "Europe/Rome" | "Sarajevo" | "Europe/Sarajevo" | "Skopje" | "Europe/Skopje" | "Stockholm" | "Europe/Stockholm" | "Vienna" | "Europe/Vienna" | "Warsaw" | "Europe/Warsaw" | "West Central Africa" | "Africa/Algiers" | "Zagreb" | "Europe/Zagreb" | "Zurich" | "Europe/Zurich" | "Athens" | "Europe/Athens" | "Bucharest" | "Europe/Bucharest" | "Cairo" | "Africa/Cairo" | "Harare" | "Africa/Harare" | "Helsinki" | "Europe/Helsinki" | "Jerusalem" | "Asia/Jerusalem" | "Kaliningrad" | "Europe/Kaliningrad" | "Kyiv" | "Europe/Kiev" | "Pretoria" | "Africa/Johannesburg" | "Riga" | "Europe/Riga" | "Sofia" | "Europe/Sofia" | "Tallinn" | "Europe/Tallinn" | "Vilnius" | "Europe/Vilnius" | "Baghdad" | "Asia/Baghdad" | "Istanbul" | "Europe/Istanbul" | "Kuwait" | "Asia/Kuwait" | "Minsk" | "Europe/Minsk" | "Moscow" | "Europe/Moscow" | "Nairobi" | "Africa/Nairobi" | "Riyadh" | "Asia/Riyadh" | "St. Petersburg" | "Europe/Moscow" | "Volgograd" | "Europe/Volgograd" | "Tehran" | "Asia/Tehran" | "Abu Dhabi" | "Asia/Muscat" | "Baku" | "Asia/Baku" | "Muscat" | "Asia/Muscat" | "Samara" | "Europe/Samara" | "Tbilisi" | "Asia/Tbilisi" | "Yerevan" | "Asia/Yerevan" | "Kabul" | "Asia/Kabul" | "Almaty" | "Asia/Almaty" | "Astana" | "Asia/Almaty" | "Ekaterinburg" | "Asia/Yekaterinburg" | "Islamabad" | "Asia/Karachi" | "Karachi" | "Asia/Karachi" | "Tashkent" | "Asia/Tashkent" | "Chennai" | "Asia/Kolkata" | "Kolkata" | "Asia/Kolkata" | "Mumbai" | "Asia/Kolkata" | "New Delhi" | "Asia/Kolkata" | "Sri Jayawardenepura" | "Asia/Colombo" | "Kathmandu" | "Asia/Kathmandu" | "Dhaka" | "Asia/Dhaka" | "Urumqi" | "Asia/Urumqi" | "Rangoon" | "Asia/Rangoon" | "Bangkok" | "Asia/Bangkok" | "Hanoi" | "Asia/Bangkok" | "Jakarta" | "Asia/Jakarta" | "Krasnoyarsk" | "Asia/Krasnoyarsk" | "Novosibirsk" | "Asia/Novosibirsk" | "Beijing" | "Asia/Shanghai" | "Chongqing" | "Asia/Chongqing" | "Hong Kong" | "Asia/Hong_Kong" | "Irkutsk" | "Asia/Irkutsk" | "Kuala Lumpur" | "Asia/Kuala_Lumpur" | "Perth" | "Australia/Perth" | "Singapore" | "Asia/Singapore" | "Taipei" | "Asia/Taipei" | "Ulaanbaatar" | "Asia/Ulaanbaatar" | "Osaka" | "Asia/Tokyo" | "Sapporo" | "Asia/Tokyo" | "Seoul" | "Asia/Seoul" | "Tokyo" | "Asia/Tokyo" | "Yakutsk" | "Asia/Yakutsk" | "Adelaide" | "Australia/Adelaide" | "Darwin" | "Australia/Darwin" | "Brisbane" | "Australia/Brisbane" | "Canberra" | "Australia/Canberra" | "Guam" | "Pacific/Guam" | "Hobart" | "Australia/Hobart" | "Melbourne" | "Australia/Melbourne" | "Port Moresby" | "Pacific/Port_Moresby" | "Sydney" | "Australia/Sydney" | "Vladivostok" | "Asia/Vladivostok" | "Magadan" | "Asia/Magadan" | "New Caledonia" | "Pacific/Noumea" | "Solomon Is." | "Pacific/Guadalcanal" | "Srednekolymsk" | "Asia/Srednekolymsk" | "Auckland" | "Pacific/Auckland" | "Fiji" | "Pacific/Fiji" | "Kamchatka" | "Asia/Kamchatka" | "Marshall Is." | "Pacific/Majuro" | "Wellington" | "Pacific/Auckland" | "Chatham Is." | "Pacific/Chatham" | "Nuku'alofa" | "Pacific/Tongatapu" | "Samoa" | "Pacific/Apia" | "Tokelau Is." | "Pacific/Fakaofo" | null;
                         /** @description Business days */
                         days?: ("M" | "T" | "W" | "R" | "F" | "U" | "S")[] | null;
                         /** @description Start time for business hours (HH:MM) */
@@ -10367,7 +10515,7 @@ export interface components {
                          * @description Time zone for business hours
                          * @enum {string|null}
                          */
-                        time_zone?: "International Date Line West" | "Etc/GMT+12" | "American Samoa" | "Pacific/Pago_Pago" | "Midway Island" | "Pacific/Midway" | "Hawaii" | "Pacific/Honolulu" | "Alaska" | "America/Juneau" | "Pacific Time (US & Canada)" | "America/Los_Angeles" | "Tijuana" | "America/Tijuana" | "Arizona" | "America/Phoenix" | "Mazatlan" | "America/Mazatlan" | "Mountain Time (US & Canada)" | "America/Denver" | "Central America" | "America/Guatemala" | "Central Time (US & Canada)" | "America/Chicago" | "Chihuahua" | "America/Chihuahua" | "Guadalajara" | "America/Mexico_City" | "Mexico City" | "America/Mexico_City" | "Monterrey" | "America/Monterrey" | "Saskatchewan" | "America/Regina" | "Bogota" | "America/Bogota" | "Eastern Time (US & Canada)" | "America/New_York" | "Indiana (East)" | "America/Indiana/Indianapolis" | "Lima" | "America/Lima" | "Quito" | "America/Lima" | "Atlantic Time (Canada)" | "America/Halifax" | "Caracas" | "America/Caracas" | "Georgetown" | "America/Guyana" | "La Paz" | "America/La_Paz" | "Puerto Rico" | "America/Puerto_Rico" | "Santiago" | "America/Santiago" | "Newfoundland" | "America/St_Johns" | "Asuncion" | "America/Asuncion" | "Brasilia" | "America/Sao_Paulo" | "Buenos Aires" | "America/Argentina/Buenos_Aires" | "Montevideo" | "America/Montevideo" | "Greenland" | "America/Nuuk" | "Mid-Atlantic" | "Atlantic/South_Georgia" | "Azores" | "Atlantic/Azores" | "Cape Verde Is." | "Atlantic/Cape_Verde" | "Casablanca" | "Africa/Casablanca" | "Dublin" | "Europe/Dublin" | "Edinburgh" | "Europe/London" | "Lisbon" | "Europe/Lisbon" | "London" | "Europe/London" | "Monrovia" | "Africa/Monrovia" | "UTC" | "Etc/UTC" | "Amsterdam" | "Europe/Amsterdam" | "Belgrade" | "Europe/Belgrade" | "Berlin" | "Europe/Berlin" | "Bern" | "Europe/Zurich" | "Bratislava" | "Europe/Bratislava" | "Brussels" | "Europe/Brussels" | "Budapest" | "Europe/Budapest" | "Copenhagen" | "Europe/Copenhagen" | "Ljubljana" | "Europe/Ljubljana" | "Madrid" | "Europe/Madrid" | "Paris" | "Europe/Paris" | "Prague" | "Europe/Prague" | "Rome" | "Europe/Rome" | "Sarajevo" | "Europe/Sarajevo" | "Skopje" | "Europe/Skopje" | "Stockholm" | "Europe/Stockholm" | "Vienna" | "Europe/Vienna" | "Warsaw" | "Europe/Warsaw" | "West Central Africa" | "Africa/Algiers" | "Zagreb" | "Europe/Zagreb" | "Zurich" | "Europe/Zurich" | "Athens" | "Europe/Athens" | "Bucharest" | "Europe/Bucharest" | "Cairo" | "Africa/Cairo" | "Harare" | "Africa/Harare" | "Helsinki" | "Europe/Helsinki" | "Jerusalem" | "Asia/Jerusalem" | "Kaliningrad" | "Europe/Kaliningrad" | "Pretoria" | "Africa/Johannesburg" | "Riga" | "Europe/Riga" | "Sofia" | "Europe/Sofia" | "Tallinn" | "Europe/Tallinn" | "Vilnius" | "Europe/Vilnius" | "Baghdad" | "Asia/Baghdad" | "Istanbul" | "Europe/Istanbul" | "Kuwait" | "Asia/Kuwait" | "Minsk" | "Europe/Minsk" | "Moscow" | "Europe/Moscow" | "Nairobi" | "Africa/Nairobi" | "Riyadh" | "Asia/Riyadh" | "St. Petersburg" | "Europe/Moscow" | "Volgograd" | "Europe/Volgograd" | "Tehran" | "Asia/Tehran" | "Abu Dhabi" | "Asia/Muscat" | "Baku" | "Asia/Baku" | "Muscat" | "Asia/Muscat" | "Samara" | "Europe/Samara" | "Tbilisi" | "Asia/Tbilisi" | "Yerevan" | "Asia/Yerevan" | "Kabul" | "Asia/Kabul" | "Almaty" | "Asia/Almaty" | "Astana" | "Asia/Almaty" | "Ekaterinburg" | "Asia/Yekaterinburg" | "Islamabad" | "Asia/Karachi" | "Karachi" | "Asia/Karachi" | "Tashkent" | "Asia/Tashkent" | "Chennai" | "Asia/Kolkata" | "Kolkata" | "Asia/Kolkata" | "Mumbai" | "Asia/Kolkata" | "New Delhi" | "Asia/Kolkata" | "Sri Jayawardenepura" | "Asia/Colombo" | "Kathmandu" | "Asia/Kathmandu" | "Dhaka" | "Asia/Dhaka" | "Urumqi" | "Asia/Urumqi" | "Bangkok" | "Asia/Bangkok" | "Hanoi" | "Asia/Bangkok" | "Jakarta" | "Asia/Jakarta" | "Krasnoyarsk" | "Asia/Krasnoyarsk" | "Novosibirsk" | "Asia/Novosibirsk" | "Beijing" | "Asia/Shanghai" | "Chongqing" | "Asia/Chongqing" | "Hong Kong" | "Asia/Hong_Kong" | "Irkutsk" | "Asia/Irkutsk" | "Kuala Lumpur" | "Asia/Kuala_Lumpur" | "Perth" | "Australia/Perth" | "Singapore" | "Asia/Singapore" | "Taipei" | "Asia/Taipei" | "Ulaanbaatar" | "Asia/Ulaanbaatar" | "Osaka" | "Asia/Tokyo" | "Sapporo" | "Asia/Tokyo" | "Seoul" | "Asia/Seoul" | "Tokyo" | "Asia/Tokyo" | "Yakutsk" | "Asia/Yakutsk" | "Adelaide" | "Australia/Adelaide" | "Darwin" | "Australia/Darwin" | "Brisbane" | "Australia/Brisbane" | "Canberra" | "Australia/Canberra" | "Guam" | "Pacific/Guam" | "Hobart" | "Australia/Hobart" | "Melbourne" | "Australia/Melbourne" | "Port Moresby" | "Pacific/Port_Moresby" | "Sydney" | "Australia/Sydney" | "Vladivostok" | "Asia/Vladivostok" | "Magadan" | "Asia/Magadan" | "New Caledonia" | "Pacific/Noumea" | "Solomon Is." | "Pacific/Guadalcanal" | "Srednekolymsk" | "Asia/Srednekolymsk" | "Auckland" | "Pacific/Auckland" | "Fiji" | "Pacific/Fiji" | "Kamchatka" | "Asia/Kamchatka" | "Marshall Is." | "Pacific/Majuro" | "Wellington" | "Pacific/Auckland" | "Chatham Is." | "Pacific/Chatham" | "Nuku'alofa" | "Pacific/Tongatapu" | "Samoa" | "Pacific/Apia" | "Tokelau Is." | "Pacific/Fakaofo" | null;
+                        time_zone?: "International Date Line West" | "Etc/GMT+12" | "American Samoa" | "Pacific/Pago_Pago" | "Midway Island" | "Pacific/Midway" | "Hawaii" | "Pacific/Honolulu" | "Alaska" | "America/Juneau" | "Pacific Time (US & Canada)" | "America/Los_Angeles" | "Tijuana" | "America/Tijuana" | "Arizona" | "America/Phoenix" | "Mazatlan" | "America/Mazatlan" | "Mountain Time (US & Canada)" | "America/Denver" | "Central America" | "America/Guatemala" | "Central Time (US & Canada)" | "America/Chicago" | "Chihuahua" | "America/Chihuahua" | "Guadalajara" | "America/Mexico_City" | "Mexico City" | "America/Mexico_City" | "Monterrey" | "America/Monterrey" | "Saskatchewan" | "America/Regina" | "Bogota" | "America/Bogota" | "Eastern Time (US & Canada)" | "America/New_York" | "Indiana (East)" | "America/Indiana/Indianapolis" | "Lima" | "America/Lima" | "Quito" | "America/Lima" | "Atlantic Time (Canada)" | "America/Halifax" | "Caracas" | "America/Caracas" | "Georgetown" | "America/Guyana" | "La Paz" | "America/La_Paz" | "Puerto Rico" | "America/Puerto_Rico" | "Santiago" | "America/Santiago" | "Newfoundland" | "America/St_Johns" | "Asuncion" | "America/Asuncion" | "Brasilia" | "America/Sao_Paulo" | "Buenos Aires" | "America/Argentina/Buenos_Aires" | "Montevideo" | "America/Montevideo" | "Greenland" | "America/Nuuk" | "Mid-Atlantic" | "Atlantic/South_Georgia" | "Azores" | "Atlantic/Azores" | "Cape Verde Is." | "Atlantic/Cape_Verde" | "Edinburgh" | "Europe/London" | "Lisbon" | "Europe/Lisbon" | "London" | "Europe/London" | "Monrovia" | "Africa/Monrovia" | "UTC" | "Etc/UTC" | "Amsterdam" | "Europe/Amsterdam" | "Belgrade" | "Europe/Belgrade" | "Berlin" | "Europe/Berlin" | "Bern" | "Europe/Zurich" | "Bratislava" | "Europe/Bratislava" | "Brussels" | "Europe/Brussels" | "Budapest" | "Europe/Budapest" | "Casablanca" | "Africa/Casablanca" | "Copenhagen" | "Europe/Copenhagen" | "Dublin" | "Europe/Dublin" | "Ljubljana" | "Europe/Ljubljana" | "Madrid" | "Europe/Madrid" | "Paris" | "Europe/Paris" | "Prague" | "Europe/Prague" | "Rome" | "Europe/Rome" | "Sarajevo" | "Europe/Sarajevo" | "Skopje" | "Europe/Skopje" | "Stockholm" | "Europe/Stockholm" | "Vienna" | "Europe/Vienna" | "Warsaw" | "Europe/Warsaw" | "West Central Africa" | "Africa/Algiers" | "Zagreb" | "Europe/Zagreb" | "Zurich" | "Europe/Zurich" | "Athens" | "Europe/Athens" | "Bucharest" | "Europe/Bucharest" | "Cairo" | "Africa/Cairo" | "Harare" | "Africa/Harare" | "Helsinki" | "Europe/Helsinki" | "Jerusalem" | "Asia/Jerusalem" | "Kaliningrad" | "Europe/Kaliningrad" | "Kyiv" | "Europe/Kiev" | "Pretoria" | "Africa/Johannesburg" | "Riga" | "Europe/Riga" | "Sofia" | "Europe/Sofia" | "Tallinn" | "Europe/Tallinn" | "Vilnius" | "Europe/Vilnius" | "Baghdad" | "Asia/Baghdad" | "Istanbul" | "Europe/Istanbul" | "Kuwait" | "Asia/Kuwait" | "Minsk" | "Europe/Minsk" | "Moscow" | "Europe/Moscow" | "Nairobi" | "Africa/Nairobi" | "Riyadh" | "Asia/Riyadh" | "St. Petersburg" | "Europe/Moscow" | "Volgograd" | "Europe/Volgograd" | "Tehran" | "Asia/Tehran" | "Abu Dhabi" | "Asia/Muscat" | "Baku" | "Asia/Baku" | "Muscat" | "Asia/Muscat" | "Samara" | "Europe/Samara" | "Tbilisi" | "Asia/Tbilisi" | "Yerevan" | "Asia/Yerevan" | "Kabul" | "Asia/Kabul" | "Almaty" | "Asia/Almaty" | "Astana" | "Asia/Almaty" | "Ekaterinburg" | "Asia/Yekaterinburg" | "Islamabad" | "Asia/Karachi" | "Karachi" | "Asia/Karachi" | "Tashkent" | "Asia/Tashkent" | "Chennai" | "Asia/Kolkata" | "Kolkata" | "Asia/Kolkata" | "Mumbai" | "Asia/Kolkata" | "New Delhi" | "Asia/Kolkata" | "Sri Jayawardenepura" | "Asia/Colombo" | "Kathmandu" | "Asia/Kathmandu" | "Dhaka" | "Asia/Dhaka" | "Urumqi" | "Asia/Urumqi" | "Rangoon" | "Asia/Rangoon" | "Bangkok" | "Asia/Bangkok" | "Hanoi" | "Asia/Bangkok" | "Jakarta" | "Asia/Jakarta" | "Krasnoyarsk" | "Asia/Krasnoyarsk" | "Novosibirsk" | "Asia/Novosibirsk" | "Beijing" | "Asia/Shanghai" | "Chongqing" | "Asia/Chongqing" | "Hong Kong" | "Asia/Hong_Kong" | "Irkutsk" | "Asia/Irkutsk" | "Kuala Lumpur" | "Asia/Kuala_Lumpur" | "Perth" | "Australia/Perth" | "Singapore" | "Asia/Singapore" | "Taipei" | "Asia/Taipei" | "Ulaanbaatar" | "Asia/Ulaanbaatar" | "Osaka" | "Asia/Tokyo" | "Sapporo" | "Asia/Tokyo" | "Seoul" | "Asia/Seoul" | "Tokyo" | "Asia/Tokyo" | "Yakutsk" | "Asia/Yakutsk" | "Adelaide" | "Australia/Adelaide" | "Darwin" | "Australia/Darwin" | "Brisbane" | "Australia/Brisbane" | "Canberra" | "Australia/Canberra" | "Guam" | "Pacific/Guam" | "Hobart" | "Australia/Hobart" | "Melbourne" | "Australia/Melbourne" | "Port Moresby" | "Pacific/Port_Moresby" | "Sydney" | "Australia/Sydney" | "Vladivostok" | "Asia/Vladivostok" | "Magadan" | "Asia/Magadan" | "New Caledonia" | "Pacific/Noumea" | "Solomon Is." | "Pacific/Guadalcanal" | "Srednekolymsk" | "Asia/Srednekolymsk" | "Auckland" | "Pacific/Auckland" | "Fiji" | "Pacific/Fiji" | "Kamchatka" | "Asia/Kamchatka" | "Marshall Is." | "Pacific/Majuro" | "Wellington" | "Pacific/Auckland" | "Chatham Is." | "Pacific/Chatham" | "Nuku'alofa" | "Pacific/Tongatapu" | "Samoa" | "Pacific/Apia" | "Tokelau Is." | "Pacific/Fakaofo" | null;
                         /** @description Business days */
                         days?: ("M" | "T" | "W" | "R" | "F" | "U" | "S")[] | null;
                         /** @description Start time for business hours (HH:MM) */
@@ -10398,7 +10546,7 @@ export interface components {
                  * @description Time zone for business hours
                  * @enum {string|null}
                  */
-                time_zone?: "International Date Line West" | "Etc/GMT+12" | "American Samoa" | "Pacific/Pago_Pago" | "Midway Island" | "Pacific/Midway" | "Hawaii" | "Pacific/Honolulu" | "Alaska" | "America/Juneau" | "Pacific Time (US & Canada)" | "America/Los_Angeles" | "Tijuana" | "America/Tijuana" | "Arizona" | "America/Phoenix" | "Mazatlan" | "America/Mazatlan" | "Mountain Time (US & Canada)" | "America/Denver" | "Central America" | "America/Guatemala" | "Central Time (US & Canada)" | "America/Chicago" | "Chihuahua" | "America/Chihuahua" | "Guadalajara" | "America/Mexico_City" | "Mexico City" | "America/Mexico_City" | "Monterrey" | "America/Monterrey" | "Saskatchewan" | "America/Regina" | "Bogota" | "America/Bogota" | "Eastern Time (US & Canada)" | "America/New_York" | "Indiana (East)" | "America/Indiana/Indianapolis" | "Lima" | "America/Lima" | "Quito" | "America/Lima" | "Atlantic Time (Canada)" | "America/Halifax" | "Caracas" | "America/Caracas" | "Georgetown" | "America/Guyana" | "La Paz" | "America/La_Paz" | "Puerto Rico" | "America/Puerto_Rico" | "Santiago" | "America/Santiago" | "Newfoundland" | "America/St_Johns" | "Asuncion" | "America/Asuncion" | "Brasilia" | "America/Sao_Paulo" | "Buenos Aires" | "America/Argentina/Buenos_Aires" | "Montevideo" | "America/Montevideo" | "Greenland" | "America/Nuuk" | "Mid-Atlantic" | "Atlantic/South_Georgia" | "Azores" | "Atlantic/Azores" | "Cape Verde Is." | "Atlantic/Cape_Verde" | "Casablanca" | "Africa/Casablanca" | "Dublin" | "Europe/Dublin" | "Edinburgh" | "Europe/London" | "Lisbon" | "Europe/Lisbon" | "London" | "Europe/London" | "Monrovia" | "Africa/Monrovia" | "UTC" | "Etc/UTC" | "Amsterdam" | "Europe/Amsterdam" | "Belgrade" | "Europe/Belgrade" | "Berlin" | "Europe/Berlin" | "Bern" | "Europe/Zurich" | "Bratislava" | "Europe/Bratislava" | "Brussels" | "Europe/Brussels" | "Budapest" | "Europe/Budapest" | "Copenhagen" | "Europe/Copenhagen" | "Ljubljana" | "Europe/Ljubljana" | "Madrid" | "Europe/Madrid" | "Paris" | "Europe/Paris" | "Prague" | "Europe/Prague" | "Rome" | "Europe/Rome" | "Sarajevo" | "Europe/Sarajevo" | "Skopje" | "Europe/Skopje" | "Stockholm" | "Europe/Stockholm" | "Vienna" | "Europe/Vienna" | "Warsaw" | "Europe/Warsaw" | "West Central Africa" | "Africa/Algiers" | "Zagreb" | "Europe/Zagreb" | "Zurich" | "Europe/Zurich" | "Athens" | "Europe/Athens" | "Bucharest" | "Europe/Bucharest" | "Cairo" | "Africa/Cairo" | "Harare" | "Africa/Harare" | "Helsinki" | "Europe/Helsinki" | "Jerusalem" | "Asia/Jerusalem" | "Kaliningrad" | "Europe/Kaliningrad" | "Pretoria" | "Africa/Johannesburg" | "Riga" | "Europe/Riga" | "Sofia" | "Europe/Sofia" | "Tallinn" | "Europe/Tallinn" | "Vilnius" | "Europe/Vilnius" | "Baghdad" | "Asia/Baghdad" | "Istanbul" | "Europe/Istanbul" | "Kuwait" | "Asia/Kuwait" | "Minsk" | "Europe/Minsk" | "Moscow" | "Europe/Moscow" | "Nairobi" | "Africa/Nairobi" | "Riyadh" | "Asia/Riyadh" | "St. Petersburg" | "Europe/Moscow" | "Volgograd" | "Europe/Volgograd" | "Tehran" | "Asia/Tehran" | "Abu Dhabi" | "Asia/Muscat" | "Baku" | "Asia/Baku" | "Muscat" | "Asia/Muscat" | "Samara" | "Europe/Samara" | "Tbilisi" | "Asia/Tbilisi" | "Yerevan" | "Asia/Yerevan" | "Kabul" | "Asia/Kabul" | "Almaty" | "Asia/Almaty" | "Astana" | "Asia/Almaty" | "Ekaterinburg" | "Asia/Yekaterinburg" | "Islamabad" | "Asia/Karachi" | "Karachi" | "Asia/Karachi" | "Tashkent" | "Asia/Tashkent" | "Chennai" | "Asia/Kolkata" | "Kolkata" | "Asia/Kolkata" | "Mumbai" | "Asia/Kolkata" | "New Delhi" | "Asia/Kolkata" | "Sri Jayawardenepura" | "Asia/Colombo" | "Kathmandu" | "Asia/Kathmandu" | "Dhaka" | "Asia/Dhaka" | "Urumqi" | "Asia/Urumqi" | "Bangkok" | "Asia/Bangkok" | "Hanoi" | "Asia/Bangkok" | "Jakarta" | "Asia/Jakarta" | "Krasnoyarsk" | "Asia/Krasnoyarsk" | "Novosibirsk" | "Asia/Novosibirsk" | "Beijing" | "Asia/Shanghai" | "Chongqing" | "Asia/Chongqing" | "Hong Kong" | "Asia/Hong_Kong" | "Irkutsk" | "Asia/Irkutsk" | "Kuala Lumpur" | "Asia/Kuala_Lumpur" | "Perth" | "Australia/Perth" | "Singapore" | "Asia/Singapore" | "Taipei" | "Asia/Taipei" | "Ulaanbaatar" | "Asia/Ulaanbaatar" | "Osaka" | "Asia/Tokyo" | "Sapporo" | "Asia/Tokyo" | "Seoul" | "Asia/Seoul" | "Tokyo" | "Asia/Tokyo" | "Yakutsk" | "Asia/Yakutsk" | "Adelaide" | "Australia/Adelaide" | "Darwin" | "Australia/Darwin" | "Brisbane" | "Australia/Brisbane" | "Canberra" | "Australia/Canberra" | "Guam" | "Pacific/Guam" | "Hobart" | "Australia/Hobart" | "Melbourne" | "Australia/Melbourne" | "Port Moresby" | "Pacific/Port_Moresby" | "Sydney" | "Australia/Sydney" | "Vladivostok" | "Asia/Vladivostok" | "Magadan" | "Asia/Magadan" | "New Caledonia" | "Pacific/Noumea" | "Solomon Is." | "Pacific/Guadalcanal" | "Srednekolymsk" | "Asia/Srednekolymsk" | "Auckland" | "Pacific/Auckland" | "Fiji" | "Pacific/Fiji" | "Kamchatka" | "Asia/Kamchatka" | "Marshall Is." | "Pacific/Majuro" | "Wellington" | "Pacific/Auckland" | "Chatham Is." | "Pacific/Chatham" | "Nuku'alofa" | "Pacific/Tongatapu" | "Samoa" | "Pacific/Apia" | "Tokelau Is." | "Pacific/Fakaofo" | null;
+                time_zone?: "International Date Line West" | "Etc/GMT+12" | "American Samoa" | "Pacific/Pago_Pago" | "Midway Island" | "Pacific/Midway" | "Hawaii" | "Pacific/Honolulu" | "Alaska" | "America/Juneau" | "Pacific Time (US & Canada)" | "America/Los_Angeles" | "Tijuana" | "America/Tijuana" | "Arizona" | "America/Phoenix" | "Mazatlan" | "America/Mazatlan" | "Mountain Time (US & Canada)" | "America/Denver" | "Central America" | "America/Guatemala" | "Central Time (US & Canada)" | "America/Chicago" | "Chihuahua" | "America/Chihuahua" | "Guadalajara" | "America/Mexico_City" | "Mexico City" | "America/Mexico_City" | "Monterrey" | "America/Monterrey" | "Saskatchewan" | "America/Regina" | "Bogota" | "America/Bogota" | "Eastern Time (US & Canada)" | "America/New_York" | "Indiana (East)" | "America/Indiana/Indianapolis" | "Lima" | "America/Lima" | "Quito" | "America/Lima" | "Atlantic Time (Canada)" | "America/Halifax" | "Caracas" | "America/Caracas" | "Georgetown" | "America/Guyana" | "La Paz" | "America/La_Paz" | "Puerto Rico" | "America/Puerto_Rico" | "Santiago" | "America/Santiago" | "Newfoundland" | "America/St_Johns" | "Asuncion" | "America/Asuncion" | "Brasilia" | "America/Sao_Paulo" | "Buenos Aires" | "America/Argentina/Buenos_Aires" | "Montevideo" | "America/Montevideo" | "Greenland" | "America/Nuuk" | "Mid-Atlantic" | "Atlantic/South_Georgia" | "Azores" | "Atlantic/Azores" | "Cape Verde Is." | "Atlantic/Cape_Verde" | "Edinburgh" | "Europe/London" | "Lisbon" | "Europe/Lisbon" | "London" | "Europe/London" | "Monrovia" | "Africa/Monrovia" | "UTC" | "Etc/UTC" | "Amsterdam" | "Europe/Amsterdam" | "Belgrade" | "Europe/Belgrade" | "Berlin" | "Europe/Berlin" | "Bern" | "Europe/Zurich" | "Bratislava" | "Europe/Bratislava" | "Brussels" | "Europe/Brussels" | "Budapest" | "Europe/Budapest" | "Casablanca" | "Africa/Casablanca" | "Copenhagen" | "Europe/Copenhagen" | "Dublin" | "Europe/Dublin" | "Ljubljana" | "Europe/Ljubljana" | "Madrid" | "Europe/Madrid" | "Paris" | "Europe/Paris" | "Prague" | "Europe/Prague" | "Rome" | "Europe/Rome" | "Sarajevo" | "Europe/Sarajevo" | "Skopje" | "Europe/Skopje" | "Stockholm" | "Europe/Stockholm" | "Vienna" | "Europe/Vienna" | "Warsaw" | "Europe/Warsaw" | "West Central Africa" | "Africa/Algiers" | "Zagreb" | "Europe/Zagreb" | "Zurich" | "Europe/Zurich" | "Athens" | "Europe/Athens" | "Bucharest" | "Europe/Bucharest" | "Cairo" | "Africa/Cairo" | "Harare" | "Africa/Harare" | "Helsinki" | "Europe/Helsinki" | "Jerusalem" | "Asia/Jerusalem" | "Kaliningrad" | "Europe/Kaliningrad" | "Kyiv" | "Europe/Kiev" | "Pretoria" | "Africa/Johannesburg" | "Riga" | "Europe/Riga" | "Sofia" | "Europe/Sofia" | "Tallinn" | "Europe/Tallinn" | "Vilnius" | "Europe/Vilnius" | "Baghdad" | "Asia/Baghdad" | "Istanbul" | "Europe/Istanbul" | "Kuwait" | "Asia/Kuwait" | "Minsk" | "Europe/Minsk" | "Moscow" | "Europe/Moscow" | "Nairobi" | "Africa/Nairobi" | "Riyadh" | "Asia/Riyadh" | "St. Petersburg" | "Europe/Moscow" | "Volgograd" | "Europe/Volgograd" | "Tehran" | "Asia/Tehran" | "Abu Dhabi" | "Asia/Muscat" | "Baku" | "Asia/Baku" | "Muscat" | "Asia/Muscat" | "Samara" | "Europe/Samara" | "Tbilisi" | "Asia/Tbilisi" | "Yerevan" | "Asia/Yerevan" | "Kabul" | "Asia/Kabul" | "Almaty" | "Asia/Almaty" | "Astana" | "Asia/Almaty" | "Ekaterinburg" | "Asia/Yekaterinburg" | "Islamabad" | "Asia/Karachi" | "Karachi" | "Asia/Karachi" | "Tashkent" | "Asia/Tashkent" | "Chennai" | "Asia/Kolkata" | "Kolkata" | "Asia/Kolkata" | "Mumbai" | "Asia/Kolkata" | "New Delhi" | "Asia/Kolkata" | "Sri Jayawardenepura" | "Asia/Colombo" | "Kathmandu" | "Asia/Kathmandu" | "Dhaka" | "Asia/Dhaka" | "Urumqi" | "Asia/Urumqi" | "Rangoon" | "Asia/Rangoon" | "Bangkok" | "Asia/Bangkok" | "Hanoi" | "Asia/Bangkok" | "Jakarta" | "Asia/Jakarta" | "Krasnoyarsk" | "Asia/Krasnoyarsk" | "Novosibirsk" | "Asia/Novosibirsk" | "Beijing" | "Asia/Shanghai" | "Chongqing" | "Asia/Chongqing" | "Hong Kong" | "Asia/Hong_Kong" | "Irkutsk" | "Asia/Irkutsk" | "Kuala Lumpur" | "Asia/Kuala_Lumpur" | "Perth" | "Australia/Perth" | "Singapore" | "Asia/Singapore" | "Taipei" | "Asia/Taipei" | "Ulaanbaatar" | "Asia/Ulaanbaatar" | "Osaka" | "Asia/Tokyo" | "Sapporo" | "Asia/Tokyo" | "Seoul" | "Asia/Seoul" | "Tokyo" | "Asia/Tokyo" | "Yakutsk" | "Asia/Yakutsk" | "Adelaide" | "Australia/Adelaide" | "Darwin" | "Australia/Darwin" | "Brisbane" | "Australia/Brisbane" | "Canberra" | "Australia/Canberra" | "Guam" | "Pacific/Guam" | "Hobart" | "Australia/Hobart" | "Melbourne" | "Australia/Melbourne" | "Port Moresby" | "Pacific/Port_Moresby" | "Sydney" | "Australia/Sydney" | "Vladivostok" | "Asia/Vladivostok" | "Magadan" | "Asia/Magadan" | "New Caledonia" | "Pacific/Noumea" | "Solomon Is." | "Pacific/Guadalcanal" | "Srednekolymsk" | "Asia/Srednekolymsk" | "Auckland" | "Pacific/Auckland" | "Fiji" | "Pacific/Fiji" | "Kamchatka" | "Asia/Kamchatka" | "Marshall Is." | "Pacific/Majuro" | "Wellington" | "Pacific/Auckland" | "Chatham Is." | "Pacific/Chatham" | "Nuku'alofa" | "Pacific/Tongatapu" | "Samoa" | "Pacific/Apia" | "Tokelau Is." | "Pacific/Fakaofo" | null;
                 /** @description Business days */
                 days?: ("M" | "T" | "W" | "R" | "F" | "U" | "S")[] | null;
                 /** @description Start time for business hours (HH:MM) */
@@ -10481,7 +10629,7 @@ export interface components {
                          */
                         rule_type: "alert_urgency";
                         /** @description Alert urgency ids for which this escalation path should be used */
-                        urgency_ids: unknown[];
+                        urgency_ids: string[];
                     } | {
                         /**
                          * @description The type of the escalation path rule
@@ -10542,7 +10690,7 @@ export interface components {
                          * @description Time zone for the deferral window
                          * @enum {string}
                          */
-                        time_zone: "International Date Line West" | "Etc/GMT+12" | "American Samoa" | "Pacific/Pago_Pago" | "Midway Island" | "Pacific/Midway" | "Hawaii" | "Pacific/Honolulu" | "Alaska" | "America/Juneau" | "Pacific Time (US & Canada)" | "America/Los_Angeles" | "Tijuana" | "America/Tijuana" | "Arizona" | "America/Phoenix" | "Mazatlan" | "America/Mazatlan" | "Mountain Time (US & Canada)" | "America/Denver" | "Central America" | "America/Guatemala" | "Central Time (US & Canada)" | "America/Chicago" | "Chihuahua" | "America/Chihuahua" | "Guadalajara" | "America/Mexico_City" | "Mexico City" | "America/Mexico_City" | "Monterrey" | "America/Monterrey" | "Saskatchewan" | "America/Regina" | "Bogota" | "America/Bogota" | "Eastern Time (US & Canada)" | "America/New_York" | "Indiana (East)" | "America/Indiana/Indianapolis" | "Lima" | "America/Lima" | "Quito" | "America/Lima" | "Atlantic Time (Canada)" | "America/Halifax" | "Caracas" | "America/Caracas" | "Georgetown" | "America/Guyana" | "La Paz" | "America/La_Paz" | "Puerto Rico" | "America/Puerto_Rico" | "Santiago" | "America/Santiago" | "Newfoundland" | "America/St_Johns" | "Asuncion" | "America/Asuncion" | "Brasilia" | "America/Sao_Paulo" | "Buenos Aires" | "America/Argentina/Buenos_Aires" | "Montevideo" | "America/Montevideo" | "Greenland" | "America/Nuuk" | "Mid-Atlantic" | "Atlantic/South_Georgia" | "Azores" | "Atlantic/Azores" | "Cape Verde Is." | "Atlantic/Cape_Verde" | "Casablanca" | "Africa/Casablanca" | "Dublin" | "Europe/Dublin" | "Edinburgh" | "Europe/London" | "Lisbon" | "Europe/Lisbon" | "London" | "Europe/London" | "Monrovia" | "Africa/Monrovia" | "UTC" | "Etc/UTC" | "Amsterdam" | "Europe/Amsterdam" | "Belgrade" | "Europe/Belgrade" | "Berlin" | "Europe/Berlin" | "Bern" | "Europe/Zurich" | "Bratislava" | "Europe/Bratislava" | "Brussels" | "Europe/Brussels" | "Budapest" | "Europe/Budapest" | "Copenhagen" | "Europe/Copenhagen" | "Ljubljana" | "Europe/Ljubljana" | "Madrid" | "Europe/Madrid" | "Paris" | "Europe/Paris" | "Prague" | "Europe/Prague" | "Rome" | "Europe/Rome" | "Sarajevo" | "Europe/Sarajevo" | "Skopje" | "Europe/Skopje" | "Stockholm" | "Europe/Stockholm" | "Vienna" | "Europe/Vienna" | "Warsaw" | "Europe/Warsaw" | "West Central Africa" | "Africa/Algiers" | "Zagreb" | "Europe/Zagreb" | "Zurich" | "Europe/Zurich" | "Athens" | "Europe/Athens" | "Bucharest" | "Europe/Bucharest" | "Cairo" | "Africa/Cairo" | "Harare" | "Africa/Harare" | "Helsinki" | "Europe/Helsinki" | "Jerusalem" | "Asia/Jerusalem" | "Kaliningrad" | "Europe/Kaliningrad" | "Pretoria" | "Africa/Johannesburg" | "Riga" | "Europe/Riga" | "Sofia" | "Europe/Sofia" | "Tallinn" | "Europe/Tallinn" | "Vilnius" | "Europe/Vilnius" | "Baghdad" | "Asia/Baghdad" | "Istanbul" | "Europe/Istanbul" | "Kuwait" | "Asia/Kuwait" | "Minsk" | "Europe/Minsk" | "Moscow" | "Europe/Moscow" | "Nairobi" | "Africa/Nairobi" | "Riyadh" | "Asia/Riyadh" | "St. Petersburg" | "Europe/Moscow" | "Volgograd" | "Europe/Volgograd" | "Tehran" | "Asia/Tehran" | "Abu Dhabi" | "Asia/Muscat" | "Baku" | "Asia/Baku" | "Muscat" | "Asia/Muscat" | "Samara" | "Europe/Samara" | "Tbilisi" | "Asia/Tbilisi" | "Yerevan" | "Asia/Yerevan" | "Kabul" | "Asia/Kabul" | "Almaty" | "Asia/Almaty" | "Astana" | "Asia/Almaty" | "Ekaterinburg" | "Asia/Yekaterinburg" | "Islamabad" | "Asia/Karachi" | "Karachi" | "Asia/Karachi" | "Tashkent" | "Asia/Tashkent" | "Chennai" | "Asia/Kolkata" | "Kolkata" | "Asia/Kolkata" | "Mumbai" | "Asia/Kolkata" | "New Delhi" | "Asia/Kolkata" | "Sri Jayawardenepura" | "Asia/Colombo" | "Kathmandu" | "Asia/Kathmandu" | "Dhaka" | "Asia/Dhaka" | "Urumqi" | "Asia/Urumqi" | "Bangkok" | "Asia/Bangkok" | "Hanoi" | "Asia/Bangkok" | "Jakarta" | "Asia/Jakarta" | "Krasnoyarsk" | "Asia/Krasnoyarsk" | "Novosibirsk" | "Asia/Novosibirsk" | "Beijing" | "Asia/Shanghai" | "Chongqing" | "Asia/Chongqing" | "Hong Kong" | "Asia/Hong_Kong" | "Irkutsk" | "Asia/Irkutsk" | "Kuala Lumpur" | "Asia/Kuala_Lumpur" | "Perth" | "Australia/Perth" | "Singapore" | "Asia/Singapore" | "Taipei" | "Asia/Taipei" | "Ulaanbaatar" | "Asia/Ulaanbaatar" | "Osaka" | "Asia/Tokyo" | "Sapporo" | "Asia/Tokyo" | "Seoul" | "Asia/Seoul" | "Tokyo" | "Asia/Tokyo" | "Yakutsk" | "Asia/Yakutsk" | "Adelaide" | "Australia/Adelaide" | "Darwin" | "Australia/Darwin" | "Brisbane" | "Australia/Brisbane" | "Canberra" | "Australia/Canberra" | "Guam" | "Pacific/Guam" | "Hobart" | "Australia/Hobart" | "Melbourne" | "Australia/Melbourne" | "Port Moresby" | "Pacific/Port_Moresby" | "Sydney" | "Australia/Sydney" | "Vladivostok" | "Asia/Vladivostok" | "Magadan" | "Asia/Magadan" | "New Caledonia" | "Pacific/Noumea" | "Solomon Is." | "Pacific/Guadalcanal" | "Srednekolymsk" | "Asia/Srednekolymsk" | "Auckland" | "Pacific/Auckland" | "Fiji" | "Pacific/Fiji" | "Kamchatka" | "Asia/Kamchatka" | "Marshall Is." | "Pacific/Majuro" | "Wellington" | "Pacific/Auckland" | "Chatham Is." | "Pacific/Chatham" | "Nuku'alofa" | "Pacific/Tongatapu" | "Samoa" | "Pacific/Apia" | "Tokelau Is." | "Pacific/Fakaofo";
+                        time_zone: "International Date Line West" | "Etc/GMT+12" | "American Samoa" | "Pacific/Pago_Pago" | "Midway Island" | "Pacific/Midway" | "Hawaii" | "Pacific/Honolulu" | "Alaska" | "America/Juneau" | "Pacific Time (US & Canada)" | "America/Los_Angeles" | "Tijuana" | "America/Tijuana" | "Arizona" | "America/Phoenix" | "Mazatlan" | "America/Mazatlan" | "Mountain Time (US & Canada)" | "America/Denver" | "Central America" | "America/Guatemala" | "Central Time (US & Canada)" | "America/Chicago" | "Chihuahua" | "America/Chihuahua" | "Guadalajara" | "America/Mexico_City" | "Mexico City" | "America/Mexico_City" | "Monterrey" | "America/Monterrey" | "Saskatchewan" | "America/Regina" | "Bogota" | "America/Bogota" | "Eastern Time (US & Canada)" | "America/New_York" | "Indiana (East)" | "America/Indiana/Indianapolis" | "Lima" | "America/Lima" | "Quito" | "America/Lima" | "Atlantic Time (Canada)" | "America/Halifax" | "Caracas" | "America/Caracas" | "Georgetown" | "America/Guyana" | "La Paz" | "America/La_Paz" | "Puerto Rico" | "America/Puerto_Rico" | "Santiago" | "America/Santiago" | "Newfoundland" | "America/St_Johns" | "Asuncion" | "America/Asuncion" | "Brasilia" | "America/Sao_Paulo" | "Buenos Aires" | "America/Argentina/Buenos_Aires" | "Montevideo" | "America/Montevideo" | "Greenland" | "America/Nuuk" | "Mid-Atlantic" | "Atlantic/South_Georgia" | "Azores" | "Atlantic/Azores" | "Cape Verde Is." | "Atlantic/Cape_Verde" | "Edinburgh" | "Europe/London" | "Lisbon" | "Europe/Lisbon" | "London" | "Europe/London" | "Monrovia" | "Africa/Monrovia" | "UTC" | "Etc/UTC" | "Amsterdam" | "Europe/Amsterdam" | "Belgrade" | "Europe/Belgrade" | "Berlin" | "Europe/Berlin" | "Bern" | "Europe/Zurich" | "Bratislava" | "Europe/Bratislava" | "Brussels" | "Europe/Brussels" | "Budapest" | "Europe/Budapest" | "Casablanca" | "Africa/Casablanca" | "Copenhagen" | "Europe/Copenhagen" | "Dublin" | "Europe/Dublin" | "Ljubljana" | "Europe/Ljubljana" | "Madrid" | "Europe/Madrid" | "Paris" | "Europe/Paris" | "Prague" | "Europe/Prague" | "Rome" | "Europe/Rome" | "Sarajevo" | "Europe/Sarajevo" | "Skopje" | "Europe/Skopje" | "Stockholm" | "Europe/Stockholm" | "Vienna" | "Europe/Vienna" | "Warsaw" | "Europe/Warsaw" | "West Central Africa" | "Africa/Algiers" | "Zagreb" | "Europe/Zagreb" | "Zurich" | "Europe/Zurich" | "Athens" | "Europe/Athens" | "Bucharest" | "Europe/Bucharest" | "Cairo" | "Africa/Cairo" | "Harare" | "Africa/Harare" | "Helsinki" | "Europe/Helsinki" | "Jerusalem" | "Asia/Jerusalem" | "Kaliningrad" | "Europe/Kaliningrad" | "Kyiv" | "Europe/Kiev" | "Pretoria" | "Africa/Johannesburg" | "Riga" | "Europe/Riga" | "Sofia" | "Europe/Sofia" | "Tallinn" | "Europe/Tallinn" | "Vilnius" | "Europe/Vilnius" | "Baghdad" | "Asia/Baghdad" | "Istanbul" | "Europe/Istanbul" | "Kuwait" | "Asia/Kuwait" | "Minsk" | "Europe/Minsk" | "Moscow" | "Europe/Moscow" | "Nairobi" | "Africa/Nairobi" | "Riyadh" | "Asia/Riyadh" | "St. Petersburg" | "Europe/Moscow" | "Volgograd" | "Europe/Volgograd" | "Tehran" | "Asia/Tehran" | "Abu Dhabi" | "Asia/Muscat" | "Baku" | "Asia/Baku" | "Muscat" | "Asia/Muscat" | "Samara" | "Europe/Samara" | "Tbilisi" | "Asia/Tbilisi" | "Yerevan" | "Asia/Yerevan" | "Kabul" | "Asia/Kabul" | "Almaty" | "Asia/Almaty" | "Astana" | "Asia/Almaty" | "Ekaterinburg" | "Asia/Yekaterinburg" | "Islamabad" | "Asia/Karachi" | "Karachi" | "Asia/Karachi" | "Tashkent" | "Asia/Tashkent" | "Chennai" | "Asia/Kolkata" | "Kolkata" | "Asia/Kolkata" | "Mumbai" | "Asia/Kolkata" | "New Delhi" | "Asia/Kolkata" | "Sri Jayawardenepura" | "Asia/Colombo" | "Kathmandu" | "Asia/Kathmandu" | "Dhaka" | "Asia/Dhaka" | "Urumqi" | "Asia/Urumqi" | "Rangoon" | "Asia/Rangoon" | "Bangkok" | "Asia/Bangkok" | "Hanoi" | "Asia/Bangkok" | "Jakarta" | "Asia/Jakarta" | "Krasnoyarsk" | "Asia/Krasnoyarsk" | "Novosibirsk" | "Asia/Novosibirsk" | "Beijing" | "Asia/Shanghai" | "Chongqing" | "Asia/Chongqing" | "Hong Kong" | "Asia/Hong_Kong" | "Irkutsk" | "Asia/Irkutsk" | "Kuala Lumpur" | "Asia/Kuala_Lumpur" | "Perth" | "Australia/Perth" | "Singapore" | "Asia/Singapore" | "Taipei" | "Asia/Taipei" | "Ulaanbaatar" | "Asia/Ulaanbaatar" | "Osaka" | "Asia/Tokyo" | "Sapporo" | "Asia/Tokyo" | "Seoul" | "Asia/Seoul" | "Tokyo" | "Asia/Tokyo" | "Yakutsk" | "Asia/Yakutsk" | "Adelaide" | "Australia/Adelaide" | "Darwin" | "Australia/Darwin" | "Brisbane" | "Australia/Brisbane" | "Canberra" | "Australia/Canberra" | "Guam" | "Pacific/Guam" | "Hobart" | "Australia/Hobart" | "Melbourne" | "Australia/Melbourne" | "Port Moresby" | "Pacific/Port_Moresby" | "Sydney" | "Australia/Sydney" | "Vladivostok" | "Asia/Vladivostok" | "Magadan" | "Asia/Magadan" | "New Caledonia" | "Pacific/Noumea" | "Solomon Is." | "Pacific/Guadalcanal" | "Srednekolymsk" | "Asia/Srednekolymsk" | "Auckland" | "Pacific/Auckland" | "Fiji" | "Pacific/Fiji" | "Kamchatka" | "Asia/Kamchatka" | "Marshall Is." | "Pacific/Majuro" | "Wellington" | "Pacific/Auckland" | "Chatham Is." | "Pacific/Chatham" | "Nuku'alofa" | "Pacific/Tongatapu" | "Samoa" | "Pacific/Apia" | "Tokelau Is." | "Pacific/Fakaofo";
                         /** @description Time windows during which alerts are deferred */
                         time_blocks: {
                             monday?: boolean | null;
@@ -10564,7 +10712,7 @@ export interface components {
                      * @description Time zone used for time restrictions.
                      * @enum {string|null}
                      */
-                    time_restriction_time_zone?: "International Date Line West" | "Etc/GMT+12" | "American Samoa" | "Pacific/Pago_Pago" | "Midway Island" | "Pacific/Midway" | "Hawaii" | "Pacific/Honolulu" | "Alaska" | "America/Juneau" | "Pacific Time (US & Canada)" | "America/Los_Angeles" | "Tijuana" | "America/Tijuana" | "Arizona" | "America/Phoenix" | "Mazatlan" | "America/Mazatlan" | "Mountain Time (US & Canada)" | "America/Denver" | "Central America" | "America/Guatemala" | "Central Time (US & Canada)" | "America/Chicago" | "Chihuahua" | "America/Chihuahua" | "Guadalajara" | "America/Mexico_City" | "Mexico City" | "America/Mexico_City" | "Monterrey" | "America/Monterrey" | "Saskatchewan" | "America/Regina" | "Bogota" | "America/Bogota" | "Eastern Time (US & Canada)" | "America/New_York" | "Indiana (East)" | "America/Indiana/Indianapolis" | "Lima" | "America/Lima" | "Quito" | "America/Lima" | "Atlantic Time (Canada)" | "America/Halifax" | "Caracas" | "America/Caracas" | "Georgetown" | "America/Guyana" | "La Paz" | "America/La_Paz" | "Puerto Rico" | "America/Puerto_Rico" | "Santiago" | "America/Santiago" | "Newfoundland" | "America/St_Johns" | "Asuncion" | "America/Asuncion" | "Brasilia" | "America/Sao_Paulo" | "Buenos Aires" | "America/Argentina/Buenos_Aires" | "Montevideo" | "America/Montevideo" | "Greenland" | "America/Nuuk" | "Mid-Atlantic" | "Atlantic/South_Georgia" | "Azores" | "Atlantic/Azores" | "Cape Verde Is." | "Atlantic/Cape_Verde" | "Casablanca" | "Africa/Casablanca" | "Dublin" | "Europe/Dublin" | "Edinburgh" | "Europe/London" | "Lisbon" | "Europe/Lisbon" | "London" | "Europe/London" | "Monrovia" | "Africa/Monrovia" | "UTC" | "Etc/UTC" | "Amsterdam" | "Europe/Amsterdam" | "Belgrade" | "Europe/Belgrade" | "Berlin" | "Europe/Berlin" | "Bern" | "Europe/Zurich" | "Bratislava" | "Europe/Bratislava" | "Brussels" | "Europe/Brussels" | "Budapest" | "Europe/Budapest" | "Copenhagen" | "Europe/Copenhagen" | "Ljubljana" | "Europe/Ljubljana" | "Madrid" | "Europe/Madrid" | "Paris" | "Europe/Paris" | "Prague" | "Europe/Prague" | "Rome" | "Europe/Rome" | "Sarajevo" | "Europe/Sarajevo" | "Skopje" | "Europe/Skopje" | "Stockholm" | "Europe/Stockholm" | "Vienna" | "Europe/Vienna" | "Warsaw" | "Europe/Warsaw" | "West Central Africa" | "Africa/Algiers" | "Zagreb" | "Europe/Zagreb" | "Zurich" | "Europe/Zurich" | "Athens" | "Europe/Athens" | "Bucharest" | "Europe/Bucharest" | "Cairo" | "Africa/Cairo" | "Harare" | "Africa/Harare" | "Helsinki" | "Europe/Helsinki" | "Jerusalem" | "Asia/Jerusalem" | "Kaliningrad" | "Europe/Kaliningrad" | "Pretoria" | "Africa/Johannesburg" | "Riga" | "Europe/Riga" | "Sofia" | "Europe/Sofia" | "Tallinn" | "Europe/Tallinn" | "Vilnius" | "Europe/Vilnius" | "Baghdad" | "Asia/Baghdad" | "Istanbul" | "Europe/Istanbul" | "Kuwait" | "Asia/Kuwait" | "Minsk" | "Europe/Minsk" | "Moscow" | "Europe/Moscow" | "Nairobi" | "Africa/Nairobi" | "Riyadh" | "Asia/Riyadh" | "St. Petersburg" | "Europe/Moscow" | "Volgograd" | "Europe/Volgograd" | "Tehran" | "Asia/Tehran" | "Abu Dhabi" | "Asia/Muscat" | "Baku" | "Asia/Baku" | "Muscat" | "Asia/Muscat" | "Samara" | "Europe/Samara" | "Tbilisi" | "Asia/Tbilisi" | "Yerevan" | "Asia/Yerevan" | "Kabul" | "Asia/Kabul" | "Almaty" | "Asia/Almaty" | "Astana" | "Asia/Almaty" | "Ekaterinburg" | "Asia/Yekaterinburg" | "Islamabad" | "Asia/Karachi" | "Karachi" | "Asia/Karachi" | "Tashkent" | "Asia/Tashkent" | "Chennai" | "Asia/Kolkata" | "Kolkata" | "Asia/Kolkata" | "Mumbai" | "Asia/Kolkata" | "New Delhi" | "Asia/Kolkata" | "Sri Jayawardenepura" | "Asia/Colombo" | "Kathmandu" | "Asia/Kathmandu" | "Dhaka" | "Asia/Dhaka" | "Urumqi" | "Asia/Urumqi" | "Bangkok" | "Asia/Bangkok" | "Hanoi" | "Asia/Bangkok" | "Jakarta" | "Asia/Jakarta" | "Krasnoyarsk" | "Asia/Krasnoyarsk" | "Novosibirsk" | "Asia/Novosibirsk" | "Beijing" | "Asia/Shanghai" | "Chongqing" | "Asia/Chongqing" | "Hong Kong" | "Asia/Hong_Kong" | "Irkutsk" | "Asia/Irkutsk" | "Kuala Lumpur" | "Asia/Kuala_Lumpur" | "Perth" | "Australia/Perth" | "Singapore" | "Asia/Singapore" | "Taipei" | "Asia/Taipei" | "Ulaanbaatar" | "Asia/Ulaanbaatar" | "Osaka" | "Asia/Tokyo" | "Sapporo" | "Asia/Tokyo" | "Seoul" | "Asia/Seoul" | "Tokyo" | "Asia/Tokyo" | "Yakutsk" | "Asia/Yakutsk" | "Adelaide" | "Australia/Adelaide" | "Darwin" | "Australia/Darwin" | "Brisbane" | "Australia/Brisbane" | "Canberra" | "Australia/Canberra" | "Guam" | "Pacific/Guam" | "Hobart" | "Australia/Hobart" | "Melbourne" | "Australia/Melbourne" | "Port Moresby" | "Pacific/Port_Moresby" | "Sydney" | "Australia/Sydney" | "Vladivostok" | "Asia/Vladivostok" | "Magadan" | "Asia/Magadan" | "New Caledonia" | "Pacific/Noumea" | "Solomon Is." | "Pacific/Guadalcanal" | "Srednekolymsk" | "Asia/Srednekolymsk" | "Auckland" | "Pacific/Auckland" | "Fiji" | "Pacific/Fiji" | "Kamchatka" | "Asia/Kamchatka" | "Marshall Is." | "Pacific/Majuro" | "Wellington" | "Pacific/Auckland" | "Chatham Is." | "Pacific/Chatham" | "Nuku'alofa" | "Pacific/Tongatapu" | "Samoa" | "Pacific/Apia" | "Tokelau Is." | "Pacific/Fakaofo" | null;
+                    time_restriction_time_zone?: "International Date Line West" | "Etc/GMT+12" | "American Samoa" | "Pacific/Pago_Pago" | "Midway Island" | "Pacific/Midway" | "Hawaii" | "Pacific/Honolulu" | "Alaska" | "America/Juneau" | "Pacific Time (US & Canada)" | "America/Los_Angeles" | "Tijuana" | "America/Tijuana" | "Arizona" | "America/Phoenix" | "Mazatlan" | "America/Mazatlan" | "Mountain Time (US & Canada)" | "America/Denver" | "Central America" | "America/Guatemala" | "Central Time (US & Canada)" | "America/Chicago" | "Chihuahua" | "America/Chihuahua" | "Guadalajara" | "America/Mexico_City" | "Mexico City" | "America/Mexico_City" | "Monterrey" | "America/Monterrey" | "Saskatchewan" | "America/Regina" | "Bogota" | "America/Bogota" | "Eastern Time (US & Canada)" | "America/New_York" | "Indiana (East)" | "America/Indiana/Indianapolis" | "Lima" | "America/Lima" | "Quito" | "America/Lima" | "Atlantic Time (Canada)" | "America/Halifax" | "Caracas" | "America/Caracas" | "Georgetown" | "America/Guyana" | "La Paz" | "America/La_Paz" | "Puerto Rico" | "America/Puerto_Rico" | "Santiago" | "America/Santiago" | "Newfoundland" | "America/St_Johns" | "Asuncion" | "America/Asuncion" | "Brasilia" | "America/Sao_Paulo" | "Buenos Aires" | "America/Argentina/Buenos_Aires" | "Montevideo" | "America/Montevideo" | "Greenland" | "America/Nuuk" | "Mid-Atlantic" | "Atlantic/South_Georgia" | "Azores" | "Atlantic/Azores" | "Cape Verde Is." | "Atlantic/Cape_Verde" | "Edinburgh" | "Europe/London" | "Lisbon" | "Europe/Lisbon" | "London" | "Europe/London" | "Monrovia" | "Africa/Monrovia" | "UTC" | "Etc/UTC" | "Amsterdam" | "Europe/Amsterdam" | "Belgrade" | "Europe/Belgrade" | "Berlin" | "Europe/Berlin" | "Bern" | "Europe/Zurich" | "Bratislava" | "Europe/Bratislava" | "Brussels" | "Europe/Brussels" | "Budapest" | "Europe/Budapest" | "Casablanca" | "Africa/Casablanca" | "Copenhagen" | "Europe/Copenhagen" | "Dublin" | "Europe/Dublin" | "Ljubljana" | "Europe/Ljubljana" | "Madrid" | "Europe/Madrid" | "Paris" | "Europe/Paris" | "Prague" | "Europe/Prague" | "Rome" | "Europe/Rome" | "Sarajevo" | "Europe/Sarajevo" | "Skopje" | "Europe/Skopje" | "Stockholm" | "Europe/Stockholm" | "Vienna" | "Europe/Vienna" | "Warsaw" | "Europe/Warsaw" | "West Central Africa" | "Africa/Algiers" | "Zagreb" | "Europe/Zagreb" | "Zurich" | "Europe/Zurich" | "Athens" | "Europe/Athens" | "Bucharest" | "Europe/Bucharest" | "Cairo" | "Africa/Cairo" | "Harare" | "Africa/Harare" | "Helsinki" | "Europe/Helsinki" | "Jerusalem" | "Asia/Jerusalem" | "Kaliningrad" | "Europe/Kaliningrad" | "Kyiv" | "Europe/Kiev" | "Pretoria" | "Africa/Johannesburg" | "Riga" | "Europe/Riga" | "Sofia" | "Europe/Sofia" | "Tallinn" | "Europe/Tallinn" | "Vilnius" | "Europe/Vilnius" | "Baghdad" | "Asia/Baghdad" | "Istanbul" | "Europe/Istanbul" | "Kuwait" | "Asia/Kuwait" | "Minsk" | "Europe/Minsk" | "Moscow" | "Europe/Moscow" | "Nairobi" | "Africa/Nairobi" | "Riyadh" | "Asia/Riyadh" | "St. Petersburg" | "Europe/Moscow" | "Volgograd" | "Europe/Volgograd" | "Tehran" | "Asia/Tehran" | "Abu Dhabi" | "Asia/Muscat" | "Baku" | "Asia/Baku" | "Muscat" | "Asia/Muscat" | "Samara" | "Europe/Samara" | "Tbilisi" | "Asia/Tbilisi" | "Yerevan" | "Asia/Yerevan" | "Kabul" | "Asia/Kabul" | "Almaty" | "Asia/Almaty" | "Astana" | "Asia/Almaty" | "Ekaterinburg" | "Asia/Yekaterinburg" | "Islamabad" | "Asia/Karachi" | "Karachi" | "Asia/Karachi" | "Tashkent" | "Asia/Tashkent" | "Chennai" | "Asia/Kolkata" | "Kolkata" | "Asia/Kolkata" | "Mumbai" | "Asia/Kolkata" | "New Delhi" | "Asia/Kolkata" | "Sri Jayawardenepura" | "Asia/Colombo" | "Kathmandu" | "Asia/Kathmandu" | "Dhaka" | "Asia/Dhaka" | "Urumqi" | "Asia/Urumqi" | "Rangoon" | "Asia/Rangoon" | "Bangkok" | "Asia/Bangkok" | "Hanoi" | "Asia/Bangkok" | "Jakarta" | "Asia/Jakarta" | "Krasnoyarsk" | "Asia/Krasnoyarsk" | "Novosibirsk" | "Asia/Novosibirsk" | "Beijing" | "Asia/Shanghai" | "Chongqing" | "Asia/Chongqing" | "Hong Kong" | "Asia/Hong_Kong" | "Irkutsk" | "Asia/Irkutsk" | "Kuala Lumpur" | "Asia/Kuala_Lumpur" | "Perth" | "Australia/Perth" | "Singapore" | "Asia/Singapore" | "Taipei" | "Asia/Taipei" | "Ulaanbaatar" | "Asia/Ulaanbaatar" | "Osaka" | "Asia/Tokyo" | "Sapporo" | "Asia/Tokyo" | "Seoul" | "Asia/Seoul" | "Tokyo" | "Asia/Tokyo" | "Yakutsk" | "Asia/Yakutsk" | "Adelaide" | "Australia/Adelaide" | "Darwin" | "Australia/Darwin" | "Brisbane" | "Australia/Brisbane" | "Canberra" | "Australia/Canberra" | "Guam" | "Pacific/Guam" | "Hobart" | "Australia/Hobart" | "Melbourne" | "Australia/Melbourne" | "Port Moresby" | "Pacific/Port_Moresby" | "Sydney" | "Australia/Sydney" | "Vladivostok" | "Asia/Vladivostok" | "Magadan" | "Asia/Magadan" | "New Caledonia" | "Pacific/Noumea" | "Solomon Is." | "Pacific/Guadalcanal" | "Srednekolymsk" | "Asia/Srednekolymsk" | "Auckland" | "Pacific/Auckland" | "Fiji" | "Pacific/Fiji" | "Kamchatka" | "Asia/Kamchatka" | "Marshall Is." | "Pacific/Majuro" | "Wellington" | "Pacific/Auckland" | "Chatham Is." | "Pacific/Chatham" | "Nuku'alofa" | "Pacific/Tongatapu" | "Samoa" | "Pacific/Apia" | "Tokelau Is." | "Pacific/Fakaofo" | null;
                     /** @description If time restrictions are set, alerts will follow this path when they arrive within the specified time ranges and meet the rules. */
                     time_restrictions?: {
                         /** @enum {string} */
@@ -10628,7 +10776,7 @@ export interface components {
                          */
                         rule_type: "alert_urgency";
                         /** @description Alert urgency ids for which this escalation path should be used */
-                        urgency_ids: unknown[];
+                        urgency_ids: string[];
                     } | {
                         /**
                          * @description The type of the escalation path rule
@@ -10689,7 +10837,7 @@ export interface components {
                          * @description Time zone for the deferral window
                          * @enum {string}
                          */
-                        time_zone: "International Date Line West" | "Etc/GMT+12" | "American Samoa" | "Pacific/Pago_Pago" | "Midway Island" | "Pacific/Midway" | "Hawaii" | "Pacific/Honolulu" | "Alaska" | "America/Juneau" | "Pacific Time (US & Canada)" | "America/Los_Angeles" | "Tijuana" | "America/Tijuana" | "Arizona" | "America/Phoenix" | "Mazatlan" | "America/Mazatlan" | "Mountain Time (US & Canada)" | "America/Denver" | "Central America" | "America/Guatemala" | "Central Time (US & Canada)" | "America/Chicago" | "Chihuahua" | "America/Chihuahua" | "Guadalajara" | "America/Mexico_City" | "Mexico City" | "America/Mexico_City" | "Monterrey" | "America/Monterrey" | "Saskatchewan" | "America/Regina" | "Bogota" | "America/Bogota" | "Eastern Time (US & Canada)" | "America/New_York" | "Indiana (East)" | "America/Indiana/Indianapolis" | "Lima" | "America/Lima" | "Quito" | "America/Lima" | "Atlantic Time (Canada)" | "America/Halifax" | "Caracas" | "America/Caracas" | "Georgetown" | "America/Guyana" | "La Paz" | "America/La_Paz" | "Puerto Rico" | "America/Puerto_Rico" | "Santiago" | "America/Santiago" | "Newfoundland" | "America/St_Johns" | "Asuncion" | "America/Asuncion" | "Brasilia" | "America/Sao_Paulo" | "Buenos Aires" | "America/Argentina/Buenos_Aires" | "Montevideo" | "America/Montevideo" | "Greenland" | "America/Nuuk" | "Mid-Atlantic" | "Atlantic/South_Georgia" | "Azores" | "Atlantic/Azores" | "Cape Verde Is." | "Atlantic/Cape_Verde" | "Casablanca" | "Africa/Casablanca" | "Dublin" | "Europe/Dublin" | "Edinburgh" | "Europe/London" | "Lisbon" | "Europe/Lisbon" | "London" | "Europe/London" | "Monrovia" | "Africa/Monrovia" | "UTC" | "Etc/UTC" | "Amsterdam" | "Europe/Amsterdam" | "Belgrade" | "Europe/Belgrade" | "Berlin" | "Europe/Berlin" | "Bern" | "Europe/Zurich" | "Bratislava" | "Europe/Bratislava" | "Brussels" | "Europe/Brussels" | "Budapest" | "Europe/Budapest" | "Copenhagen" | "Europe/Copenhagen" | "Ljubljana" | "Europe/Ljubljana" | "Madrid" | "Europe/Madrid" | "Paris" | "Europe/Paris" | "Prague" | "Europe/Prague" | "Rome" | "Europe/Rome" | "Sarajevo" | "Europe/Sarajevo" | "Skopje" | "Europe/Skopje" | "Stockholm" | "Europe/Stockholm" | "Vienna" | "Europe/Vienna" | "Warsaw" | "Europe/Warsaw" | "West Central Africa" | "Africa/Algiers" | "Zagreb" | "Europe/Zagreb" | "Zurich" | "Europe/Zurich" | "Athens" | "Europe/Athens" | "Bucharest" | "Europe/Bucharest" | "Cairo" | "Africa/Cairo" | "Harare" | "Africa/Harare" | "Helsinki" | "Europe/Helsinki" | "Jerusalem" | "Asia/Jerusalem" | "Kaliningrad" | "Europe/Kaliningrad" | "Pretoria" | "Africa/Johannesburg" | "Riga" | "Europe/Riga" | "Sofia" | "Europe/Sofia" | "Tallinn" | "Europe/Tallinn" | "Vilnius" | "Europe/Vilnius" | "Baghdad" | "Asia/Baghdad" | "Istanbul" | "Europe/Istanbul" | "Kuwait" | "Asia/Kuwait" | "Minsk" | "Europe/Minsk" | "Moscow" | "Europe/Moscow" | "Nairobi" | "Africa/Nairobi" | "Riyadh" | "Asia/Riyadh" | "St. Petersburg" | "Europe/Moscow" | "Volgograd" | "Europe/Volgograd" | "Tehran" | "Asia/Tehran" | "Abu Dhabi" | "Asia/Muscat" | "Baku" | "Asia/Baku" | "Muscat" | "Asia/Muscat" | "Samara" | "Europe/Samara" | "Tbilisi" | "Asia/Tbilisi" | "Yerevan" | "Asia/Yerevan" | "Kabul" | "Asia/Kabul" | "Almaty" | "Asia/Almaty" | "Astana" | "Asia/Almaty" | "Ekaterinburg" | "Asia/Yekaterinburg" | "Islamabad" | "Asia/Karachi" | "Karachi" | "Asia/Karachi" | "Tashkent" | "Asia/Tashkent" | "Chennai" | "Asia/Kolkata" | "Kolkata" | "Asia/Kolkata" | "Mumbai" | "Asia/Kolkata" | "New Delhi" | "Asia/Kolkata" | "Sri Jayawardenepura" | "Asia/Colombo" | "Kathmandu" | "Asia/Kathmandu" | "Dhaka" | "Asia/Dhaka" | "Urumqi" | "Asia/Urumqi" | "Bangkok" | "Asia/Bangkok" | "Hanoi" | "Asia/Bangkok" | "Jakarta" | "Asia/Jakarta" | "Krasnoyarsk" | "Asia/Krasnoyarsk" | "Novosibirsk" | "Asia/Novosibirsk" | "Beijing" | "Asia/Shanghai" | "Chongqing" | "Asia/Chongqing" | "Hong Kong" | "Asia/Hong_Kong" | "Irkutsk" | "Asia/Irkutsk" | "Kuala Lumpur" | "Asia/Kuala_Lumpur" | "Perth" | "Australia/Perth" | "Singapore" | "Asia/Singapore" | "Taipei" | "Asia/Taipei" | "Ulaanbaatar" | "Asia/Ulaanbaatar" | "Osaka" | "Asia/Tokyo" | "Sapporo" | "Asia/Tokyo" | "Seoul" | "Asia/Seoul" | "Tokyo" | "Asia/Tokyo" | "Yakutsk" | "Asia/Yakutsk" | "Adelaide" | "Australia/Adelaide" | "Darwin" | "Australia/Darwin" | "Brisbane" | "Australia/Brisbane" | "Canberra" | "Australia/Canberra" | "Guam" | "Pacific/Guam" | "Hobart" | "Australia/Hobart" | "Melbourne" | "Australia/Melbourne" | "Port Moresby" | "Pacific/Port_Moresby" | "Sydney" | "Australia/Sydney" | "Vladivostok" | "Asia/Vladivostok" | "Magadan" | "Asia/Magadan" | "New Caledonia" | "Pacific/Noumea" | "Solomon Is." | "Pacific/Guadalcanal" | "Srednekolymsk" | "Asia/Srednekolymsk" | "Auckland" | "Pacific/Auckland" | "Fiji" | "Pacific/Fiji" | "Kamchatka" | "Asia/Kamchatka" | "Marshall Is." | "Pacific/Majuro" | "Wellington" | "Pacific/Auckland" | "Chatham Is." | "Pacific/Chatham" | "Nuku'alofa" | "Pacific/Tongatapu" | "Samoa" | "Pacific/Apia" | "Tokelau Is." | "Pacific/Fakaofo";
+                        time_zone: "International Date Line West" | "Etc/GMT+12" | "American Samoa" | "Pacific/Pago_Pago" | "Midway Island" | "Pacific/Midway" | "Hawaii" | "Pacific/Honolulu" | "Alaska" | "America/Juneau" | "Pacific Time (US & Canada)" | "America/Los_Angeles" | "Tijuana" | "America/Tijuana" | "Arizona" | "America/Phoenix" | "Mazatlan" | "America/Mazatlan" | "Mountain Time (US & Canada)" | "America/Denver" | "Central America" | "America/Guatemala" | "Central Time (US & Canada)" | "America/Chicago" | "Chihuahua" | "America/Chihuahua" | "Guadalajara" | "America/Mexico_City" | "Mexico City" | "America/Mexico_City" | "Monterrey" | "America/Monterrey" | "Saskatchewan" | "America/Regina" | "Bogota" | "America/Bogota" | "Eastern Time (US & Canada)" | "America/New_York" | "Indiana (East)" | "America/Indiana/Indianapolis" | "Lima" | "America/Lima" | "Quito" | "America/Lima" | "Atlantic Time (Canada)" | "America/Halifax" | "Caracas" | "America/Caracas" | "Georgetown" | "America/Guyana" | "La Paz" | "America/La_Paz" | "Puerto Rico" | "America/Puerto_Rico" | "Santiago" | "America/Santiago" | "Newfoundland" | "America/St_Johns" | "Asuncion" | "America/Asuncion" | "Brasilia" | "America/Sao_Paulo" | "Buenos Aires" | "America/Argentina/Buenos_Aires" | "Montevideo" | "America/Montevideo" | "Greenland" | "America/Nuuk" | "Mid-Atlantic" | "Atlantic/South_Georgia" | "Azores" | "Atlantic/Azores" | "Cape Verde Is." | "Atlantic/Cape_Verde" | "Edinburgh" | "Europe/London" | "Lisbon" | "Europe/Lisbon" | "London" | "Europe/London" | "Monrovia" | "Africa/Monrovia" | "UTC" | "Etc/UTC" | "Amsterdam" | "Europe/Amsterdam" | "Belgrade" | "Europe/Belgrade" | "Berlin" | "Europe/Berlin" | "Bern" | "Europe/Zurich" | "Bratislava" | "Europe/Bratislava" | "Brussels" | "Europe/Brussels" | "Budapest" | "Europe/Budapest" | "Casablanca" | "Africa/Casablanca" | "Copenhagen" | "Europe/Copenhagen" | "Dublin" | "Europe/Dublin" | "Ljubljana" | "Europe/Ljubljana" | "Madrid" | "Europe/Madrid" | "Paris" | "Europe/Paris" | "Prague" | "Europe/Prague" | "Rome" | "Europe/Rome" | "Sarajevo" | "Europe/Sarajevo" | "Skopje" | "Europe/Skopje" | "Stockholm" | "Europe/Stockholm" | "Vienna" | "Europe/Vienna" | "Warsaw" | "Europe/Warsaw" | "West Central Africa" | "Africa/Algiers" | "Zagreb" | "Europe/Zagreb" | "Zurich" | "Europe/Zurich" | "Athens" | "Europe/Athens" | "Bucharest" | "Europe/Bucharest" | "Cairo" | "Africa/Cairo" | "Harare" | "Africa/Harare" | "Helsinki" | "Europe/Helsinki" | "Jerusalem" | "Asia/Jerusalem" | "Kaliningrad" | "Europe/Kaliningrad" | "Kyiv" | "Europe/Kiev" | "Pretoria" | "Africa/Johannesburg" | "Riga" | "Europe/Riga" | "Sofia" | "Europe/Sofia" | "Tallinn" | "Europe/Tallinn" | "Vilnius" | "Europe/Vilnius" | "Baghdad" | "Asia/Baghdad" | "Istanbul" | "Europe/Istanbul" | "Kuwait" | "Asia/Kuwait" | "Minsk" | "Europe/Minsk" | "Moscow" | "Europe/Moscow" | "Nairobi" | "Africa/Nairobi" | "Riyadh" | "Asia/Riyadh" | "St. Petersburg" | "Europe/Moscow" | "Volgograd" | "Europe/Volgograd" | "Tehran" | "Asia/Tehran" | "Abu Dhabi" | "Asia/Muscat" | "Baku" | "Asia/Baku" | "Muscat" | "Asia/Muscat" | "Samara" | "Europe/Samara" | "Tbilisi" | "Asia/Tbilisi" | "Yerevan" | "Asia/Yerevan" | "Kabul" | "Asia/Kabul" | "Almaty" | "Asia/Almaty" | "Astana" | "Asia/Almaty" | "Ekaterinburg" | "Asia/Yekaterinburg" | "Islamabad" | "Asia/Karachi" | "Karachi" | "Asia/Karachi" | "Tashkent" | "Asia/Tashkent" | "Chennai" | "Asia/Kolkata" | "Kolkata" | "Asia/Kolkata" | "Mumbai" | "Asia/Kolkata" | "New Delhi" | "Asia/Kolkata" | "Sri Jayawardenepura" | "Asia/Colombo" | "Kathmandu" | "Asia/Kathmandu" | "Dhaka" | "Asia/Dhaka" | "Urumqi" | "Asia/Urumqi" | "Rangoon" | "Asia/Rangoon" | "Bangkok" | "Asia/Bangkok" | "Hanoi" | "Asia/Bangkok" | "Jakarta" | "Asia/Jakarta" | "Krasnoyarsk" | "Asia/Krasnoyarsk" | "Novosibirsk" | "Asia/Novosibirsk" | "Beijing" | "Asia/Shanghai" | "Chongqing" | "Asia/Chongqing" | "Hong Kong" | "Asia/Hong_Kong" | "Irkutsk" | "Asia/Irkutsk" | "Kuala Lumpur" | "Asia/Kuala_Lumpur" | "Perth" | "Australia/Perth" | "Singapore" | "Asia/Singapore" | "Taipei" | "Asia/Taipei" | "Ulaanbaatar" | "Asia/Ulaanbaatar" | "Osaka" | "Asia/Tokyo" | "Sapporo" | "Asia/Tokyo" | "Seoul" | "Asia/Seoul" | "Tokyo" | "Asia/Tokyo" | "Yakutsk" | "Asia/Yakutsk" | "Adelaide" | "Australia/Adelaide" | "Darwin" | "Australia/Darwin" | "Brisbane" | "Australia/Brisbane" | "Canberra" | "Australia/Canberra" | "Guam" | "Pacific/Guam" | "Hobart" | "Australia/Hobart" | "Melbourne" | "Australia/Melbourne" | "Port Moresby" | "Pacific/Port_Moresby" | "Sydney" | "Australia/Sydney" | "Vladivostok" | "Asia/Vladivostok" | "Magadan" | "Asia/Magadan" | "New Caledonia" | "Pacific/Noumea" | "Solomon Is." | "Pacific/Guadalcanal" | "Srednekolymsk" | "Asia/Srednekolymsk" | "Auckland" | "Pacific/Auckland" | "Fiji" | "Pacific/Fiji" | "Kamchatka" | "Asia/Kamchatka" | "Marshall Is." | "Pacific/Majuro" | "Wellington" | "Pacific/Auckland" | "Chatham Is." | "Pacific/Chatham" | "Nuku'alofa" | "Pacific/Tongatapu" | "Samoa" | "Pacific/Apia" | "Tokelau Is." | "Pacific/Fakaofo";
                         /** @description Time windows during which alerts are deferred */
                         time_blocks: {
                             monday?: boolean | null;
@@ -10711,7 +10859,7 @@ export interface components {
                      * @description Time zone used for time restrictions.
                      * @enum {string|null}
                      */
-                    time_restriction_time_zone?: "International Date Line West" | "Etc/GMT+12" | "American Samoa" | "Pacific/Pago_Pago" | "Midway Island" | "Pacific/Midway" | "Hawaii" | "Pacific/Honolulu" | "Alaska" | "America/Juneau" | "Pacific Time (US & Canada)" | "America/Los_Angeles" | "Tijuana" | "America/Tijuana" | "Arizona" | "America/Phoenix" | "Mazatlan" | "America/Mazatlan" | "Mountain Time (US & Canada)" | "America/Denver" | "Central America" | "America/Guatemala" | "Central Time (US & Canada)" | "America/Chicago" | "Chihuahua" | "America/Chihuahua" | "Guadalajara" | "America/Mexico_City" | "Mexico City" | "America/Mexico_City" | "Monterrey" | "America/Monterrey" | "Saskatchewan" | "America/Regina" | "Bogota" | "America/Bogota" | "Eastern Time (US & Canada)" | "America/New_York" | "Indiana (East)" | "America/Indiana/Indianapolis" | "Lima" | "America/Lima" | "Quito" | "America/Lima" | "Atlantic Time (Canada)" | "America/Halifax" | "Caracas" | "America/Caracas" | "Georgetown" | "America/Guyana" | "La Paz" | "America/La_Paz" | "Puerto Rico" | "America/Puerto_Rico" | "Santiago" | "America/Santiago" | "Newfoundland" | "America/St_Johns" | "Asuncion" | "America/Asuncion" | "Brasilia" | "America/Sao_Paulo" | "Buenos Aires" | "America/Argentina/Buenos_Aires" | "Montevideo" | "America/Montevideo" | "Greenland" | "America/Nuuk" | "Mid-Atlantic" | "Atlantic/South_Georgia" | "Azores" | "Atlantic/Azores" | "Cape Verde Is." | "Atlantic/Cape_Verde" | "Casablanca" | "Africa/Casablanca" | "Dublin" | "Europe/Dublin" | "Edinburgh" | "Europe/London" | "Lisbon" | "Europe/Lisbon" | "London" | "Europe/London" | "Monrovia" | "Africa/Monrovia" | "UTC" | "Etc/UTC" | "Amsterdam" | "Europe/Amsterdam" | "Belgrade" | "Europe/Belgrade" | "Berlin" | "Europe/Berlin" | "Bern" | "Europe/Zurich" | "Bratislava" | "Europe/Bratislava" | "Brussels" | "Europe/Brussels" | "Budapest" | "Europe/Budapest" | "Copenhagen" | "Europe/Copenhagen" | "Ljubljana" | "Europe/Ljubljana" | "Madrid" | "Europe/Madrid" | "Paris" | "Europe/Paris" | "Prague" | "Europe/Prague" | "Rome" | "Europe/Rome" | "Sarajevo" | "Europe/Sarajevo" | "Skopje" | "Europe/Skopje" | "Stockholm" | "Europe/Stockholm" | "Vienna" | "Europe/Vienna" | "Warsaw" | "Europe/Warsaw" | "West Central Africa" | "Africa/Algiers" | "Zagreb" | "Europe/Zagreb" | "Zurich" | "Europe/Zurich" | "Athens" | "Europe/Athens" | "Bucharest" | "Europe/Bucharest" | "Cairo" | "Africa/Cairo" | "Harare" | "Africa/Harare" | "Helsinki" | "Europe/Helsinki" | "Jerusalem" | "Asia/Jerusalem" | "Kaliningrad" | "Europe/Kaliningrad" | "Pretoria" | "Africa/Johannesburg" | "Riga" | "Europe/Riga" | "Sofia" | "Europe/Sofia" | "Tallinn" | "Europe/Tallinn" | "Vilnius" | "Europe/Vilnius" | "Baghdad" | "Asia/Baghdad" | "Istanbul" | "Europe/Istanbul" | "Kuwait" | "Asia/Kuwait" | "Minsk" | "Europe/Minsk" | "Moscow" | "Europe/Moscow" | "Nairobi" | "Africa/Nairobi" | "Riyadh" | "Asia/Riyadh" | "St. Petersburg" | "Europe/Moscow" | "Volgograd" | "Europe/Volgograd" | "Tehran" | "Asia/Tehran" | "Abu Dhabi" | "Asia/Muscat" | "Baku" | "Asia/Baku" | "Muscat" | "Asia/Muscat" | "Samara" | "Europe/Samara" | "Tbilisi" | "Asia/Tbilisi" | "Yerevan" | "Asia/Yerevan" | "Kabul" | "Asia/Kabul" | "Almaty" | "Asia/Almaty" | "Astana" | "Asia/Almaty" | "Ekaterinburg" | "Asia/Yekaterinburg" | "Islamabad" | "Asia/Karachi" | "Karachi" | "Asia/Karachi" | "Tashkent" | "Asia/Tashkent" | "Chennai" | "Asia/Kolkata" | "Kolkata" | "Asia/Kolkata" | "Mumbai" | "Asia/Kolkata" | "New Delhi" | "Asia/Kolkata" | "Sri Jayawardenepura" | "Asia/Colombo" | "Kathmandu" | "Asia/Kathmandu" | "Dhaka" | "Asia/Dhaka" | "Urumqi" | "Asia/Urumqi" | "Bangkok" | "Asia/Bangkok" | "Hanoi" | "Asia/Bangkok" | "Jakarta" | "Asia/Jakarta" | "Krasnoyarsk" | "Asia/Krasnoyarsk" | "Novosibirsk" | "Asia/Novosibirsk" | "Beijing" | "Asia/Shanghai" | "Chongqing" | "Asia/Chongqing" | "Hong Kong" | "Asia/Hong_Kong" | "Irkutsk" | "Asia/Irkutsk" | "Kuala Lumpur" | "Asia/Kuala_Lumpur" | "Perth" | "Australia/Perth" | "Singapore" | "Asia/Singapore" | "Taipei" | "Asia/Taipei" | "Ulaanbaatar" | "Asia/Ulaanbaatar" | "Osaka" | "Asia/Tokyo" | "Sapporo" | "Asia/Tokyo" | "Seoul" | "Asia/Seoul" | "Tokyo" | "Asia/Tokyo" | "Yakutsk" | "Asia/Yakutsk" | "Adelaide" | "Australia/Adelaide" | "Darwin" | "Australia/Darwin" | "Brisbane" | "Australia/Brisbane" | "Canberra" | "Australia/Canberra" | "Guam" | "Pacific/Guam" | "Hobart" | "Australia/Hobart" | "Melbourne" | "Australia/Melbourne" | "Port Moresby" | "Pacific/Port_Moresby" | "Sydney" | "Australia/Sydney" | "Vladivostok" | "Asia/Vladivostok" | "Magadan" | "Asia/Magadan" | "New Caledonia" | "Pacific/Noumea" | "Solomon Is." | "Pacific/Guadalcanal" | "Srednekolymsk" | "Asia/Srednekolymsk" | "Auckland" | "Pacific/Auckland" | "Fiji" | "Pacific/Fiji" | "Kamchatka" | "Asia/Kamchatka" | "Marshall Is." | "Pacific/Majuro" | "Wellington" | "Pacific/Auckland" | "Chatham Is." | "Pacific/Chatham" | "Nuku'alofa" | "Pacific/Tongatapu" | "Samoa" | "Pacific/Apia" | "Tokelau Is." | "Pacific/Fakaofo" | null;
+                    time_restriction_time_zone?: "International Date Line West" | "Etc/GMT+12" | "American Samoa" | "Pacific/Pago_Pago" | "Midway Island" | "Pacific/Midway" | "Hawaii" | "Pacific/Honolulu" | "Alaska" | "America/Juneau" | "Pacific Time (US & Canada)" | "America/Los_Angeles" | "Tijuana" | "America/Tijuana" | "Arizona" | "America/Phoenix" | "Mazatlan" | "America/Mazatlan" | "Mountain Time (US & Canada)" | "America/Denver" | "Central America" | "America/Guatemala" | "Central Time (US & Canada)" | "America/Chicago" | "Chihuahua" | "America/Chihuahua" | "Guadalajara" | "America/Mexico_City" | "Mexico City" | "America/Mexico_City" | "Monterrey" | "America/Monterrey" | "Saskatchewan" | "America/Regina" | "Bogota" | "America/Bogota" | "Eastern Time (US & Canada)" | "America/New_York" | "Indiana (East)" | "America/Indiana/Indianapolis" | "Lima" | "America/Lima" | "Quito" | "America/Lima" | "Atlantic Time (Canada)" | "America/Halifax" | "Caracas" | "America/Caracas" | "Georgetown" | "America/Guyana" | "La Paz" | "America/La_Paz" | "Puerto Rico" | "America/Puerto_Rico" | "Santiago" | "America/Santiago" | "Newfoundland" | "America/St_Johns" | "Asuncion" | "America/Asuncion" | "Brasilia" | "America/Sao_Paulo" | "Buenos Aires" | "America/Argentina/Buenos_Aires" | "Montevideo" | "America/Montevideo" | "Greenland" | "America/Nuuk" | "Mid-Atlantic" | "Atlantic/South_Georgia" | "Azores" | "Atlantic/Azores" | "Cape Verde Is." | "Atlantic/Cape_Verde" | "Edinburgh" | "Europe/London" | "Lisbon" | "Europe/Lisbon" | "London" | "Europe/London" | "Monrovia" | "Africa/Monrovia" | "UTC" | "Etc/UTC" | "Amsterdam" | "Europe/Amsterdam" | "Belgrade" | "Europe/Belgrade" | "Berlin" | "Europe/Berlin" | "Bern" | "Europe/Zurich" | "Bratislava" | "Europe/Bratislava" | "Brussels" | "Europe/Brussels" | "Budapest" | "Europe/Budapest" | "Casablanca" | "Africa/Casablanca" | "Copenhagen" | "Europe/Copenhagen" | "Dublin" | "Europe/Dublin" | "Ljubljana" | "Europe/Ljubljana" | "Madrid" | "Europe/Madrid" | "Paris" | "Europe/Paris" | "Prague" | "Europe/Prague" | "Rome" | "Europe/Rome" | "Sarajevo" | "Europe/Sarajevo" | "Skopje" | "Europe/Skopje" | "Stockholm" | "Europe/Stockholm" | "Vienna" | "Europe/Vienna" | "Warsaw" | "Europe/Warsaw" | "West Central Africa" | "Africa/Algiers" | "Zagreb" | "Europe/Zagreb" | "Zurich" | "Europe/Zurich" | "Athens" | "Europe/Athens" | "Bucharest" | "Europe/Bucharest" | "Cairo" | "Africa/Cairo" | "Harare" | "Africa/Harare" | "Helsinki" | "Europe/Helsinki" | "Jerusalem" | "Asia/Jerusalem" | "Kaliningrad" | "Europe/Kaliningrad" | "Kyiv" | "Europe/Kiev" | "Pretoria" | "Africa/Johannesburg" | "Riga" | "Europe/Riga" | "Sofia" | "Europe/Sofia" | "Tallinn" | "Europe/Tallinn" | "Vilnius" | "Europe/Vilnius" | "Baghdad" | "Asia/Baghdad" | "Istanbul" | "Europe/Istanbul" | "Kuwait" | "Asia/Kuwait" | "Minsk" | "Europe/Minsk" | "Moscow" | "Europe/Moscow" | "Nairobi" | "Africa/Nairobi" | "Riyadh" | "Asia/Riyadh" | "St. Petersburg" | "Europe/Moscow" | "Volgograd" | "Europe/Volgograd" | "Tehran" | "Asia/Tehran" | "Abu Dhabi" | "Asia/Muscat" | "Baku" | "Asia/Baku" | "Muscat" | "Asia/Muscat" | "Samara" | "Europe/Samara" | "Tbilisi" | "Asia/Tbilisi" | "Yerevan" | "Asia/Yerevan" | "Kabul" | "Asia/Kabul" | "Almaty" | "Asia/Almaty" | "Astana" | "Asia/Almaty" | "Ekaterinburg" | "Asia/Yekaterinburg" | "Islamabad" | "Asia/Karachi" | "Karachi" | "Asia/Karachi" | "Tashkent" | "Asia/Tashkent" | "Chennai" | "Asia/Kolkata" | "Kolkata" | "Asia/Kolkata" | "Mumbai" | "Asia/Kolkata" | "New Delhi" | "Asia/Kolkata" | "Sri Jayawardenepura" | "Asia/Colombo" | "Kathmandu" | "Asia/Kathmandu" | "Dhaka" | "Asia/Dhaka" | "Urumqi" | "Asia/Urumqi" | "Rangoon" | "Asia/Rangoon" | "Bangkok" | "Asia/Bangkok" | "Hanoi" | "Asia/Bangkok" | "Jakarta" | "Asia/Jakarta" | "Krasnoyarsk" | "Asia/Krasnoyarsk" | "Novosibirsk" | "Asia/Novosibirsk" | "Beijing" | "Asia/Shanghai" | "Chongqing" | "Asia/Chongqing" | "Hong Kong" | "Asia/Hong_Kong" | "Irkutsk" | "Asia/Irkutsk" | "Kuala Lumpur" | "Asia/Kuala_Lumpur" | "Perth" | "Australia/Perth" | "Singapore" | "Asia/Singapore" | "Taipei" | "Asia/Taipei" | "Ulaanbaatar" | "Asia/Ulaanbaatar" | "Osaka" | "Asia/Tokyo" | "Sapporo" | "Asia/Tokyo" | "Seoul" | "Asia/Seoul" | "Tokyo" | "Asia/Tokyo" | "Yakutsk" | "Asia/Yakutsk" | "Adelaide" | "Australia/Adelaide" | "Darwin" | "Australia/Darwin" | "Brisbane" | "Australia/Brisbane" | "Canberra" | "Australia/Canberra" | "Guam" | "Pacific/Guam" | "Hobart" | "Australia/Hobart" | "Melbourne" | "Australia/Melbourne" | "Port Moresby" | "Pacific/Port_Moresby" | "Sydney" | "Australia/Sydney" | "Vladivostok" | "Asia/Vladivostok" | "Magadan" | "Asia/Magadan" | "New Caledonia" | "Pacific/Noumea" | "Solomon Is." | "Pacific/Guadalcanal" | "Srednekolymsk" | "Asia/Srednekolymsk" | "Auckland" | "Pacific/Auckland" | "Fiji" | "Pacific/Fiji" | "Kamchatka" | "Asia/Kamchatka" | "Marshall Is." | "Pacific/Majuro" | "Wellington" | "Pacific/Auckland" | "Chatham Is." | "Pacific/Chatham" | "Nuku'alofa" | "Pacific/Tongatapu" | "Samoa" | "Pacific/Apia" | "Tokelau Is." | "Pacific/Fakaofo" | null;
                     /** @description If time restrictions are set, alerts will follow this path when they arrive within the specified time ranges and meet the rules. */
                     time_restrictions?: {
                         /** @enum {string} */
@@ -10833,7 +10981,7 @@ export interface components {
                  * @description Time zone for the deferral window
                  * @enum {string}
                  */
-                time_zone: "International Date Line West" | "Etc/GMT+12" | "American Samoa" | "Pacific/Pago_Pago" | "Midway Island" | "Pacific/Midway" | "Hawaii" | "Pacific/Honolulu" | "Alaska" | "America/Juneau" | "Pacific Time (US & Canada)" | "America/Los_Angeles" | "Tijuana" | "America/Tijuana" | "Arizona" | "America/Phoenix" | "Mazatlan" | "America/Mazatlan" | "Mountain Time (US & Canada)" | "America/Denver" | "Central America" | "America/Guatemala" | "Central Time (US & Canada)" | "America/Chicago" | "Chihuahua" | "America/Chihuahua" | "Guadalajara" | "America/Mexico_City" | "Mexico City" | "America/Mexico_City" | "Monterrey" | "America/Monterrey" | "Saskatchewan" | "America/Regina" | "Bogota" | "America/Bogota" | "Eastern Time (US & Canada)" | "America/New_York" | "Indiana (East)" | "America/Indiana/Indianapolis" | "Lima" | "America/Lima" | "Quito" | "America/Lima" | "Atlantic Time (Canada)" | "America/Halifax" | "Caracas" | "America/Caracas" | "Georgetown" | "America/Guyana" | "La Paz" | "America/La_Paz" | "Puerto Rico" | "America/Puerto_Rico" | "Santiago" | "America/Santiago" | "Newfoundland" | "America/St_Johns" | "Asuncion" | "America/Asuncion" | "Brasilia" | "America/Sao_Paulo" | "Buenos Aires" | "America/Argentina/Buenos_Aires" | "Montevideo" | "America/Montevideo" | "Greenland" | "America/Nuuk" | "Mid-Atlantic" | "Atlantic/South_Georgia" | "Azores" | "Atlantic/Azores" | "Cape Verde Is." | "Atlantic/Cape_Verde" | "Casablanca" | "Africa/Casablanca" | "Dublin" | "Europe/Dublin" | "Edinburgh" | "Europe/London" | "Lisbon" | "Europe/Lisbon" | "London" | "Europe/London" | "Monrovia" | "Africa/Monrovia" | "UTC" | "Etc/UTC" | "Amsterdam" | "Europe/Amsterdam" | "Belgrade" | "Europe/Belgrade" | "Berlin" | "Europe/Berlin" | "Bern" | "Europe/Zurich" | "Bratislava" | "Europe/Bratislava" | "Brussels" | "Europe/Brussels" | "Budapest" | "Europe/Budapest" | "Copenhagen" | "Europe/Copenhagen" | "Ljubljana" | "Europe/Ljubljana" | "Madrid" | "Europe/Madrid" | "Paris" | "Europe/Paris" | "Prague" | "Europe/Prague" | "Rome" | "Europe/Rome" | "Sarajevo" | "Europe/Sarajevo" | "Skopje" | "Europe/Skopje" | "Stockholm" | "Europe/Stockholm" | "Vienna" | "Europe/Vienna" | "Warsaw" | "Europe/Warsaw" | "West Central Africa" | "Africa/Algiers" | "Zagreb" | "Europe/Zagreb" | "Zurich" | "Europe/Zurich" | "Athens" | "Europe/Athens" | "Bucharest" | "Europe/Bucharest" | "Cairo" | "Africa/Cairo" | "Harare" | "Africa/Harare" | "Helsinki" | "Europe/Helsinki" | "Jerusalem" | "Asia/Jerusalem" | "Kaliningrad" | "Europe/Kaliningrad" | "Pretoria" | "Africa/Johannesburg" | "Riga" | "Europe/Riga" | "Sofia" | "Europe/Sofia" | "Tallinn" | "Europe/Tallinn" | "Vilnius" | "Europe/Vilnius" | "Baghdad" | "Asia/Baghdad" | "Istanbul" | "Europe/Istanbul" | "Kuwait" | "Asia/Kuwait" | "Minsk" | "Europe/Minsk" | "Moscow" | "Europe/Moscow" | "Nairobi" | "Africa/Nairobi" | "Riyadh" | "Asia/Riyadh" | "St. Petersburg" | "Europe/Moscow" | "Volgograd" | "Europe/Volgograd" | "Tehran" | "Asia/Tehran" | "Abu Dhabi" | "Asia/Muscat" | "Baku" | "Asia/Baku" | "Muscat" | "Asia/Muscat" | "Samara" | "Europe/Samara" | "Tbilisi" | "Asia/Tbilisi" | "Yerevan" | "Asia/Yerevan" | "Kabul" | "Asia/Kabul" | "Almaty" | "Asia/Almaty" | "Astana" | "Asia/Almaty" | "Ekaterinburg" | "Asia/Yekaterinburg" | "Islamabad" | "Asia/Karachi" | "Karachi" | "Asia/Karachi" | "Tashkent" | "Asia/Tashkent" | "Chennai" | "Asia/Kolkata" | "Kolkata" | "Asia/Kolkata" | "Mumbai" | "Asia/Kolkata" | "New Delhi" | "Asia/Kolkata" | "Sri Jayawardenepura" | "Asia/Colombo" | "Kathmandu" | "Asia/Kathmandu" | "Dhaka" | "Asia/Dhaka" | "Urumqi" | "Asia/Urumqi" | "Bangkok" | "Asia/Bangkok" | "Hanoi" | "Asia/Bangkok" | "Jakarta" | "Asia/Jakarta" | "Krasnoyarsk" | "Asia/Krasnoyarsk" | "Novosibirsk" | "Asia/Novosibirsk" | "Beijing" | "Asia/Shanghai" | "Chongqing" | "Asia/Chongqing" | "Hong Kong" | "Asia/Hong_Kong" | "Irkutsk" | "Asia/Irkutsk" | "Kuala Lumpur" | "Asia/Kuala_Lumpur" | "Perth" | "Australia/Perth" | "Singapore" | "Asia/Singapore" | "Taipei" | "Asia/Taipei" | "Ulaanbaatar" | "Asia/Ulaanbaatar" | "Osaka" | "Asia/Tokyo" | "Sapporo" | "Asia/Tokyo" | "Seoul" | "Asia/Seoul" | "Tokyo" | "Asia/Tokyo" | "Yakutsk" | "Asia/Yakutsk" | "Adelaide" | "Australia/Adelaide" | "Darwin" | "Australia/Darwin" | "Brisbane" | "Australia/Brisbane" | "Canberra" | "Australia/Canberra" | "Guam" | "Pacific/Guam" | "Hobart" | "Australia/Hobart" | "Melbourne" | "Australia/Melbourne" | "Port Moresby" | "Pacific/Port_Moresby" | "Sydney" | "Australia/Sydney" | "Vladivostok" | "Asia/Vladivostok" | "Magadan" | "Asia/Magadan" | "New Caledonia" | "Pacific/Noumea" | "Solomon Is." | "Pacific/Guadalcanal" | "Srednekolymsk" | "Asia/Srednekolymsk" | "Auckland" | "Pacific/Auckland" | "Fiji" | "Pacific/Fiji" | "Kamchatka" | "Asia/Kamchatka" | "Marshall Is." | "Pacific/Majuro" | "Wellington" | "Pacific/Auckland" | "Chatham Is." | "Pacific/Chatham" | "Nuku'alofa" | "Pacific/Tongatapu" | "Samoa" | "Pacific/Apia" | "Tokelau Is." | "Pacific/Fakaofo";
+                time_zone: "International Date Line West" | "Etc/GMT+12" | "American Samoa" | "Pacific/Pago_Pago" | "Midway Island" | "Pacific/Midway" | "Hawaii" | "Pacific/Honolulu" | "Alaska" | "America/Juneau" | "Pacific Time (US & Canada)" | "America/Los_Angeles" | "Tijuana" | "America/Tijuana" | "Arizona" | "America/Phoenix" | "Mazatlan" | "America/Mazatlan" | "Mountain Time (US & Canada)" | "America/Denver" | "Central America" | "America/Guatemala" | "Central Time (US & Canada)" | "America/Chicago" | "Chihuahua" | "America/Chihuahua" | "Guadalajara" | "America/Mexico_City" | "Mexico City" | "America/Mexico_City" | "Monterrey" | "America/Monterrey" | "Saskatchewan" | "America/Regina" | "Bogota" | "America/Bogota" | "Eastern Time (US & Canada)" | "America/New_York" | "Indiana (East)" | "America/Indiana/Indianapolis" | "Lima" | "America/Lima" | "Quito" | "America/Lima" | "Atlantic Time (Canada)" | "America/Halifax" | "Caracas" | "America/Caracas" | "Georgetown" | "America/Guyana" | "La Paz" | "America/La_Paz" | "Puerto Rico" | "America/Puerto_Rico" | "Santiago" | "America/Santiago" | "Newfoundland" | "America/St_Johns" | "Asuncion" | "America/Asuncion" | "Brasilia" | "America/Sao_Paulo" | "Buenos Aires" | "America/Argentina/Buenos_Aires" | "Montevideo" | "America/Montevideo" | "Greenland" | "America/Nuuk" | "Mid-Atlantic" | "Atlantic/South_Georgia" | "Azores" | "Atlantic/Azores" | "Cape Verde Is." | "Atlantic/Cape_Verde" | "Edinburgh" | "Europe/London" | "Lisbon" | "Europe/Lisbon" | "London" | "Europe/London" | "Monrovia" | "Africa/Monrovia" | "UTC" | "Etc/UTC" | "Amsterdam" | "Europe/Amsterdam" | "Belgrade" | "Europe/Belgrade" | "Berlin" | "Europe/Berlin" | "Bern" | "Europe/Zurich" | "Bratislava" | "Europe/Bratislava" | "Brussels" | "Europe/Brussels" | "Budapest" | "Europe/Budapest" | "Casablanca" | "Africa/Casablanca" | "Copenhagen" | "Europe/Copenhagen" | "Dublin" | "Europe/Dublin" | "Ljubljana" | "Europe/Ljubljana" | "Madrid" | "Europe/Madrid" | "Paris" | "Europe/Paris" | "Prague" | "Europe/Prague" | "Rome" | "Europe/Rome" | "Sarajevo" | "Europe/Sarajevo" | "Skopje" | "Europe/Skopje" | "Stockholm" | "Europe/Stockholm" | "Vienna" | "Europe/Vienna" | "Warsaw" | "Europe/Warsaw" | "West Central Africa" | "Africa/Algiers" | "Zagreb" | "Europe/Zagreb" | "Zurich" | "Europe/Zurich" | "Athens" | "Europe/Athens" | "Bucharest" | "Europe/Bucharest" | "Cairo" | "Africa/Cairo" | "Harare" | "Africa/Harare" | "Helsinki" | "Europe/Helsinki" | "Jerusalem" | "Asia/Jerusalem" | "Kaliningrad" | "Europe/Kaliningrad" | "Kyiv" | "Europe/Kiev" | "Pretoria" | "Africa/Johannesburg" | "Riga" | "Europe/Riga" | "Sofia" | "Europe/Sofia" | "Tallinn" | "Europe/Tallinn" | "Vilnius" | "Europe/Vilnius" | "Baghdad" | "Asia/Baghdad" | "Istanbul" | "Europe/Istanbul" | "Kuwait" | "Asia/Kuwait" | "Minsk" | "Europe/Minsk" | "Moscow" | "Europe/Moscow" | "Nairobi" | "Africa/Nairobi" | "Riyadh" | "Asia/Riyadh" | "St. Petersburg" | "Europe/Moscow" | "Volgograd" | "Europe/Volgograd" | "Tehran" | "Asia/Tehran" | "Abu Dhabi" | "Asia/Muscat" | "Baku" | "Asia/Baku" | "Muscat" | "Asia/Muscat" | "Samara" | "Europe/Samara" | "Tbilisi" | "Asia/Tbilisi" | "Yerevan" | "Asia/Yerevan" | "Kabul" | "Asia/Kabul" | "Almaty" | "Asia/Almaty" | "Astana" | "Asia/Almaty" | "Ekaterinburg" | "Asia/Yekaterinburg" | "Islamabad" | "Asia/Karachi" | "Karachi" | "Asia/Karachi" | "Tashkent" | "Asia/Tashkent" | "Chennai" | "Asia/Kolkata" | "Kolkata" | "Asia/Kolkata" | "Mumbai" | "Asia/Kolkata" | "New Delhi" | "Asia/Kolkata" | "Sri Jayawardenepura" | "Asia/Colombo" | "Kathmandu" | "Asia/Kathmandu" | "Dhaka" | "Asia/Dhaka" | "Urumqi" | "Asia/Urumqi" | "Rangoon" | "Asia/Rangoon" | "Bangkok" | "Asia/Bangkok" | "Hanoi" | "Asia/Bangkok" | "Jakarta" | "Asia/Jakarta" | "Krasnoyarsk" | "Asia/Krasnoyarsk" | "Novosibirsk" | "Asia/Novosibirsk" | "Beijing" | "Asia/Shanghai" | "Chongqing" | "Asia/Chongqing" | "Hong Kong" | "Asia/Hong_Kong" | "Irkutsk" | "Asia/Irkutsk" | "Kuala Lumpur" | "Asia/Kuala_Lumpur" | "Perth" | "Australia/Perth" | "Singapore" | "Asia/Singapore" | "Taipei" | "Asia/Taipei" | "Ulaanbaatar" | "Asia/Ulaanbaatar" | "Osaka" | "Asia/Tokyo" | "Sapporo" | "Asia/Tokyo" | "Seoul" | "Asia/Seoul" | "Tokyo" | "Asia/Tokyo" | "Yakutsk" | "Asia/Yakutsk" | "Adelaide" | "Australia/Adelaide" | "Darwin" | "Australia/Darwin" | "Brisbane" | "Australia/Brisbane" | "Canberra" | "Australia/Canberra" | "Guam" | "Pacific/Guam" | "Hobart" | "Australia/Hobart" | "Melbourne" | "Australia/Melbourne" | "Port Moresby" | "Pacific/Port_Moresby" | "Sydney" | "Australia/Sydney" | "Vladivostok" | "Asia/Vladivostok" | "Magadan" | "Asia/Magadan" | "New Caledonia" | "Pacific/Noumea" | "Solomon Is." | "Pacific/Guadalcanal" | "Srednekolymsk" | "Asia/Srednekolymsk" | "Auckland" | "Pacific/Auckland" | "Fiji" | "Pacific/Fiji" | "Kamchatka" | "Asia/Kamchatka" | "Marshall Is." | "Pacific/Majuro" | "Wellington" | "Pacific/Auckland" | "Chatham Is." | "Pacific/Chatham" | "Nuku'alofa" | "Pacific/Tongatapu" | "Samoa" | "Pacific/Apia" | "Tokelau Is." | "Pacific/Fakaofo";
                 /** @description Time windows during which alerts are deferred */
                 time_blocks: {
                     monday?: boolean | null;
@@ -10855,7 +11003,7 @@ export interface components {
              * @description Time zone used for time restrictions.
              * @enum {string|null}
              */
-            time_restriction_time_zone?: "International Date Line West" | "Etc/GMT+12" | "American Samoa" | "Pacific/Pago_Pago" | "Midway Island" | "Pacific/Midway" | "Hawaii" | "Pacific/Honolulu" | "Alaska" | "America/Juneau" | "Pacific Time (US & Canada)" | "America/Los_Angeles" | "Tijuana" | "America/Tijuana" | "Arizona" | "America/Phoenix" | "Mazatlan" | "America/Mazatlan" | "Mountain Time (US & Canada)" | "America/Denver" | "Central America" | "America/Guatemala" | "Central Time (US & Canada)" | "America/Chicago" | "Chihuahua" | "America/Chihuahua" | "Guadalajara" | "America/Mexico_City" | "Mexico City" | "America/Mexico_City" | "Monterrey" | "America/Monterrey" | "Saskatchewan" | "America/Regina" | "Bogota" | "America/Bogota" | "Eastern Time (US & Canada)" | "America/New_York" | "Indiana (East)" | "America/Indiana/Indianapolis" | "Lima" | "America/Lima" | "Quito" | "America/Lima" | "Atlantic Time (Canada)" | "America/Halifax" | "Caracas" | "America/Caracas" | "Georgetown" | "America/Guyana" | "La Paz" | "America/La_Paz" | "Puerto Rico" | "America/Puerto_Rico" | "Santiago" | "America/Santiago" | "Newfoundland" | "America/St_Johns" | "Asuncion" | "America/Asuncion" | "Brasilia" | "America/Sao_Paulo" | "Buenos Aires" | "America/Argentina/Buenos_Aires" | "Montevideo" | "America/Montevideo" | "Greenland" | "America/Nuuk" | "Mid-Atlantic" | "Atlantic/South_Georgia" | "Azores" | "Atlantic/Azores" | "Cape Verde Is." | "Atlantic/Cape_Verde" | "Casablanca" | "Africa/Casablanca" | "Dublin" | "Europe/Dublin" | "Edinburgh" | "Europe/London" | "Lisbon" | "Europe/Lisbon" | "London" | "Europe/London" | "Monrovia" | "Africa/Monrovia" | "UTC" | "Etc/UTC" | "Amsterdam" | "Europe/Amsterdam" | "Belgrade" | "Europe/Belgrade" | "Berlin" | "Europe/Berlin" | "Bern" | "Europe/Zurich" | "Bratislava" | "Europe/Bratislava" | "Brussels" | "Europe/Brussels" | "Budapest" | "Europe/Budapest" | "Copenhagen" | "Europe/Copenhagen" | "Ljubljana" | "Europe/Ljubljana" | "Madrid" | "Europe/Madrid" | "Paris" | "Europe/Paris" | "Prague" | "Europe/Prague" | "Rome" | "Europe/Rome" | "Sarajevo" | "Europe/Sarajevo" | "Skopje" | "Europe/Skopje" | "Stockholm" | "Europe/Stockholm" | "Vienna" | "Europe/Vienna" | "Warsaw" | "Europe/Warsaw" | "West Central Africa" | "Africa/Algiers" | "Zagreb" | "Europe/Zagreb" | "Zurich" | "Europe/Zurich" | "Athens" | "Europe/Athens" | "Bucharest" | "Europe/Bucharest" | "Cairo" | "Africa/Cairo" | "Harare" | "Africa/Harare" | "Helsinki" | "Europe/Helsinki" | "Jerusalem" | "Asia/Jerusalem" | "Kaliningrad" | "Europe/Kaliningrad" | "Pretoria" | "Africa/Johannesburg" | "Riga" | "Europe/Riga" | "Sofia" | "Europe/Sofia" | "Tallinn" | "Europe/Tallinn" | "Vilnius" | "Europe/Vilnius" | "Baghdad" | "Asia/Baghdad" | "Istanbul" | "Europe/Istanbul" | "Kuwait" | "Asia/Kuwait" | "Minsk" | "Europe/Minsk" | "Moscow" | "Europe/Moscow" | "Nairobi" | "Africa/Nairobi" | "Riyadh" | "Asia/Riyadh" | "St. Petersburg" | "Europe/Moscow" | "Volgograd" | "Europe/Volgograd" | "Tehran" | "Asia/Tehran" | "Abu Dhabi" | "Asia/Muscat" | "Baku" | "Asia/Baku" | "Muscat" | "Asia/Muscat" | "Samara" | "Europe/Samara" | "Tbilisi" | "Asia/Tbilisi" | "Yerevan" | "Asia/Yerevan" | "Kabul" | "Asia/Kabul" | "Almaty" | "Asia/Almaty" | "Astana" | "Asia/Almaty" | "Ekaterinburg" | "Asia/Yekaterinburg" | "Islamabad" | "Asia/Karachi" | "Karachi" | "Asia/Karachi" | "Tashkent" | "Asia/Tashkent" | "Chennai" | "Asia/Kolkata" | "Kolkata" | "Asia/Kolkata" | "Mumbai" | "Asia/Kolkata" | "New Delhi" | "Asia/Kolkata" | "Sri Jayawardenepura" | "Asia/Colombo" | "Kathmandu" | "Asia/Kathmandu" | "Dhaka" | "Asia/Dhaka" | "Urumqi" | "Asia/Urumqi" | "Bangkok" | "Asia/Bangkok" | "Hanoi" | "Asia/Bangkok" | "Jakarta" | "Asia/Jakarta" | "Krasnoyarsk" | "Asia/Krasnoyarsk" | "Novosibirsk" | "Asia/Novosibirsk" | "Beijing" | "Asia/Shanghai" | "Chongqing" | "Asia/Chongqing" | "Hong Kong" | "Asia/Hong_Kong" | "Irkutsk" | "Asia/Irkutsk" | "Kuala Lumpur" | "Asia/Kuala_Lumpur" | "Perth" | "Australia/Perth" | "Singapore" | "Asia/Singapore" | "Taipei" | "Asia/Taipei" | "Ulaanbaatar" | "Asia/Ulaanbaatar" | "Osaka" | "Asia/Tokyo" | "Sapporo" | "Asia/Tokyo" | "Seoul" | "Asia/Seoul" | "Tokyo" | "Asia/Tokyo" | "Yakutsk" | "Asia/Yakutsk" | "Adelaide" | "Australia/Adelaide" | "Darwin" | "Australia/Darwin" | "Brisbane" | "Australia/Brisbane" | "Canberra" | "Australia/Canberra" | "Guam" | "Pacific/Guam" | "Hobart" | "Australia/Hobart" | "Melbourne" | "Australia/Melbourne" | "Port Moresby" | "Pacific/Port_Moresby" | "Sydney" | "Australia/Sydney" | "Vladivostok" | "Asia/Vladivostok" | "Magadan" | "Asia/Magadan" | "New Caledonia" | "Pacific/Noumea" | "Solomon Is." | "Pacific/Guadalcanal" | "Srednekolymsk" | "Asia/Srednekolymsk" | "Auckland" | "Pacific/Auckland" | "Fiji" | "Pacific/Fiji" | "Kamchatka" | "Asia/Kamchatka" | "Marshall Is." | "Pacific/Majuro" | "Wellington" | "Pacific/Auckland" | "Chatham Is." | "Pacific/Chatham" | "Nuku'alofa" | "Pacific/Tongatapu" | "Samoa" | "Pacific/Apia" | "Tokelau Is." | "Pacific/Fakaofo" | null;
+            time_restriction_time_zone?: "International Date Line West" | "Etc/GMT+12" | "American Samoa" | "Pacific/Pago_Pago" | "Midway Island" | "Pacific/Midway" | "Hawaii" | "Pacific/Honolulu" | "Alaska" | "America/Juneau" | "Pacific Time (US & Canada)" | "America/Los_Angeles" | "Tijuana" | "America/Tijuana" | "Arizona" | "America/Phoenix" | "Mazatlan" | "America/Mazatlan" | "Mountain Time (US & Canada)" | "America/Denver" | "Central America" | "America/Guatemala" | "Central Time (US & Canada)" | "America/Chicago" | "Chihuahua" | "America/Chihuahua" | "Guadalajara" | "America/Mexico_City" | "Mexico City" | "America/Mexico_City" | "Monterrey" | "America/Monterrey" | "Saskatchewan" | "America/Regina" | "Bogota" | "America/Bogota" | "Eastern Time (US & Canada)" | "America/New_York" | "Indiana (East)" | "America/Indiana/Indianapolis" | "Lima" | "America/Lima" | "Quito" | "America/Lima" | "Atlantic Time (Canada)" | "America/Halifax" | "Caracas" | "America/Caracas" | "Georgetown" | "America/Guyana" | "La Paz" | "America/La_Paz" | "Puerto Rico" | "America/Puerto_Rico" | "Santiago" | "America/Santiago" | "Newfoundland" | "America/St_Johns" | "Asuncion" | "America/Asuncion" | "Brasilia" | "America/Sao_Paulo" | "Buenos Aires" | "America/Argentina/Buenos_Aires" | "Montevideo" | "America/Montevideo" | "Greenland" | "America/Nuuk" | "Mid-Atlantic" | "Atlantic/South_Georgia" | "Azores" | "Atlantic/Azores" | "Cape Verde Is." | "Atlantic/Cape_Verde" | "Edinburgh" | "Europe/London" | "Lisbon" | "Europe/Lisbon" | "London" | "Europe/London" | "Monrovia" | "Africa/Monrovia" | "UTC" | "Etc/UTC" | "Amsterdam" | "Europe/Amsterdam" | "Belgrade" | "Europe/Belgrade" | "Berlin" | "Europe/Berlin" | "Bern" | "Europe/Zurich" | "Bratislava" | "Europe/Bratislava" | "Brussels" | "Europe/Brussels" | "Budapest" | "Europe/Budapest" | "Casablanca" | "Africa/Casablanca" | "Copenhagen" | "Europe/Copenhagen" | "Dublin" | "Europe/Dublin" | "Ljubljana" | "Europe/Ljubljana" | "Madrid" | "Europe/Madrid" | "Paris" | "Europe/Paris" | "Prague" | "Europe/Prague" | "Rome" | "Europe/Rome" | "Sarajevo" | "Europe/Sarajevo" | "Skopje" | "Europe/Skopje" | "Stockholm" | "Europe/Stockholm" | "Vienna" | "Europe/Vienna" | "Warsaw" | "Europe/Warsaw" | "West Central Africa" | "Africa/Algiers" | "Zagreb" | "Europe/Zagreb" | "Zurich" | "Europe/Zurich" | "Athens" | "Europe/Athens" | "Bucharest" | "Europe/Bucharest" | "Cairo" | "Africa/Cairo" | "Harare" | "Africa/Harare" | "Helsinki" | "Europe/Helsinki" | "Jerusalem" | "Asia/Jerusalem" | "Kaliningrad" | "Europe/Kaliningrad" | "Kyiv" | "Europe/Kiev" | "Pretoria" | "Africa/Johannesburg" | "Riga" | "Europe/Riga" | "Sofia" | "Europe/Sofia" | "Tallinn" | "Europe/Tallinn" | "Vilnius" | "Europe/Vilnius" | "Baghdad" | "Asia/Baghdad" | "Istanbul" | "Europe/Istanbul" | "Kuwait" | "Asia/Kuwait" | "Minsk" | "Europe/Minsk" | "Moscow" | "Europe/Moscow" | "Nairobi" | "Africa/Nairobi" | "Riyadh" | "Asia/Riyadh" | "St. Petersburg" | "Europe/Moscow" | "Volgograd" | "Europe/Volgograd" | "Tehran" | "Asia/Tehran" | "Abu Dhabi" | "Asia/Muscat" | "Baku" | "Asia/Baku" | "Muscat" | "Asia/Muscat" | "Samara" | "Europe/Samara" | "Tbilisi" | "Asia/Tbilisi" | "Yerevan" | "Asia/Yerevan" | "Kabul" | "Asia/Kabul" | "Almaty" | "Asia/Almaty" | "Astana" | "Asia/Almaty" | "Ekaterinburg" | "Asia/Yekaterinburg" | "Islamabad" | "Asia/Karachi" | "Karachi" | "Asia/Karachi" | "Tashkent" | "Asia/Tashkent" | "Chennai" | "Asia/Kolkata" | "Kolkata" | "Asia/Kolkata" | "Mumbai" | "Asia/Kolkata" | "New Delhi" | "Asia/Kolkata" | "Sri Jayawardenepura" | "Asia/Colombo" | "Kathmandu" | "Asia/Kathmandu" | "Dhaka" | "Asia/Dhaka" | "Urumqi" | "Asia/Urumqi" | "Rangoon" | "Asia/Rangoon" | "Bangkok" | "Asia/Bangkok" | "Hanoi" | "Asia/Bangkok" | "Jakarta" | "Asia/Jakarta" | "Krasnoyarsk" | "Asia/Krasnoyarsk" | "Novosibirsk" | "Asia/Novosibirsk" | "Beijing" | "Asia/Shanghai" | "Chongqing" | "Asia/Chongqing" | "Hong Kong" | "Asia/Hong_Kong" | "Irkutsk" | "Asia/Irkutsk" | "Kuala Lumpur" | "Asia/Kuala_Lumpur" | "Perth" | "Australia/Perth" | "Singapore" | "Asia/Singapore" | "Taipei" | "Asia/Taipei" | "Ulaanbaatar" | "Asia/Ulaanbaatar" | "Osaka" | "Asia/Tokyo" | "Sapporo" | "Asia/Tokyo" | "Seoul" | "Asia/Seoul" | "Tokyo" | "Asia/Tokyo" | "Yakutsk" | "Asia/Yakutsk" | "Adelaide" | "Australia/Adelaide" | "Darwin" | "Australia/Darwin" | "Brisbane" | "Australia/Brisbane" | "Canberra" | "Australia/Canberra" | "Guam" | "Pacific/Guam" | "Hobart" | "Australia/Hobart" | "Melbourne" | "Australia/Melbourne" | "Port Moresby" | "Pacific/Port_Moresby" | "Sydney" | "Australia/Sydney" | "Vladivostok" | "Asia/Vladivostok" | "Magadan" | "Asia/Magadan" | "New Caledonia" | "Pacific/Noumea" | "Solomon Is." | "Pacific/Guadalcanal" | "Srednekolymsk" | "Asia/Srednekolymsk" | "Auckland" | "Pacific/Auckland" | "Fiji" | "Pacific/Fiji" | "Kamchatka" | "Asia/Kamchatka" | "Marshall Is." | "Pacific/Majuro" | "Wellington" | "Pacific/Auckland" | "Chatham Is." | "Pacific/Chatham" | "Nuku'alofa" | "Pacific/Tongatapu" | "Samoa" | "Pacific/Apia" | "Tokelau Is." | "Pacific/Fakaofo" | null;
             /** @description If time restrictions are set, alerts will follow this path when they arrive within the specified time ranges and meet the rules. */
             time_restrictions?: {
                 /** @enum {string} */
@@ -15353,6 +15501,12 @@ export interface components {
              * @default ANY
              * @enum {string}
              */
+            alert_condition_urgency: "IS" | "IS NOT" | "ANY" | "CONTAINS" | "CONTAINS_ALL" | "CONTAINS_NONE" | "NONE" | "SET" | "UNSET";
+            alert_urgency_ids?: string[];
+            /**
+             * @default ANY
+             * @enum {string}
+             */
             alert_condition_payload: "IS" | "IS NOT" | "ANY" | "CONTAINS" | "CONTAINS_ALL" | "CONTAINS_NONE" | "NONE" | "SET" | "UNSET";
             /** @default false */
             alert_condition_payload_use_regexp: boolean;
@@ -15540,7 +15694,7 @@ export interface components {
                      * @description The country code of the live_call_router
                      * @enum {string}
                      */
-                    country_code: "AU" | "CA" | "DE" | "NL" | "NZ" | "GB" | "US";
+                    country_code: "AU" | "CA" | "DE" | "NL" | "NZ" | "SE" | "GB" | "US";
                     /**
                      * @description The phone type of the live_call_router
                      * @enum {string}
@@ -15567,6 +15721,8 @@ export interface components {
                     should_auto_resolve_alert_on_call_end?: boolean;
                     /** @description This is used in escalation paths to determine who to page */
                     alert_urgency_id?: string;
+                    /** @description Whether the live call router is configured as a phone tree, requiring callers to press a key before being connected */
+                    calling_tree_enabled?: boolean;
                     /** @description The audio instructions callers will hear when they call this number, prompting them to select from available options to route their call */
                     calling_tree_prompt?: string;
                     /** @description Paging targets that callers can select from when this live call router is configured as a phone tree. */
@@ -15611,7 +15767,7 @@ export interface components {
                      * @description The country code of the live_call_router
                      * @enum {string}
                      */
-                    country_code?: "AU" | "CA" | "DE" | "NL" | "NZ" | "GB" | "US";
+                    country_code?: "AU" | "CA" | "DE" | "NL" | "NZ" | "SE" | "GB" | "US";
                     /**
                      * @description The phone type of the live_call_router
                      * @enum {string}
@@ -15636,6 +15792,8 @@ export interface components {
                     should_auto_resolve_alert_on_call_end?: boolean;
                     /** @description This is used in escalation paths to determine who to page */
                     alert_urgency_id?: string;
+                    /** @description Whether the live call router is configured as a phone tree, requiring callers to press a key before being connected */
+                    calling_tree_enabled?: boolean;
                     /** @description The audio instructions callers will hear when they call this number, prompting them to select from available options to route their call */
                     calling_tree_prompt?: string;
                     /** @description Paging targets that callers can select from when this live call router is configured as a phone tree. */
@@ -15676,7 +15834,7 @@ export interface components {
              * @description The country code of the live_call_router
              * @enum {string}
              */
-            country_code?: "AU" | "CA" | "DE" | "NL" | "NZ" | "GB" | "US";
+            country_code?: "AU" | "CA" | "DE" | "NL" | "NZ" | "SE" | "GB" | "US";
             /**
              * @description The phone type of the live_call_router
              * @enum {string}
@@ -17781,10 +17939,65 @@ export interface components {
             first: string;
             prev: string | null;
             next: string | null;
-            last: string;
+            last: string | null;
+        };
+        meeting_recording: {
+            /**
+             * @description Meeting platform
+             * @enum {string}
+             */
+            platform: "zoom" | "google_meet" | "microsoft_teams" | "webex";
+            /** @description Session number within the incident for this platform (starts at 1, increments on re-invite) */
+            session_number: number;
+            /**
+             * @description Current recording lifecycle status
+             * @enum {string}
+             */
+            status: "pending" | "recording" | "paused" | "call_ended" | "analyzing" | "completed" | "failed";
+            /**
+             * Format: date-time
+             * @description When the bot started recording (null if bot never joined)
+             */
+            started_at?: string | null;
+            /**
+             * Format: date-time
+             * @description When the recording ended
+             */
+            ended_at?: string | null;
+            /** @description Recording duration in minutes (null if not started) */
+            duration_minutes?: number | null;
+            /** @description Number of unique speakers detected in the transcript */
+            speaker_count?: number;
+            /** @description Total word count across all transcript segments */
+            word_count?: number;
+            /** @description AI-generated summary of the meeting transcript (null if no transcript or not yet analyzed) */
+            transcript_summary?: string | null;
+            /** @description Whether a video recording file is attached */
+            has_video?: boolean;
+            /**
+             * Format: date-time
+             * @description When the recording session was created
+             */
+            created_at: string;
+            /**
+             * Format: date-time
+             * @description When the recording session was last updated
+             */
+            updated_at: string;
+        };
+        meeting_recording_list: {
+            data: {
+                /** @description Unique UUID of the meeting recording */
+                id: string;
+                /** @enum {string} */
+                type: "meeting_recordings";
+                attributes: components["schemas"]["meeting_recording"];
+            }[];
+            meta?: components["schemas"]["meta"];
         };
         meta: {
-            current_page: number;
+            next_cursor?: string | null;
+            current_page: number | null;
             next_page: number | null;
             prev_page: number | null;
             total_count: number;
@@ -17876,6 +18089,18 @@ export interface components {
              * @description When the report was last generated.
              */
             last_generated_at?: string | null;
+            /** @description The team's IANA timezone used to interpret start_date and end_date. */
+            time_zone?: string | null;
+            /**
+             * Format: uri
+             * @description Download URL for the generated CSV report. Null until the report is generated.
+             */
+            csv_file_url?: string | null;
+            /**
+             * Format: uri
+             * @description Download URL for the generated XLSX report. Null until the report is generated.
+             */
+            xlsx_file_url?: string | null;
             /** Format: date-time */
             created_at: string;
             /** Format: date-time */
@@ -20123,6 +20348,8 @@ export interface components {
             ends_at: string;
             /** @description Denotes shift is an override shift */
             is_override: boolean;
+            /** @description Denotes shift is a shadow shift */
+            is_shadow: boolean;
             /** @description ID of user on shift */
             user_id?: number | null;
         };
@@ -21482,7 +21709,7 @@ export interface components {
                     assignment_deadline_parent_status: "in_triage" | "started" | "mitigated" | "resolved" | "closed" | "cancelled";
                     /**
                      * Format: uuid
-                     * @description Optional sub-status for the assignment deadline
+                     * @description Sub-status for the assignment deadline. Required when custom lifecycle statuses are enabled on the team.
                      */
                     assignment_deadline_sub_status_id?: string | null;
                     /** @description Whether to skip weekends when calculating the assignment deadline */
@@ -21499,7 +21726,7 @@ export interface components {
                     completion_deadline_parent_status: "in_triage" | "started" | "mitigated" | "resolved" | "closed" | "cancelled";
                     /**
                      * Format: uuid
-                     * @description Optional sub-status for the completion deadline
+                     * @description Sub-status for the completion deadline. Required when custom lifecycle statuses are enabled on the team.
                      */
                     completion_deadline_sub_status_id?: string | null;
                     /** @description Whether to skip weekends when calculating the completion deadline */
@@ -21559,10 +21786,10 @@ export interface components {
                     condition_match_type?: "ALL" | "ANY";
                     /**
                      * Format: uuid
-                     * @description The ID of the incident role responsible for this SLA
+                     * @description The ID of the incident role responsible for this SLA. Exactly one of `manager_role_id` or `manager_user_id` must be provided.
                      */
                     manager_role_id?: string | null;
-                    /** @description The ID of the user responsible for this SLA */
+                    /** @description The ID of the user responsible for this SLA. Exactly one of `manager_role_id` or `manager_user_id` must be provided. */
                     manager_user_id?: number | null;
                     /**
                      * @description Number of days for the assignment deadline
@@ -21576,7 +21803,7 @@ export interface components {
                     assignment_deadline_parent_status?: "in_triage" | "started" | "mitigated" | "resolved" | "closed" | "cancelled";
                     /**
                      * Format: uuid
-                     * @description Optional sub-status for the assignment deadline
+                     * @description Sub-status for the assignment deadline. Required when custom lifecycle statuses are enabled on the team.
                      */
                     assignment_deadline_sub_status_id?: string | null;
                     /** @description Whether to skip weekends when calculating the assignment deadline */
@@ -21593,7 +21820,7 @@ export interface components {
                     completion_deadline_parent_status?: "in_triage" | "started" | "mitigated" | "resolved" | "closed" | "cancelled";
                     /**
                      * Format: uuid
-                     * @description Optional sub-status for the completion deadline
+                     * @description Sub-status for the completion deadline. Required when custom lifecycle statuses are enabled on the team.
                      */
                     completion_deadline_sub_status_id?: string | null;
                     /** @description Whether to skip weekends when calculating the completion deadline */
@@ -21656,10 +21883,10 @@ export interface components {
             condition_match_type: "ALL" | "ANY";
             /**
              * Format: uuid
-             * @description The ID of the manager incident role
+             * @description The ID of the manager incident role. Exactly one of `manager_role_id` or `manager_user_id` must be provided.
              */
             manager_role_id?: string | null;
-            /** @description The ID of the manager user */
+            /** @description The ID of the manager user. Exactly one of `manager_role_id` or `manager_user_id` must be provided. */
             manager_user_id?: number | null;
             /** @description Number of days for the assignment deadline */
             assignment_deadline_days: number;
@@ -21667,7 +21894,7 @@ export interface components {
             assignment_deadline_parent_status: string;
             /**
              * Format: uuid
-             * @description Optional sub-status for the assignment deadline
+             * @description Sub-status for the assignment deadline. Required when custom lifecycle statuses are enabled on the team.
              */
             assignment_deadline_sub_status_id?: string | null;
             /** @description Whether to skip weekends when calculating the assignment deadline */
@@ -21678,7 +21905,7 @@ export interface components {
             completion_deadline_parent_status: string;
             /**
              * Format: uuid
-             * @description Optional sub-status for the completion deadline
+             * @description Sub-status for the completion deadline. Required when custom lifecycle statuses are enabled on the team.
              */
             completion_deadline_sub_status_id?: string | null;
             /** @description Whether to skip weekends when calculating the completion deadline */
@@ -23123,6 +23350,8 @@ export interface operations {
                 "filter[created_at][gte]"?: string;
                 "filter[created_at][lt]"?: string;
                 "filter[created_at][lte]"?: string;
+                /** @description The cursor to fetch results using cursor pagination. A cursor is provided in meta.next_cursor in the response. */
+                "page[after]"?: string;
                 "page[number]"?: number;
                 "page[size]"?: number;
             };
@@ -23811,15 +24040,6 @@ export interface operations {
                     "application/vnd.api+json": components["schemas"]["catalog_checklist_template_list"];
                 };
             };
-            /** @description returns 404 when feature flag is disabled */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/vnd.api+json": components["schemas"]["errors_list"];
-                };
-            };
         };
     };
     createCatalogChecklistTemplate: {
@@ -24197,15 +24417,6 @@ export interface operations {
                 };
                 content: {
                     "application/vnd.api+json": components["schemas"]["catalog_entity_checklist_list"];
-                };
-            };
-            /** @description returns 404 when feature flag is disabled */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/vnd.api+json": components["schemas"]["errors_list"];
                 };
             };
         };
@@ -28404,7 +28615,7 @@ export interface operations {
             };
         };
         responses: {
-            /** @description form_field created ignoring auto_set_by_catalog_property_id when flipper is disabled */
+            /** @description form_field created with auto_set_by_catalog_property_id */
             201: {
                 headers: {
                     [name: string]: unknown;
@@ -29547,7 +29758,7 @@ export interface operations {
             };
         };
         responses: {
-            /** @description workflow_form_field_condition created without environment ids when catalog_v1 disabled */
+            /** @description workflow_form_field_condition created with environment ids for non-environment form field */
             201: {
                 headers: {
                     [name: string]: unknown;
@@ -29578,7 +29789,7 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description excludes native field ids when catalog_v1 disabled */
+            /** @description includes native field ids */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -33823,7 +34034,7 @@ export interface operations {
             };
         };
         responses: {
-            /** @description live_call_router created with multiple notification targets */
+            /** @description live_call_router created with multiple targets without calling_tree_enabled (backward compat) */
             201: {
                 headers: {
                     [name: string]: unknown;
@@ -33855,7 +34066,7 @@ export interface operations {
     generatePhoneNumberLiveCallRouter: {
         parameters: {
             query: {
-                country_code: "AU" | "CA" | "DE" | "NL" | "NZ" | "GB" | "US";
+                country_code: "AU" | "CA" | "DE" | "NL" | "NZ" | "SE" | "GB" | "US";
                 phone_type: "local" | "toll_free" | "mobile";
             };
             header?: never;
@@ -33976,6 +34187,268 @@ export interface operations {
                 content: {
                     "application/vnd.api+json": components["schemas"]["errors_list"];
                 };
+            };
+        };
+    };
+    listMeetingRecordings: {
+        parameters: {
+            query?: {
+                /** @description Page number */
+                "page[number]"?: number;
+                /** @description Number of recordings per page */
+                "page[size]"?: number;
+            };
+            header?: never;
+            path: {
+                /** @description Incident UUID */
+                incident_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description meeting recordings listed */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/vnd.api+json": components["schemas"]["meeting_recording_list"];
+                };
+            };
+            /** @description incident not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    createMeetingRecording: {
+        parameters: {
+            query?: {
+                /** @description Meeting platform */
+                platform?: "zoom" | "google_meet" | "microsoft_teams" | "webex";
+            };
+            header?: never;
+            path: {
+                /** @description Incident UUID */
+                incident_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description recording session created */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description validation error (e.g. bot already active) */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    getMeetingRecording: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Meeting Recording UUID */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description meeting recording found */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description meeting recording not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    deleteMeetingRecording: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Meeting Recording UUID */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description meeting recording deleted */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description cannot delete active recording */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    deleteMeetingRecordingVideo: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Meeting Recording UUID */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description video deleted */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description cannot delete video (active recording or no video) */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    pauseMeetingRecording: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Meeting Recording UUID */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description recording paused */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description recording is not active */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    resumeMeetingRecording: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Meeting Recording UUID */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description recording resumed */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description recording is not paused */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    stopMeetingRecording: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Meeting Recording UUID */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description recording stopped */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description recording cannot be stopped */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    leaveMeetingRecording: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Meeting Recording UUID */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description bot left the call */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description bot is not in a call */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
         };
     };
@@ -34476,7 +34949,7 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description override shift deleted */
+            /** @description active shadow is preserved with truncated end time */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -34487,6 +34960,15 @@ export interface operations {
             };
             /** @description resource not found */
             404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/vnd.api+json": components["schemas"]["errors_list"];
+                };
+            };
+            /** @description shadow period already ended */
+            422: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -34519,6 +35001,8 @@ export interface operations {
                 "filter[service_ids]"?: string;
                 /** @description Comma-separated group IDs (teams) */
                 "filter[group_ids]"?: string;
+                /** @description Comma-separated notification types to include. One or both of: audible, quiet. When present, oncalls are returned from every non-deferral escalation path whose notification_type is in the filter, sorted audible-first. When absent, only the default path's oncalls are returned (existing behavior). */
+                "filter[notification_types]"?: string;
             };
             header?: never;
             path?: never;
@@ -37627,7 +38111,7 @@ export interface operations {
         parameters: {
             query?: {
                 /** @description comma separated if needed. eg: shift_override,user. Note: `user` is deprecated, use `assignee` instead. */
-                include?: "shift_override" | "user" | "assignee";
+                include?: "shift_override" | "user" | "assignee" | "shift_shadow";
                 /** @description Start range for shifts in ISO-8601 format (e.g., 2025-01-01T00:00:00Z or 2025-01-01T00:00:00+00:00) */
                 from?: string;
                 /** @description End range for shifts in ISO-8601 format (e.g., 2025-01-01T00:00:00Z or 2025-01-01T00:00:00+00:00) */
