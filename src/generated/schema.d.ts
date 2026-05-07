@@ -530,6 +530,50 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/alerts/{id}/snooze": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Snoozes an alert
+         * @description Snoozes a specific alert by id, extending the acknowledgment timeout
+         */
+        post: operations["snoozeAlert"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/alerts/{id}/escalate": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Escalates an alert
+         * @description Escalates a specific alert to the next or specified level in its escalation policy
+         */
+        post: operations["escalateAlert"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/api_keys": {
         parameters: {
             query?: never;
@@ -6571,10 +6615,10 @@ export interface components {
                     /** @description The ID of the alert urgency */
                     alert_urgency_id?: string | null;
                     /**
-                     * @description Only available for organizations with Rootly On-Call enabled. Can be one of Group, Service, EscalationPolicy, User.
+                     * @description Only available for organizations with Rootly On-Call enabled. Can be one of Group, Service, EscalationPolicy, Functionality, User. Please contact support if you encounter issues using `Functionality` as a notification target type.
                      * @enum {string|null}
                      */
-                    notification_target_type?: "User" | "Group" | "EscalationPolicy" | "Service" | null;
+                    notification_target_type?: "User" | "Group" | "EscalationPolicy" | "Service" | "Functionality" | null;
                     /** @description Only available for organizations with Rootly On-Call enabled. The _identifier_ of the notification target object. */
                     notification_target_id?: string | null;
                     labels?: ({
@@ -6773,6 +6817,28 @@ export interface components {
                     resolution_message?: string | null;
                     /** @description Resolve all associated incidents */
                     resolve_related_incidents?: boolean | null;
+                };
+            };
+        };
+        snooze_alert: {
+            data: {
+                /** @enum {string} */
+                type: "alerts";
+                attributes: {
+                    /** @description Number of minutes to snooze the alert for */
+                    delay_minutes: number;
+                };
+            };
+        };
+        escalate_alert: {
+            data?: {
+                /** @enum {string} */
+                type?: "alerts";
+                attributes?: {
+                    /** @description The ID of the escalation policy to escalate to. If omitted, uses the alert's current escalation policy from metadata. Required for resolved alerts whose metadata may have been cleared. */
+                    escalation_policy_id?: string;
+                    /** @description The escalation policy level to escalate to. If omitted, defaults to the next level (same EP) or level 1 (different EP). */
+                    escalation_policy_level?: number;
                 };
             };
         };
@@ -8012,13 +8078,13 @@ export interface components {
                     time_window?: number;
                     targets?: {
                         /**
-                         * @description The type of the target.
+                         * @description The type of the target. Please contact support if you encounter issues using `Functionality` as a target type.
                          * @enum {string}
                          */
-                        target_type: "Group" | "Service" | "EscalationPolicy";
+                        target_type: "Group" | "Service" | "EscalationPolicy" | "Functionality";
                         /**
                          * Format: uuid
-                         * @description id for the Group, Service or EscalationPolicy
+                         * @description id for the Group, Service, EscalationPolicy or Functionality
                          */
                         target_id: string;
                     }[];
@@ -8090,13 +8156,13 @@ export interface components {
                     time_window?: number;
                     targets?: {
                         /**
-                         * @description The type of the target.
+                         * @description The type of the target. Please contact support if you encounter issues using `Functionality` as a target type.
                          * @enum {string}
                          */
-                        target_type: "Group" | "Service" | "EscalationPolicy";
+                        target_type: "Group" | "Service" | "EscalationPolicy" | "Functionality";
                         /**
                          * Format: uuid
-                         * @description id for the Group, Service or EscalationPolicy
+                         * @description id for the Group, Service, EscalationPolicy or Functionality
                          */
                         target_id: string;
                     }[];
@@ -8178,13 +8244,13 @@ export interface components {
             group_by_alert_urgency?: boolean;
             targets?: {
                 /**
-                 * @description The type of the target.
+                 * @description The type of the target. Please contact support if you encounter issues using `Functionality` as a target type.
                  * @enum {string}
                  */
-                target_type: "Group" | "Service" | "EscalationPolicy";
+                target_type: "Group" | "Service" | "EscalationPolicy" | "Functionality";
                 /**
                  * Format: uuid
-                 * @description id for the Group, Service or EscalationPolicy
+                 * @description id for the Group, Service, EscalationPolicy or Functionality
                  */
                 target_id: string;
             }[];
@@ -8382,7 +8448,9 @@ export interface components {
              * @description Describes the object in which the action was taken on
              * @enum {string|null}
              */
-            item_type?: "Alerts::Source" | "ApiKey" | "Catalog" | "CatalogEntity" | "CatalogEntityProperty" | "CatalogField" | "Cause" | "CustomField" | "CustomFieldOption" | "CustomForm" | "Dashboard" | "EdgeConnector" | "EdgeConnector::Action" | "Environment" | "EscalationPolicy" | "EscalationPolicyPath" | "ExportJob" | "FormField" | "Functionality" | "GeniusWorkflow" | "GeniusWorkflowGroup" | "GeniusWorkflowRun" | "Group" | "Heartbeat" | "Incident" | "IncidentActionItem" | "IncidentEvent" | "IncidentFormFieldSelection" | "IncidentFormFieldSelectionUser" | "IncidentPostMortem" | "IncidentRoleAssignment" | "IncidentRoleTask" | "IncidentStatusPageEvent" | "IncidentTask" | "IncidentType" | "LiveCallRouter" | "OnCallRole" | "Playbook" | "PlaybookTask" | "Role" | "Schedule" | "Service" | "Severity" | "StatusPage" | null;
+            item_type?: "AlertRoute" | "AlertRoutingRule" | "Alerts::Source" | "ApiKey" | "Catalog" | "CatalogEntity" | "CatalogEntityProperty" | "CatalogField" | "Cause" | "CustomField" | "CustomFieldOption" | "CustomForm" | "Dashboard" | "EdgeConnector" | "EdgeConnector::Action" | "Environment" | "EscalationPolicy" | "EscalationPolicyPath" | "ExportJob" | "FormField" | "Functionality" | "GeniusWorkflow" | "GeniusWorkflowGroup" | "GeniusWorkflowRun" | "Group" | "GroupUser" | "Heartbeat" | "Incident" | "LoginActivity" | "IncidentActionItem" | "IncidentEvent" | "IncidentFormFieldSelection" | "IncidentFormFieldSelectionUser" | "IncidentPermissionSet" | "IncidentPostMortem" | "IncidentRoleAssignment" | "IncidentRoleTask" | "IncidentStatusPageEvent" | "IncidentTask" | "IncidentType" | "Integrations::DatadogAccount" | "Integrations::GithubAccount" | "Integrations::GoogleMeetAccount" | "Integrations::JiraAccount" | "Integrations::MicrosoftTeamsAccount" | "Integrations::OpsgenieAccount" | "Integrations::PagerdutyAccount" | "Integrations::ServiceNowAccount" | "Integrations::SlackAccount" | "Integrations::StatusPageIoAccount" | "Integrations::ZendeskAccount" | "Integrations::ZoomAccount" | "LiveCallRouter" | "Membership" | "OnCallRole" | "Playbook" | "PlaybookTask" | "Role" | "Schedule" | "Secret" | "Service" | "Severity" | "StatusPage" | null;
+            /** @description Human-friendly display name for the item type */
+            item_type_display?: string | null;
             /** @description The object in which the action was taken on */
             object?: Record<string, never> | null;
             /** @description The changes that occurred on the object */
@@ -8723,6 +8791,8 @@ export interface components {
                     description?: string | null;
                     /** @description Default position of the item when displayed in a list. */
                     position?: number | null;
+                    /** @description The Backstage entity ID this catalog entity is linked to. */
+                    backstage_id?: string | null;
                     /** @description Array of property values for this catalog entity */
                     properties?: {
                         /** @description Unique ID of the catalog property */
@@ -8742,6 +8812,8 @@ export interface components {
                     description?: string | null;
                     /** @description Default position of the item when displayed in a list. */
                     position?: number | null;
+                    /** @description The Backstage entity ID this catalog entity is linked to. */
+                    backstage_id?: string | null;
                     /** @description Array of property values for this catalog entity */
                     properties?: {
                         /** @description Unique ID of the catalog property */
@@ -8757,6 +8829,8 @@ export interface components {
             description?: string | null;
             /** @description Default position of the item when displayed in a list. */
             position: number | null;
+            /** @description The Backstage entity ID this catalog entity is linked to. */
+            backstage_id?: string | null;
             created_at: string;
             updated_at: string;
             /** @description Array of property values for this catalog entity */
@@ -10650,7 +10724,7 @@ export interface components {
                          * @description How JSON path value should be matched
                          * @enum {string}
                          */
-                        operator: "is" | "is_not" | "contains" | "does_not_contain" | "is_one_of" | "is_not_one_of";
+                        operator: "is" | "is_not" | "contains" | "does_not_contain" | "is_one_of" | "is_not_one_of" | "is_set" | "is_not_set";
                         /** @description Value with which JSON path value should be matched */
                         value?: string | null;
                         /** @description Values to match against (for is_one_of / is_not_one_of operators) */
@@ -10693,18 +10767,26 @@ export interface components {
                         time_zone: "International Date Line West" | "Etc/GMT+12" | "American Samoa" | "Pacific/Pago_Pago" | "Midway Island" | "Pacific/Midway" | "Hawaii" | "Pacific/Honolulu" | "Alaska" | "America/Juneau" | "Pacific Time (US & Canada)" | "America/Los_Angeles" | "Tijuana" | "America/Tijuana" | "Arizona" | "America/Phoenix" | "Mazatlan" | "America/Mazatlan" | "Mountain Time (US & Canada)" | "America/Denver" | "Central America" | "America/Guatemala" | "Central Time (US & Canada)" | "America/Chicago" | "Chihuahua" | "America/Chihuahua" | "Guadalajara" | "America/Mexico_City" | "Mexico City" | "America/Mexico_City" | "Monterrey" | "America/Monterrey" | "Saskatchewan" | "America/Regina" | "Bogota" | "America/Bogota" | "Eastern Time (US & Canada)" | "America/New_York" | "Indiana (East)" | "America/Indiana/Indianapolis" | "Lima" | "America/Lima" | "Quito" | "America/Lima" | "Atlantic Time (Canada)" | "America/Halifax" | "Caracas" | "America/Caracas" | "Georgetown" | "America/Guyana" | "La Paz" | "America/La_Paz" | "Puerto Rico" | "America/Puerto_Rico" | "Santiago" | "America/Santiago" | "Newfoundland" | "America/St_Johns" | "Asuncion" | "America/Asuncion" | "Brasilia" | "America/Sao_Paulo" | "Buenos Aires" | "America/Argentina/Buenos_Aires" | "Montevideo" | "America/Montevideo" | "Greenland" | "America/Nuuk" | "Mid-Atlantic" | "Atlantic/South_Georgia" | "Azores" | "Atlantic/Azores" | "Cape Verde Is." | "Atlantic/Cape_Verde" | "Edinburgh" | "Europe/London" | "Lisbon" | "Europe/Lisbon" | "London" | "Europe/London" | "Monrovia" | "Africa/Monrovia" | "UTC" | "Etc/UTC" | "Amsterdam" | "Europe/Amsterdam" | "Belgrade" | "Europe/Belgrade" | "Berlin" | "Europe/Berlin" | "Bern" | "Europe/Zurich" | "Bratislava" | "Europe/Bratislava" | "Brussels" | "Europe/Brussels" | "Budapest" | "Europe/Budapest" | "Casablanca" | "Africa/Casablanca" | "Copenhagen" | "Europe/Copenhagen" | "Dublin" | "Europe/Dublin" | "Ljubljana" | "Europe/Ljubljana" | "Madrid" | "Europe/Madrid" | "Paris" | "Europe/Paris" | "Prague" | "Europe/Prague" | "Rome" | "Europe/Rome" | "Sarajevo" | "Europe/Sarajevo" | "Skopje" | "Europe/Skopje" | "Stockholm" | "Europe/Stockholm" | "Vienna" | "Europe/Vienna" | "Warsaw" | "Europe/Warsaw" | "West Central Africa" | "Africa/Algiers" | "Zagreb" | "Europe/Zagreb" | "Zurich" | "Europe/Zurich" | "Athens" | "Europe/Athens" | "Bucharest" | "Europe/Bucharest" | "Cairo" | "Africa/Cairo" | "Harare" | "Africa/Harare" | "Helsinki" | "Europe/Helsinki" | "Jerusalem" | "Asia/Jerusalem" | "Kaliningrad" | "Europe/Kaliningrad" | "Kyiv" | "Europe/Kiev" | "Pretoria" | "Africa/Johannesburg" | "Riga" | "Europe/Riga" | "Sofia" | "Europe/Sofia" | "Tallinn" | "Europe/Tallinn" | "Vilnius" | "Europe/Vilnius" | "Baghdad" | "Asia/Baghdad" | "Istanbul" | "Europe/Istanbul" | "Kuwait" | "Asia/Kuwait" | "Minsk" | "Europe/Minsk" | "Moscow" | "Europe/Moscow" | "Nairobi" | "Africa/Nairobi" | "Riyadh" | "Asia/Riyadh" | "St. Petersburg" | "Europe/Moscow" | "Volgograd" | "Europe/Volgograd" | "Tehran" | "Asia/Tehran" | "Abu Dhabi" | "Asia/Muscat" | "Baku" | "Asia/Baku" | "Muscat" | "Asia/Muscat" | "Samara" | "Europe/Samara" | "Tbilisi" | "Asia/Tbilisi" | "Yerevan" | "Asia/Yerevan" | "Kabul" | "Asia/Kabul" | "Almaty" | "Asia/Almaty" | "Astana" | "Asia/Almaty" | "Ekaterinburg" | "Asia/Yekaterinburg" | "Islamabad" | "Asia/Karachi" | "Karachi" | "Asia/Karachi" | "Tashkent" | "Asia/Tashkent" | "Chennai" | "Asia/Kolkata" | "Kolkata" | "Asia/Kolkata" | "Mumbai" | "Asia/Kolkata" | "New Delhi" | "Asia/Kolkata" | "Sri Jayawardenepura" | "Asia/Colombo" | "Kathmandu" | "Asia/Kathmandu" | "Dhaka" | "Asia/Dhaka" | "Urumqi" | "Asia/Urumqi" | "Rangoon" | "Asia/Rangoon" | "Bangkok" | "Asia/Bangkok" | "Hanoi" | "Asia/Bangkok" | "Jakarta" | "Asia/Jakarta" | "Krasnoyarsk" | "Asia/Krasnoyarsk" | "Novosibirsk" | "Asia/Novosibirsk" | "Beijing" | "Asia/Shanghai" | "Chongqing" | "Asia/Chongqing" | "Hong Kong" | "Asia/Hong_Kong" | "Irkutsk" | "Asia/Irkutsk" | "Kuala Lumpur" | "Asia/Kuala_Lumpur" | "Perth" | "Australia/Perth" | "Singapore" | "Asia/Singapore" | "Taipei" | "Asia/Taipei" | "Ulaanbaatar" | "Asia/Ulaanbaatar" | "Osaka" | "Asia/Tokyo" | "Sapporo" | "Asia/Tokyo" | "Seoul" | "Asia/Seoul" | "Tokyo" | "Asia/Tokyo" | "Yakutsk" | "Asia/Yakutsk" | "Adelaide" | "Australia/Adelaide" | "Darwin" | "Australia/Darwin" | "Brisbane" | "Australia/Brisbane" | "Canberra" | "Australia/Canberra" | "Guam" | "Pacific/Guam" | "Hobart" | "Australia/Hobart" | "Melbourne" | "Australia/Melbourne" | "Port Moresby" | "Pacific/Port_Moresby" | "Sydney" | "Australia/Sydney" | "Vladivostok" | "Asia/Vladivostok" | "Magadan" | "Asia/Magadan" | "New Caledonia" | "Pacific/Noumea" | "Solomon Is." | "Pacific/Guadalcanal" | "Srednekolymsk" | "Asia/Srednekolymsk" | "Auckland" | "Pacific/Auckland" | "Fiji" | "Pacific/Fiji" | "Kamchatka" | "Asia/Kamchatka" | "Marshall Is." | "Pacific/Majuro" | "Wellington" | "Pacific/Auckland" | "Chatham Is." | "Pacific/Chatham" | "Nuku'alofa" | "Pacific/Tongatapu" | "Samoa" | "Pacific/Apia" | "Tokelau Is." | "Pacific/Fakaofo";
                         /** @description Time windows during which alerts are deferred */
                         time_blocks: {
-                            monday?: boolean | null;
-                            tuesday?: boolean | null;
-                            wednesday?: boolean | null;
-                            thursday?: boolean | null;
-                            friday?: boolean | null;
-                            saturday?: boolean | null;
-                            sunday?: boolean | null;
+                            /** @default false */
+                            monday: boolean;
+                            /** @default false */
+                            tuesday: boolean;
+                            /** @default false */
+                            wednesday: boolean;
+                            /** @default false */
+                            thursday: boolean;
+                            /** @default false */
+                            friday: boolean;
+                            /** @default false */
+                            saturday: boolean;
+                            /** @default false */
+                            sunday: boolean;
                             /** @description Formatted as HH:MM */
                             start_time?: string;
                             /** @description Formatted as HH:MM */
                             end_time?: string;
-                            all_day?: boolean | null;
+                            /** @default false */
+                            all_day: boolean;
                             position?: number | null;
                         }[];
                     })[];
@@ -10797,7 +10879,7 @@ export interface components {
                          * @description How JSON path value should be matched
                          * @enum {string}
                          */
-                        operator: "is" | "is_not" | "contains" | "does_not_contain" | "is_one_of" | "is_not_one_of";
+                        operator: "is" | "is_not" | "contains" | "does_not_contain" | "is_one_of" | "is_not_one_of" | "is_set" | "is_not_set";
                         /** @description Value with which JSON path value should be matched */
                         value?: string | null;
                         /** @description Values to match against (for is_one_of / is_not_one_of operators) */
@@ -10840,18 +10922,26 @@ export interface components {
                         time_zone: "International Date Line West" | "Etc/GMT+12" | "American Samoa" | "Pacific/Pago_Pago" | "Midway Island" | "Pacific/Midway" | "Hawaii" | "Pacific/Honolulu" | "Alaska" | "America/Juneau" | "Pacific Time (US & Canada)" | "America/Los_Angeles" | "Tijuana" | "America/Tijuana" | "Arizona" | "America/Phoenix" | "Mazatlan" | "America/Mazatlan" | "Mountain Time (US & Canada)" | "America/Denver" | "Central America" | "America/Guatemala" | "Central Time (US & Canada)" | "America/Chicago" | "Chihuahua" | "America/Chihuahua" | "Guadalajara" | "America/Mexico_City" | "Mexico City" | "America/Mexico_City" | "Monterrey" | "America/Monterrey" | "Saskatchewan" | "America/Regina" | "Bogota" | "America/Bogota" | "Eastern Time (US & Canada)" | "America/New_York" | "Indiana (East)" | "America/Indiana/Indianapolis" | "Lima" | "America/Lima" | "Quito" | "America/Lima" | "Atlantic Time (Canada)" | "America/Halifax" | "Caracas" | "America/Caracas" | "Georgetown" | "America/Guyana" | "La Paz" | "America/La_Paz" | "Puerto Rico" | "America/Puerto_Rico" | "Santiago" | "America/Santiago" | "Newfoundland" | "America/St_Johns" | "Asuncion" | "America/Asuncion" | "Brasilia" | "America/Sao_Paulo" | "Buenos Aires" | "America/Argentina/Buenos_Aires" | "Montevideo" | "America/Montevideo" | "Greenland" | "America/Nuuk" | "Mid-Atlantic" | "Atlantic/South_Georgia" | "Azores" | "Atlantic/Azores" | "Cape Verde Is." | "Atlantic/Cape_Verde" | "Edinburgh" | "Europe/London" | "Lisbon" | "Europe/Lisbon" | "London" | "Europe/London" | "Monrovia" | "Africa/Monrovia" | "UTC" | "Etc/UTC" | "Amsterdam" | "Europe/Amsterdam" | "Belgrade" | "Europe/Belgrade" | "Berlin" | "Europe/Berlin" | "Bern" | "Europe/Zurich" | "Bratislava" | "Europe/Bratislava" | "Brussels" | "Europe/Brussels" | "Budapest" | "Europe/Budapest" | "Casablanca" | "Africa/Casablanca" | "Copenhagen" | "Europe/Copenhagen" | "Dublin" | "Europe/Dublin" | "Ljubljana" | "Europe/Ljubljana" | "Madrid" | "Europe/Madrid" | "Paris" | "Europe/Paris" | "Prague" | "Europe/Prague" | "Rome" | "Europe/Rome" | "Sarajevo" | "Europe/Sarajevo" | "Skopje" | "Europe/Skopje" | "Stockholm" | "Europe/Stockholm" | "Vienna" | "Europe/Vienna" | "Warsaw" | "Europe/Warsaw" | "West Central Africa" | "Africa/Algiers" | "Zagreb" | "Europe/Zagreb" | "Zurich" | "Europe/Zurich" | "Athens" | "Europe/Athens" | "Bucharest" | "Europe/Bucharest" | "Cairo" | "Africa/Cairo" | "Harare" | "Africa/Harare" | "Helsinki" | "Europe/Helsinki" | "Jerusalem" | "Asia/Jerusalem" | "Kaliningrad" | "Europe/Kaliningrad" | "Kyiv" | "Europe/Kiev" | "Pretoria" | "Africa/Johannesburg" | "Riga" | "Europe/Riga" | "Sofia" | "Europe/Sofia" | "Tallinn" | "Europe/Tallinn" | "Vilnius" | "Europe/Vilnius" | "Baghdad" | "Asia/Baghdad" | "Istanbul" | "Europe/Istanbul" | "Kuwait" | "Asia/Kuwait" | "Minsk" | "Europe/Minsk" | "Moscow" | "Europe/Moscow" | "Nairobi" | "Africa/Nairobi" | "Riyadh" | "Asia/Riyadh" | "St. Petersburg" | "Europe/Moscow" | "Volgograd" | "Europe/Volgograd" | "Tehran" | "Asia/Tehran" | "Abu Dhabi" | "Asia/Muscat" | "Baku" | "Asia/Baku" | "Muscat" | "Asia/Muscat" | "Samara" | "Europe/Samara" | "Tbilisi" | "Asia/Tbilisi" | "Yerevan" | "Asia/Yerevan" | "Kabul" | "Asia/Kabul" | "Almaty" | "Asia/Almaty" | "Astana" | "Asia/Almaty" | "Ekaterinburg" | "Asia/Yekaterinburg" | "Islamabad" | "Asia/Karachi" | "Karachi" | "Asia/Karachi" | "Tashkent" | "Asia/Tashkent" | "Chennai" | "Asia/Kolkata" | "Kolkata" | "Asia/Kolkata" | "Mumbai" | "Asia/Kolkata" | "New Delhi" | "Asia/Kolkata" | "Sri Jayawardenepura" | "Asia/Colombo" | "Kathmandu" | "Asia/Kathmandu" | "Dhaka" | "Asia/Dhaka" | "Urumqi" | "Asia/Urumqi" | "Rangoon" | "Asia/Rangoon" | "Bangkok" | "Asia/Bangkok" | "Hanoi" | "Asia/Bangkok" | "Jakarta" | "Asia/Jakarta" | "Krasnoyarsk" | "Asia/Krasnoyarsk" | "Novosibirsk" | "Asia/Novosibirsk" | "Beijing" | "Asia/Shanghai" | "Chongqing" | "Asia/Chongqing" | "Hong Kong" | "Asia/Hong_Kong" | "Irkutsk" | "Asia/Irkutsk" | "Kuala Lumpur" | "Asia/Kuala_Lumpur" | "Perth" | "Australia/Perth" | "Singapore" | "Asia/Singapore" | "Taipei" | "Asia/Taipei" | "Ulaanbaatar" | "Asia/Ulaanbaatar" | "Osaka" | "Asia/Tokyo" | "Sapporo" | "Asia/Tokyo" | "Seoul" | "Asia/Seoul" | "Tokyo" | "Asia/Tokyo" | "Yakutsk" | "Asia/Yakutsk" | "Adelaide" | "Australia/Adelaide" | "Darwin" | "Australia/Darwin" | "Brisbane" | "Australia/Brisbane" | "Canberra" | "Australia/Canberra" | "Guam" | "Pacific/Guam" | "Hobart" | "Australia/Hobart" | "Melbourne" | "Australia/Melbourne" | "Port Moresby" | "Pacific/Port_Moresby" | "Sydney" | "Australia/Sydney" | "Vladivostok" | "Asia/Vladivostok" | "Magadan" | "Asia/Magadan" | "New Caledonia" | "Pacific/Noumea" | "Solomon Is." | "Pacific/Guadalcanal" | "Srednekolymsk" | "Asia/Srednekolymsk" | "Auckland" | "Pacific/Auckland" | "Fiji" | "Pacific/Fiji" | "Kamchatka" | "Asia/Kamchatka" | "Marshall Is." | "Pacific/Majuro" | "Wellington" | "Pacific/Auckland" | "Chatham Is." | "Pacific/Chatham" | "Nuku'alofa" | "Pacific/Tongatapu" | "Samoa" | "Pacific/Apia" | "Tokelau Is." | "Pacific/Fakaofo";
                         /** @description Time windows during which alerts are deferred */
                         time_blocks: {
-                            monday?: boolean | null;
-                            tuesday?: boolean | null;
-                            wednesday?: boolean | null;
-                            thursday?: boolean | null;
-                            friday?: boolean | null;
-                            saturday?: boolean | null;
-                            sunday?: boolean | null;
+                            /** @default false */
+                            monday: boolean;
+                            /** @default false */
+                            tuesday: boolean;
+                            /** @default false */
+                            wednesday: boolean;
+                            /** @default false */
+                            thursday: boolean;
+                            /** @default false */
+                            friday: boolean;
+                            /** @default false */
+                            saturday: boolean;
+                            /** @default false */
+                            sunday: boolean;
                             /** @description Formatted as HH:MM */
                             start_time?: string;
                             /** @description Formatted as HH:MM */
                             end_time?: string;
-                            all_day?: boolean | null;
+                            /** @default false */
+                            all_day: boolean;
                             position?: number | null;
                         }[];
                     }) | null)[];
@@ -10941,7 +11031,7 @@ export interface components {
                  * @description How JSON path value should be matched
                  * @enum {string}
                  */
-                operator: "is" | "is_not" | "contains" | "does_not_contain" | "is_one_of" | "is_not_one_of";
+                operator: "is" | "is_not" | "contains" | "does_not_contain" | "is_one_of" | "is_not_one_of" | "is_set" | "is_not_set";
                 /** @description Value with which JSON path value should be matched */
                 value?: string | null;
                 /** @description Values to match against (for is_one_of / is_not_one_of operators) */
@@ -10984,18 +11074,26 @@ export interface components {
                 time_zone: "International Date Line West" | "Etc/GMT+12" | "American Samoa" | "Pacific/Pago_Pago" | "Midway Island" | "Pacific/Midway" | "Hawaii" | "Pacific/Honolulu" | "Alaska" | "America/Juneau" | "Pacific Time (US & Canada)" | "America/Los_Angeles" | "Tijuana" | "America/Tijuana" | "Arizona" | "America/Phoenix" | "Mazatlan" | "America/Mazatlan" | "Mountain Time (US & Canada)" | "America/Denver" | "Central America" | "America/Guatemala" | "Central Time (US & Canada)" | "America/Chicago" | "Chihuahua" | "America/Chihuahua" | "Guadalajara" | "America/Mexico_City" | "Mexico City" | "America/Mexico_City" | "Monterrey" | "America/Monterrey" | "Saskatchewan" | "America/Regina" | "Bogota" | "America/Bogota" | "Eastern Time (US & Canada)" | "America/New_York" | "Indiana (East)" | "America/Indiana/Indianapolis" | "Lima" | "America/Lima" | "Quito" | "America/Lima" | "Atlantic Time (Canada)" | "America/Halifax" | "Caracas" | "America/Caracas" | "Georgetown" | "America/Guyana" | "La Paz" | "America/La_Paz" | "Puerto Rico" | "America/Puerto_Rico" | "Santiago" | "America/Santiago" | "Newfoundland" | "America/St_Johns" | "Asuncion" | "America/Asuncion" | "Brasilia" | "America/Sao_Paulo" | "Buenos Aires" | "America/Argentina/Buenos_Aires" | "Montevideo" | "America/Montevideo" | "Greenland" | "America/Nuuk" | "Mid-Atlantic" | "Atlantic/South_Georgia" | "Azores" | "Atlantic/Azores" | "Cape Verde Is." | "Atlantic/Cape_Verde" | "Edinburgh" | "Europe/London" | "Lisbon" | "Europe/Lisbon" | "London" | "Europe/London" | "Monrovia" | "Africa/Monrovia" | "UTC" | "Etc/UTC" | "Amsterdam" | "Europe/Amsterdam" | "Belgrade" | "Europe/Belgrade" | "Berlin" | "Europe/Berlin" | "Bern" | "Europe/Zurich" | "Bratislava" | "Europe/Bratislava" | "Brussels" | "Europe/Brussels" | "Budapest" | "Europe/Budapest" | "Casablanca" | "Africa/Casablanca" | "Copenhagen" | "Europe/Copenhagen" | "Dublin" | "Europe/Dublin" | "Ljubljana" | "Europe/Ljubljana" | "Madrid" | "Europe/Madrid" | "Paris" | "Europe/Paris" | "Prague" | "Europe/Prague" | "Rome" | "Europe/Rome" | "Sarajevo" | "Europe/Sarajevo" | "Skopje" | "Europe/Skopje" | "Stockholm" | "Europe/Stockholm" | "Vienna" | "Europe/Vienna" | "Warsaw" | "Europe/Warsaw" | "West Central Africa" | "Africa/Algiers" | "Zagreb" | "Europe/Zagreb" | "Zurich" | "Europe/Zurich" | "Athens" | "Europe/Athens" | "Bucharest" | "Europe/Bucharest" | "Cairo" | "Africa/Cairo" | "Harare" | "Africa/Harare" | "Helsinki" | "Europe/Helsinki" | "Jerusalem" | "Asia/Jerusalem" | "Kaliningrad" | "Europe/Kaliningrad" | "Kyiv" | "Europe/Kiev" | "Pretoria" | "Africa/Johannesburg" | "Riga" | "Europe/Riga" | "Sofia" | "Europe/Sofia" | "Tallinn" | "Europe/Tallinn" | "Vilnius" | "Europe/Vilnius" | "Baghdad" | "Asia/Baghdad" | "Istanbul" | "Europe/Istanbul" | "Kuwait" | "Asia/Kuwait" | "Minsk" | "Europe/Minsk" | "Moscow" | "Europe/Moscow" | "Nairobi" | "Africa/Nairobi" | "Riyadh" | "Asia/Riyadh" | "St. Petersburg" | "Europe/Moscow" | "Volgograd" | "Europe/Volgograd" | "Tehran" | "Asia/Tehran" | "Abu Dhabi" | "Asia/Muscat" | "Baku" | "Asia/Baku" | "Muscat" | "Asia/Muscat" | "Samara" | "Europe/Samara" | "Tbilisi" | "Asia/Tbilisi" | "Yerevan" | "Asia/Yerevan" | "Kabul" | "Asia/Kabul" | "Almaty" | "Asia/Almaty" | "Astana" | "Asia/Almaty" | "Ekaterinburg" | "Asia/Yekaterinburg" | "Islamabad" | "Asia/Karachi" | "Karachi" | "Asia/Karachi" | "Tashkent" | "Asia/Tashkent" | "Chennai" | "Asia/Kolkata" | "Kolkata" | "Asia/Kolkata" | "Mumbai" | "Asia/Kolkata" | "New Delhi" | "Asia/Kolkata" | "Sri Jayawardenepura" | "Asia/Colombo" | "Kathmandu" | "Asia/Kathmandu" | "Dhaka" | "Asia/Dhaka" | "Urumqi" | "Asia/Urumqi" | "Rangoon" | "Asia/Rangoon" | "Bangkok" | "Asia/Bangkok" | "Hanoi" | "Asia/Bangkok" | "Jakarta" | "Asia/Jakarta" | "Krasnoyarsk" | "Asia/Krasnoyarsk" | "Novosibirsk" | "Asia/Novosibirsk" | "Beijing" | "Asia/Shanghai" | "Chongqing" | "Asia/Chongqing" | "Hong Kong" | "Asia/Hong_Kong" | "Irkutsk" | "Asia/Irkutsk" | "Kuala Lumpur" | "Asia/Kuala_Lumpur" | "Perth" | "Australia/Perth" | "Singapore" | "Asia/Singapore" | "Taipei" | "Asia/Taipei" | "Ulaanbaatar" | "Asia/Ulaanbaatar" | "Osaka" | "Asia/Tokyo" | "Sapporo" | "Asia/Tokyo" | "Seoul" | "Asia/Seoul" | "Tokyo" | "Asia/Tokyo" | "Yakutsk" | "Asia/Yakutsk" | "Adelaide" | "Australia/Adelaide" | "Darwin" | "Australia/Darwin" | "Brisbane" | "Australia/Brisbane" | "Canberra" | "Australia/Canberra" | "Guam" | "Pacific/Guam" | "Hobart" | "Australia/Hobart" | "Melbourne" | "Australia/Melbourne" | "Port Moresby" | "Pacific/Port_Moresby" | "Sydney" | "Australia/Sydney" | "Vladivostok" | "Asia/Vladivostok" | "Magadan" | "Asia/Magadan" | "New Caledonia" | "Pacific/Noumea" | "Solomon Is." | "Pacific/Guadalcanal" | "Srednekolymsk" | "Asia/Srednekolymsk" | "Auckland" | "Pacific/Auckland" | "Fiji" | "Pacific/Fiji" | "Kamchatka" | "Asia/Kamchatka" | "Marshall Is." | "Pacific/Majuro" | "Wellington" | "Pacific/Auckland" | "Chatham Is." | "Pacific/Chatham" | "Nuku'alofa" | "Pacific/Tongatapu" | "Samoa" | "Pacific/Apia" | "Tokelau Is." | "Pacific/Fakaofo";
                 /** @description Time windows during which alerts are deferred */
                 time_blocks: {
-                    monday?: boolean | null;
-                    tuesday?: boolean | null;
-                    wednesday?: boolean | null;
-                    thursday?: boolean | null;
-                    friday?: boolean | null;
-                    saturday?: boolean | null;
-                    sunday?: boolean | null;
+                    /** @default false */
+                    monday: boolean;
+                    /** @default false */
+                    tuesday: boolean;
+                    /** @default false */
+                    wednesday: boolean;
+                    /** @default false */
+                    thursday: boolean;
+                    /** @default false */
+                    friday: boolean;
+                    /** @default false */
+                    saturday: boolean;
+                    /** @default false */
+                    sunday: boolean;
                     /** @description Formatted as HH:MM */
                     start_time?: string;
                     /** @description Formatted as HH:MM */
                     end_time?: string;
-                    all_day?: boolean | null;
+                    /** @default false */
+                    all_day: boolean;
                     position?: number | null;
                 }[];
             }) | null)[];
@@ -11797,6 +11895,8 @@ export interface components {
                     owner_group_ids?: string[] | null;
                     /** @description Owner Users associated with this functionality */
                     owner_user_ids?: number[] | null;
+                    /** @description The escalation policy id of the functionality */
+                    escalation_policy_id?: string | null;
                     /** @description Slack Channels associated with this functionality */
                     slack_channels?: {
                         /** @description Slack channel ID */
@@ -11860,6 +11960,8 @@ export interface components {
                     owner_group_ids?: string[] | null;
                     /** @description Owner Users associated with this functionality */
                     owner_user_ids?: number[] | null;
+                    /** @description The escalation policy id of the functionality */
+                    escalation_policy_id?: string | null;
                     /** @description Slack Channels associated with this functionality */
                     slack_channels?: {
                         /** @description Slack channel ID */
@@ -11921,6 +12023,8 @@ export interface components {
             owner_group_ids?: string[] | null;
             /** @description Owner Users associated with this functionality */
             owner_user_ids?: number[] | null;
+            /** @description The escalation policy id of the functionality */
+            escalation_policy_id?: string | null;
             /** @description Slack Channels associated with this functionality */
             slack_channels?: {
                 /** @description Slack channel ID */
@@ -13158,6 +13262,11 @@ export interface components {
         update_confluence_page_task_params: {
             /** @enum {string} */
             task_type?: "update_confluence_page";
+            /** @description Specify integration id if you have more than one Confluence instance */
+            integration?: {
+                id?: string;
+                name?: string;
+            };
             /** @description The Confluence page ID */
             file_id: string;
             /** @description The Confluence page title */
@@ -14195,6 +14304,12 @@ export interface components {
                 id?: string;
                 name?: string;
             }[];
+            /**
+             * @description How to apply labels. 'replace' (default) overwrites all existing labels. 'append' adds to existing labels without removing them.
+             * @default replace
+             * @enum {string}
+             */
+            labels_mode: "replace" | "append";
             /** @description The issue type */
             issue_type?: {
                 id?: string;
@@ -14273,6 +14388,11 @@ export interface components {
         update_jira_issue_task_params: {
             /** @enum {string} */
             task_type?: "update_jira_issue";
+            /** @description Specify integration id if you have more than one Jira instance */
+            integration?: {
+                id?: string;
+                name?: string;
+            };
             /** @description The issue id */
             issue_id: string;
             /** @description The issue title */
@@ -15190,7 +15310,8 @@ export interface components {
             incident_visibilities?: boolean[];
             incident_kinds?: ("test" | "test_sub" | "example" | "example_sub" | "normal" | "normal_sub" | "backfilled" | "scheduled" | "scheduled_sub")[];
             incident_statuses?: ("in_triage" | "started" | "detected" | "acknowledged" | "mitigated" | "resolved" | "closed" | "cancelled" | "scheduled" | "in_progress" | "completed")[];
-            incident_inactivity_duration?: null | string;
+            /** @description ex. 10 min, 1h, 3 days, 2 weeks */
+            incident_inactivity_duration?: string | null;
             /**
              * @default ALL
              * @enum {string}
@@ -15262,13 +15383,20 @@ export interface components {
              * @enum {string}
              */
             incident_post_mortem_condition_cause: "IS" | "IS NOT" | "ANY" | "CONTAINS" | "CONTAINS_ALL" | "CONTAINS_NONE" | "NONE" | "SET" | "UNSET";
-            incident_condition_summary?: null | ("SET" | "UNSET");
-            incident_condition_started_at?: null | ("SET" | "UNSET");
-            incident_condition_detected_at?: null | ("SET" | "UNSET");
-            incident_condition_acknowledged_at?: null | ("SET" | "UNSET");
-            incident_condition_mitigated_at?: null | ("SET" | "UNSET");
-            incident_condition_resolved_at?: null | ("SET" | "UNSET");
-            incident_conditional_inactivity?: null | "IS";
+            /** @enum {string|null} */
+            incident_condition_summary?: "SET" | "UNSET" | null;
+            /** @enum {string|null} */
+            incident_condition_started_at?: "SET" | "UNSET" | null;
+            /** @enum {string|null} */
+            incident_condition_detected_at?: "SET" | "UNSET" | null;
+            /** @enum {string|null} */
+            incident_condition_acknowledged_at?: "SET" | "UNSET" | null;
+            /** @enum {string|null} */
+            incident_condition_mitigated_at?: "SET" | "UNSET" | null;
+            /** @enum {string|null} */
+            incident_condition_resolved_at?: "SET" | "UNSET" | null;
+            /** @enum {string|null} */
+            incident_conditional_inactivity?: "IS" | null;
         };
         post_mortem_trigger_params: {
             /** @enum {string} */
@@ -15277,7 +15405,8 @@ export interface components {
             incident_visibilities?: boolean[];
             incident_kinds?: ("test" | "test_sub" | "example" | "example_sub" | "normal" | "normal_sub" | "backfilled" | "scheduled" | "scheduled_sub")[];
             incident_statuses?: ("in_triage" | "started" | "detected" | "acknowledged" | "mitigated" | "resolved" | "closed" | "cancelled" | "scheduled" | "in_progress" | "completed")[];
-            incident_inactivity_duration?: null | string;
+            /** @description ex. 10 min, 1h, 3 days, 2 weeks */
+            incident_inactivity_duration?: string | null;
             /**
              * @default ALL
              * @enum {string}
@@ -15349,13 +15478,20 @@ export interface components {
              * @enum {string}
              */
             incident_post_mortem_condition_cause: "IS" | "IS NOT" | "ANY" | "CONTAINS" | "CONTAINS_ALL" | "CONTAINS_NONE" | "NONE" | "SET" | "UNSET";
-            incident_condition_summary?: null | ("SET" | "UNSET");
-            incident_condition_started_at?: null | ("SET" | "UNSET");
-            incident_condition_detected_at?: null | ("SET" | "UNSET");
-            incident_condition_acknowledged_at?: null | ("SET" | "UNSET");
-            incident_condition_mitigated_at?: null | ("SET" | "UNSET");
-            incident_condition_resolved_at?: null | ("SET" | "UNSET");
-            incident_conditional_inactivity?: null | "IS";
+            /** @enum {string|null} */
+            incident_condition_summary?: "SET" | "UNSET" | null;
+            /** @enum {string|null} */
+            incident_condition_started_at?: "SET" | "UNSET" | null;
+            /** @enum {string|null} */
+            incident_condition_detected_at?: "SET" | "UNSET" | null;
+            /** @enum {string|null} */
+            incident_condition_acknowledged_at?: "SET" | "UNSET" | null;
+            /** @enum {string|null} */
+            incident_condition_mitigated_at?: "SET" | "UNSET" | null;
+            /** @enum {string|null} */
+            incident_condition_resolved_at?: "SET" | "UNSET" | null;
+            /** @enum {string|null} */
+            incident_conditional_inactivity?: "IS" | null;
             /** @enum {string} */
             incident_post_mortem_condition?: "ALL" | "ANY" | "NONE";
             /**
@@ -15372,7 +15508,8 @@ export interface components {
             incident_visibilities?: boolean[];
             incident_kinds?: ("test" | "test_sub" | "example" | "example_sub" | "normal" | "normal_sub" | "backfilled" | "scheduled" | "scheduled_sub")[];
             incident_statuses?: ("in_triage" | "started" | "detected" | "acknowledged" | "mitigated" | "resolved" | "closed" | "cancelled" | "scheduled" | "in_progress" | "completed")[];
-            incident_inactivity_duration?: null | string;
+            /** @description ex. 10 min, 1h, 3 days, 2 weeks */
+            incident_inactivity_duration?: string | null;
             /**
              * @default ALL
              * @enum {string}
@@ -15433,13 +15570,20 @@ export interface components {
              * @enum {string}
              */
             incident_condition_group: "IS" | "IS NOT" | "ANY" | "CONTAINS" | "CONTAINS_ALL" | "CONTAINS_NONE" | "NONE" | "SET" | "UNSET";
-            incident_condition_summary?: null | ("SET" | "UNSET");
-            incident_condition_started_at?: null | ("SET" | "UNSET");
-            incident_condition_detected_at?: null | ("SET" | "UNSET");
-            incident_condition_acknowledged_at?: null | ("SET" | "UNSET");
-            incident_condition_mitigated_at?: null | ("SET" | "UNSET");
-            incident_condition_resolved_at?: null | ("SET" | "UNSET");
-            incident_conditional_inactivity?: null | "IS";
+            /** @enum {string|null} */
+            incident_condition_summary?: "SET" | "UNSET" | null;
+            /** @enum {string|null} */
+            incident_condition_started_at?: "SET" | "UNSET" | null;
+            /** @enum {string|null} */
+            incident_condition_detected_at?: "SET" | "UNSET" | null;
+            /** @enum {string|null} */
+            incident_condition_acknowledged_at?: "SET" | "UNSET" | null;
+            /** @enum {string|null} */
+            incident_condition_mitigated_at?: "SET" | "UNSET" | null;
+            /** @enum {string|null} */
+            incident_condition_resolved_at?: "SET" | "UNSET" | null;
+            /** @enum {string|null} */
+            incident_conditional_inactivity?: "IS" | null;
             /** @enum {string} */
             incident_action_item_condition?: "ALL" | "ANY" | "NONE";
             /**
@@ -19450,13 +19594,13 @@ export interface components {
                         handoff_time: string;
                     };
                     /**
-                     * Format: date
-                     * @description ISO8601 date and time when rotation starts. Shifts will only be created after this time.
+                     * Format: date-time
+                     * @description RFC3339 date-time when rotation starts. Shifts will only be created after this time.
                      */
                     start_time?: string | null;
                     /**
-                     * Format: date
-                     * @description ISO8601 date and time when rotation ends. Shifts will only be created before this time.
+                     * Format: date-time
+                     * @description RFC3339 date-time when rotation ends. Shifts will only be created before this time.
                      */
                     end_time?: string | null;
                     /** @description You can only add schedule rotation members if your account has schedule nesting feature enabled */
@@ -19556,13 +19700,13 @@ export interface components {
                         handoff_time: string;
                     };
                     /**
-                     * Format: time
-                     * @description ISO8601 date and time when rotation starts. Shifts will only be created after this time.
+                     * Format: date-time
+                     * @description RFC3339 date-time when rotation starts. Shifts will only be created after this time.
                      */
                     start_time?: string | null;
                     /**
-                     * Format: time
-                     * @description ISO8601 date and time when rotation ends. Shifts will only be created before this time.
+                     * Format: date-time
+                     * @description RFC3339 date-time when rotation ends. Shifts will only be created before this time.
                      */
                     end_time?: string | null;
                     /** @description You can only update schedule rotation members if your account has schedule nesting feature enabled */
@@ -19660,13 +19804,13 @@ export interface components {
                 handoff_time: string;
             };
             /**
-             * Format: date
-             * @description ISO8601 date and time when rotation starts. Shifts will only be created after this time.
+             * Format: date-time
+             * @description RFC3339 date-time when rotation starts. Shifts will only be created after this time.
              */
             start_time?: string | null;
             /**
-             * Format: date
-             * @description ISO8601 date and time when rotation ends. Shifts will only be created before this time.
+             * Format: date-time
+             * @description RFC3339 date-time when rotation ends. Shifts will only be created before this time.
              */
             end_time?: string | null;
         };
@@ -19717,6 +19861,10 @@ export interface components {
                     owner_group_ids?: string[];
                     /** @description ID of the owner of the schedule */
                     owner_user_id: number;
+                    /** @description Whether shift-start notifications are enabled */
+                    shift_start_notifications_enabled?: boolean | null;
+                    /** @description Whether shift-update notifications are enabled */
+                    shift_update_notifications_enabled?: boolean | null;
                 };
             };
         };
@@ -19747,6 +19895,10 @@ export interface components {
                     owner_group_ids?: string[];
                     /** @description ID of the owner of the schedule */
                     owner_user_id?: number | null;
+                    /** @description Whether shift-start notifications are enabled */
+                    shift_start_notifications_enabled?: boolean | null;
+                    /** @description Whether shift-update notifications are enabled */
+                    shift_update_notifications_enabled?: boolean | null;
                 };
             };
         };
@@ -19775,6 +19927,10 @@ export interface components {
             owner_group_ids?: string[];
             /** @description ID of user assigned as owner of the schedule */
             owner_user_id: number;
+            /** @description Whether shift-start notifications are enabled */
+            shift_start_notifications_enabled?: boolean;
+            /** @description Whether shift-update notifications are enabled */
+            shift_update_notifications_enabled?: boolean;
             /** @description Date of creation */
             created_at: string;
             /** @description Date of last update */
@@ -21398,7 +21554,7 @@ export interface components {
                     url: string;
                     /** @description The webhook signing secret used to verify webhook requests. */
                     secret?: string;
-                    event_types?: ("incident.created" | "incident.updated" | "incident.in_triage" | "incident.mitigated" | "incident.resolved" | "incident.cancelled" | "incident.deleted" | "incident.scheduled.created" | "incident.scheduled.updated" | "incident.scheduled.in_progress" | "incident.scheduled.completed" | "incident.scheduled.deleted" | "incident_post_mortem.created" | "incident_post_mortem.updated" | "incident_post_mortem.published" | "incident_post_mortem.deleted" | "incident_status_page_event.created" | "incident_status_page_event.updated" | "incident_status_page_event.deleted" | "incident_event.created" | "incident_event.updated" | "incident_event.deleted" | "alert.created" | "pulse.created" | "genius_workflow_run.queued" | "genius_workflow_run.started" | "genius_workflow_run.completed" | "genius_workflow_run.failed" | "genius_workflow_run.canceled")[];
+                    event_types?: ("incident.created" | "incident.updated" | "incident.in_triage" | "incident.mitigated" | "incident.resolved" | "incident.cancelled" | "incident.deleted" | "incident.scheduled.created" | "incident.scheduled.updated" | "incident.scheduled.in_progress" | "incident.scheduled.completed" | "incident.scheduled.deleted" | "incident_post_mortem.created" | "incident_post_mortem.updated" | "incident_post_mortem.published" | "incident_post_mortem.deleted" | "incident_status_page_event.created" | "incident_status_page_event.updated" | "incident_status_page_event.deleted" | "incident_event.created" | "incident_event.updated" | "incident_event.deleted" | "alert.created" | "pulse.created" | "genius_workflow_run.queued" | "genius_workflow_run.started" | "genius_workflow_run.completed" | "genius_workflow_run.failed" | "genius_workflow_run.canceled" | "audit_log.created")[];
                     enabled?: boolean;
                 };
             };
@@ -21410,7 +21566,7 @@ export interface components {
                 attributes: {
                     /** @description The name of the endpoint */
                     name?: string;
-                    event_types?: ("incident.created" | "incident.updated" | "incident.in_triage" | "incident.mitigated" | "incident.resolved" | "incident.cancelled" | "incident.deleted" | "incident.scheduled.created" | "incident.scheduled.updated" | "incident.scheduled.in_progress" | "incident.scheduled.completed" | "incident.scheduled.deleted" | "incident_post_mortem.created" | "incident_post_mortem.updated" | "incident_post_mortem.published" | "incident_post_mortem.deleted" | "incident_status_page_event.created" | "incident_status_page_event.updated" | "incident_status_page_event.deleted" | "incident_event.created" | "incident_event.updated" | "incident_event.deleted" | "alert.created" | "pulse.created" | "genius_workflow_run.queued" | "genius_workflow_run.started" | "genius_workflow_run.completed" | "genius_workflow_run.failed" | "genius_workflow_run.canceled")[];
+                    event_types?: ("incident.created" | "incident.updated" | "incident.in_triage" | "incident.mitigated" | "incident.resolved" | "incident.cancelled" | "incident.deleted" | "incident.scheduled.created" | "incident.scheduled.updated" | "incident.scheduled.in_progress" | "incident.scheduled.completed" | "incident.scheduled.deleted" | "incident_post_mortem.created" | "incident_post_mortem.updated" | "incident_post_mortem.published" | "incident_post_mortem.deleted" | "incident_status_page_event.created" | "incident_status_page_event.updated" | "incident_status_page_event.deleted" | "incident_event.created" | "incident_event.updated" | "incident_event.deleted" | "alert.created" | "pulse.created" | "genius_workflow_run.queued" | "genius_workflow_run.started" | "genius_workflow_run.completed" | "genius_workflow_run.failed" | "genius_workflow_run.canceled" | "audit_log.created")[];
                     enabled?: boolean;
                 };
             };
@@ -21422,7 +21578,7 @@ export interface components {
             slug?: string;
             /** @description The URL of the endpoint. */
             url: string;
-            event_types: ("incident.created" | "incident.updated" | "incident.in_triage" | "incident.mitigated" | "incident.resolved" | "incident.cancelled" | "incident.deleted" | "incident.scheduled.created" | "incident.scheduled.updated" | "incident.scheduled.in_progress" | "incident.scheduled.completed" | "incident.scheduled.deleted" | "incident_post_mortem.created" | "incident_post_mortem.updated" | "incident_post_mortem.published" | "incident_post_mortem.deleted" | "incident_status_page_event.created" | "incident_status_page_event.updated" | "incident_status_page_event.deleted" | "incident_event.created" | "incident_event.updated" | "incident_event.deleted" | "alert.created" | "pulse.created" | "genius_workflow_run.queued" | "genius_workflow_run.started" | "genius_workflow_run.completed" | "genius_workflow_run.failed" | "genius_workflow_run.canceled")[];
+            event_types: ("incident.created" | "incident.updated" | "incident.in_triage" | "incident.mitigated" | "incident.resolved" | "incident.cancelled" | "incident.deleted" | "incident.scheduled.created" | "incident.scheduled.updated" | "incident.scheduled.in_progress" | "incident.scheduled.completed" | "incident.scheduled.deleted" | "incident_post_mortem.created" | "incident_post_mortem.updated" | "incident_post_mortem.published" | "incident_post_mortem.deleted" | "incident_status_page_event.created" | "incident_status_page_event.updated" | "incident_status_page_event.deleted" | "incident_event.created" | "incident_event.updated" | "incident_event.deleted" | "alert.created" | "pulse.created" | "genius_workflow_run.queued" | "genius_workflow_run.started" | "genius_workflow_run.completed" | "genius_workflow_run.failed" | "genius_workflow_run.canceled" | "audit_log.created")[];
             /** @description The webhook signing secret used to verify webhook requests. */
             secret: string;
             enabled: boolean;
@@ -21739,7 +21895,7 @@ export interface components {
                          */
                         conditionable_type: "SLAs::BuiltInFieldCondition" | "SLAs::CustomFieldCondition";
                         /**
-                         * @description The property to evaluate (for built-in field conditions)
+                         * @description The property to evaluate (for built-in field conditions). When the team has custom lifecycle statuses enabled, use 'sub_status' (with sub-status IDs as values); otherwise use 'status' (with parent status names). Sending the wrong one will return a validation error.
                          * @enum {string|null}
                          */
                         property?: "severity" | "environment" | "service" | "functionality" | "incident_type" | "group" | "cause" | "sub_status" | "incident_role" | "status" | "kind" | "visibility" | "summary" | "started_at" | "detected_at" | "acknowledged_at" | "mitigated_at" | "resolved_at" | null;
@@ -21833,7 +21989,7 @@ export interface components {
                          */
                         conditionable_type: "SLAs::BuiltInFieldCondition" | "SLAs::CustomFieldCondition";
                         /**
-                         * @description The property to evaluate (for built-in field conditions)
+                         * @description The property to evaluate (for built-in field conditions). When the team has custom lifecycle statuses enabled, use 'sub_status' (with sub-status IDs as values); otherwise use 'status' (with parent status names). Sending the wrong one will return a validation error.
                          * @enum {string|null}
                          */
                         property?: "severity" | "environment" | "service" | "functionality" | "incident_type" | "group" | "cause" | "sub_status" | "incident_role" | "status" | "kind" | "visibility" | "summary" | "started_at" | "detected_at" | "acknowledged_at" | "mitigated_at" | "resolved_at" | null;
@@ -23350,6 +23506,10 @@ export interface operations {
                 "filter[created_at][gte]"?: string;
                 "filter[created_at][lt]"?: string;
                 "filter[created_at][lte]"?: string;
+                "filter[updated_at][gt]"?: string;
+                "filter[updated_at][gte]"?: string;
+                "filter[updated_at][lt]"?: string;
+                "filter[updated_at][lte]"?: string;
                 /** @description The cursor to fetch results using cursor pagination. A cursor is provided in meta.next_cursor in the response. */
                 "page[after]"?: string;
                 "page[number]"?: number;
@@ -23549,6 +23709,112 @@ export interface operations {
             };
             /** @description resource not found */
             404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/vnd.api+json": components["schemas"]["errors_list"];
+                };
+            };
+        };
+    };
+    snoozeAlert: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/vnd.api+json": components["schemas"]["snooze_alert"];
+            };
+        };
+        responses: {
+            /** @description alert snoozed */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/vnd.api+json": components["schemas"]["alert_response"];
+                };
+            };
+            /** @description invalid delay_minutes */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/vnd.api+json": components["schemas"]["errors_list"];
+                };
+            };
+            /** @description resource not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/vnd.api+json": components["schemas"]["errors_list"];
+                };
+            };
+            /** @description snooze service failure */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/vnd.api+json": components["schemas"]["errors_list"];
+                };
+            };
+        };
+    };
+    escalateAlert: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/vnd.api+json": components["schemas"]["escalate_alert"];
+            };
+        };
+        responses: {
+            /** @description escalates to different EP defaults to level 1 */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/vnd.api+json": components["schemas"]["alert_response"];
+                };
+            };
+            /** @description malformed escalation_policy_id */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/vnd.api+json": components["schemas"]["errors_list"];
+                };
+            };
+            /** @description cannot escalate grouped member alert */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/vnd.api+json": components["schemas"]["errors_list"];
+                };
+            };
+            /** @description escalation_policy_level exceeds max */
+            422: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -24222,6 +24488,7 @@ export interface operations {
                 "filter[search]"?: string;
                 "filter[slug]"?: string;
                 "filter[name]"?: string;
+                "filter[backstage_id]"?: string;
                 "filter[created_at][gt]"?: string;
                 "filter[created_at][gte]"?: string;
                 "filter[created_at][lt]"?: string;
@@ -27330,6 +27597,8 @@ export interface operations {
                 include?: "escalation_policy_levels" | "escalation_policy_paths" | "groups" | "services";
                 "filter[search]"?: string;
                 "filter[name]"?: string;
+                /** @description Filter escalation policies by associated team IDs. Comma-separate multiple values. */
+                "filter[team_ids]"?: string;
                 "filter[created_at][gt]"?: string;
                 "filter[created_at][gte]"?: string;
                 "filter[created_at][lt]"?: string;
@@ -30244,7 +30513,7 @@ export interface operations {
             };
         };
         responses: {
-            /** @description can set and clear alert workflow status conditions */
+            /** @description preserves repeat_condition_* fields when omitted from PATCH payload */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -38911,7 +39180,7 @@ export interface operations {
         parameters: {
             query?: {
                 /** @description comma separated if needed. eg: users */
-                include?: "users";
+                include?: "users" | "schedules" | "escalation_policies";
                 "page[number]"?: number;
                 "page[size]"?: number;
                 "filter[search]"?: string;
@@ -38993,7 +39262,7 @@ export interface operations {
         parameters: {
             query?: {
                 /** @description comma separated if needed. eg: users */
-                include?: "users";
+                include?: "users" | "schedules" | "escalation_policies";
             };
             header?: never;
             path: {
