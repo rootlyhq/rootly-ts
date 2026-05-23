@@ -1,6 +1,6 @@
 {
   "name": "@rootly/ts",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Type-safe TypeScript SDK for the Rootly API",
   "type": "module",
   "main": "./dist/index.cjs",
