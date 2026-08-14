@@ -1,6 +1,6 @@
 # Configuration for Release Drafter: https://github.com/toolmantim/release-drafter
-name-template: v$NEXT_PATCH_VERSION
-tag-template: v$NEXT_PATCH_VERSION
+name-template: v$RESOLVED_VERSION
+tag-template: v$RESOLVED_VERSION
 
 template: |
   $CHANGES
@@ -10,6 +10,16 @@ template: |
   <!-- OPENAPI_DIFF -->
 
 categories:
+  - type: version-resolver
+    semver-increment: major
+    when:
+      label: breaking
+  - type: version-resolver
+    semver-increment: minor
+    when:
+      label: enhancement
+  - type: version-resolver
+    semver-increment: patch
   - title: 🚀 New features and improvements
     labels:
       - enhancement
