@@ -4,6 +4,86 @@
  */
 
 export interface paths {
+    "/v1/ai/chat": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Send AI chat message
+         * @description Send a message to the AI assistant and receive a synchronous reply. Optionally bind the conversation to an incident or alert for context-aware responses. Requires `ai.chat:write` OAuth scope or an API key.
+         */
+        post: operations["createAiChat"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/ai/chat/stream": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Stream AI chat response (SSE)
+         * @description Send a message and receive the AI response as a Server-Sent Events stream. Optionally bind to an incident or alert for context. Events: `session_id` (initial), `text` (content chunks), `task_update` (tool progress), `error`, `done` (terminal with status). Requires `ai.chat:write` OAuth scope or an API key.
+         */
+        post: operations["streamAiChat"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/ai/chat/sessions/{session_id}/messages": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List AI chat session messages
+         * @description Returns the user and assistant message history for a session, paginated and chronologically ordered. Internal tool messages are filtered out. Requires `ai.chat:read` OAuth scope or an API key.
+         */
+        get: operations["listAiChatSessionMessages"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/ai/chat/sessions/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /**
+         * Delete AI chat session
+         * @description Permanently deletes an AI chat session and all its messages. Requires `ai.chat:write` OAuth scope or an API key.
+         */
+        delete: operations["deleteAiChatSession"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/alerts/{alert_id}/events": {
         parameters: {
             query?: never;
@@ -24,6 +104,26 @@ export interface paths {
          * @description Creates a new alert event
          */
         post: operations["createAlertEvent"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/alert_events": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List alert events across alerts
+         * @description Returns a flat list of alert events across all alerts the requester can access. Designed for periodic polling: use `page[after]` with the `next_cursor` returned in the previous response to stream forward.
+         */
+        get: operations["listAlertEventsFeed"];
+        put?: never;
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -166,6 +266,45 @@ export interface paths {
          * @description Update a specific alert group by id. **Note**: For enhanced functionality and future compatibility, consider using the advanced alert grouping with `conditions` field instead of the legacy `group_by_alert_title`, `group_by_alert_urgency`, and `attributes` fields.
          */
         patch: operations["updateAlertGroup"];
+        trace?: never;
+    };
+    "/v1/alert_retrigger_rules": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List alert re-trigger rules */
+        get: operations["listAlertRetriggerRules"];
+        put?: never;
+        /** Creates an alert re-trigger rule */
+        post: operations["createAlertRetriggerRule"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/alert_retrigger_rules/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        /** Retrieves an alert re-trigger rule */
+        get: operations["getAlertRetriggerRule"];
+        /** Updates an alert re-trigger rule */
+        put: operations["updateAlertRetriggerRule"];
+        post?: never;
+        /** Deletes an alert re-trigger rule */
+        delete: operations["deleteAlertRetriggerRule"];
+        options?: never;
+        head?: never;
+        patch?: never;
         trace?: never;
     };
     "/v1/alert_routes": {
@@ -758,6 +897,51 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/bulk_imports": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Create a bulk import
+         * @description Create a new bulk import for incidents. Requires global API key authentication.
+         */
+        post: operations["createBulkImport"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/bulk_imports/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get bulk import status
+         * @description Retrieves the current status of a bulk import job.
+         *
+         *     **Use this endpoint to:**
+         *     - Poll for import progress
+         *     - Check validation errors if status is `validation_failed`
+         *     - Get final results when status is `completed` or `failed`
+         */
+        get: operations["getBulkImport"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/catalog_checklist_templates": {
         parameters: {
             query?: never;
@@ -885,6 +1069,50 @@ export interface paths {
          * @description Delete a specific Catalog Entity by id
          */
         delete: operations["deleteCatalogEntity"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/catalogs/{catalog_id}/entities/bulk_upsert": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                catalog_id: string;
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Bulk upsert Catalog Entities
+         * @description Create or update multiple catalog entities by external_id. Only attributes present in the payload are written (managed-fields semantics). Transactional: all succeed or all fail.
+         */
+        post: operations["bulkUpsertCatalogEntities"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/catalogs/{catalog_id}/entities/bulk_delete": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                catalog_id: string;
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Bulk delete Catalog Entities
+         * @description Delete catalog entities by external_id list, or prune by managed_by source. Two mutually exclusive modes.
+         */
+        post: operations["bulkDeleteCatalogEntities"];
+        delete?: never;
         options?: never;
         head?: never;
         patch?: never;
@@ -1913,6 +2141,46 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/environments/bulk_upsert": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Bulk upsert Environments
+         * @description Create or update multiple environments by external_id. Only attributes present in the payload are written (managed-fields semantics). Transactional: all succeed or all fail. Requires an API key with both create and update capability across the resource scope (team/org-scoped); record-scoped principals cannot use this endpoint (they receive 404), which also prevents the create-vs-update branch from leaking whether an external_id exists.
+         */
+        post: operations["bulkUpsertEnvironments"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/environments/bulk_delete": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Bulk delete Environments
+         * @description Delete environments by external_id list, or prune by managed_by source. Two mutually exclusive modes.
+         */
+        post: operations["bulkDeleteEnvironments"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/escalation_policies": {
         parameters: {
             query?: never;
@@ -2615,6 +2883,46 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/functionalities/bulk_upsert": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Bulk upsert Functionalities
+         * @description Create or update multiple functionalities by external_id. Only attributes present in the payload are written (managed-fields semantics). Transactional: all succeed or all fail. Requires an API key with both create and update capability across the resource scope (team/org-scoped); record-scoped principals cannot use this endpoint (they receive 404), which also prevents the create-vs-update branch from leaking whether an external_id exists.
+         */
+        post: operations["bulkUpsertFunctionalities"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/functionalities/bulk_delete": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Bulk delete Functionalities
+         * @description Delete functionalities by external_id list, or prune by managed_by source. Two mutually exclusive modes.
+         */
+        post: operations["bulkDeleteFunctionalities"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/workflows/{workflow_id}/workflow_tasks": {
         parameters: {
             query?: never;
@@ -2666,6 +2974,62 @@ export interface paths {
          * @description Delete a specific workflow task by id
          */
         delete: operations["deleteWorkflowTask"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/workflows/{workflow_id}/action_item_form_field_conditions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                workflow_id: string;
+            };
+            cookie?: never;
+        };
+        /**
+         * List workflow action item form field conditions
+         * @description List workflow action item form field conditions
+         */
+        get: operations["listWorkflowActionItemFormFieldConditions"];
+        put?: never;
+        /**
+         * Creates a workflow action item form field condition
+         * @description Creates a new workflow action item form field condition from provided data
+         */
+        post: operations["createWorkflowActionItemFormFieldCondition"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/workflow_action_item_form_field_conditions/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        /**
+         * Retrieves a workflow action item form field condition
+         * @description Retrieves a specific workflow action item form field condition by id
+         */
+        get: operations["getWorkflowActionItemFormFieldCondition"];
+        /**
+         * Update a workflow action item form field condition
+         * @description Update a specific workflow action item form field condition by id
+         */
+        put: operations["updateWorkflowActionItemFormFieldCondition"];
+        post?: never;
+        /**
+         * Delete a workflow action item form field condition
+         * @description Delete a specific workflow action item form field condition by id
+         */
+        delete: operations["deleteWorkflowActionItemFormFieldCondition"];
         options?: never;
         head?: never;
         patch?: never;
@@ -4385,6 +4749,86 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/incidents/{incident_id}/meeting_recordings/import": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Import a meeting recording
+         * @description Import an externally captured meeting recording and attach it to an incident. Video and transcript are fetched asynchronously. The existing POST /v1/incidents/{incident_id}/meeting_recordings endpoint invites a bot — this endpoint handles recordings that were captured outside of the bot flow.
+         */
+        post: operations["importMeetingRecording"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/meeting_recordings": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List all meeting recordings
+         * @description List meeting recordings across the organization. Returns the current user's standalone recordings plus incident-backed recordings the user can access. Supports filtering by status, platform, and created_by.
+         */
+        get: operations["listAllMeetingRecordings"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/meeting_recordings/start_session": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Start a recording session
+         * @description Start a new desktop recording session. The server creates a recording record and returns a stream token the desktop client uses to send audio. No provider-specific configuration is needed from the client.
+         */
+        post: operations["startRecordingSession"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/meeting_recordings/{id}/delete_session": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /**
+         * Delete a standalone meeting recording
+         * @description Delete a standalone meeting recording (not linked to an incident). Only the recording owner can delete it. Active recordings (pending, recording, paused) must be stopped first. Returns 404 for incident-linked recordings or recordings owned by another user.
+         */
+        delete: operations["deleteStandaloneMeetingRecording"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/meeting_recordings/{id}": {
         parameters: {
             query?: never;
@@ -4728,7 +5172,7 @@ export interface paths {
         put?: never;
         /**
          * creates an override shift
-         * @description Creates a new override shift from provided data. If any existing override shifts overlap with the specified time range, they will be automatically deleted and replaced by the new override.
+         * @description Creates a new override shift from provided data. If any existing override shifts overlap with the specified time range, they will be automatically deleted and replaced by the new override. This endpoint is idempotent: re-sending an identical override (same user and same start/end time) returns the existing override with a 200 status and does not recreate it.
          */
         post: operations["createOverrideShift"];
         delete?: never;
@@ -4974,6 +5418,26 @@ export interface paths {
          * @description Update a specific pulse by id
          */
         put: operations["updatePulse"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/alerts/receipts/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get a receipt
+         * @description Retrieve the delivery receipt for a notification by ID, including its state and (when applicable) failure reason and referenced resource.
+         */
+        get: operations["getReceipt"];
+        put?: never;
         post?: never;
         delete?: never;
         options?: never;
@@ -5720,6 +6184,46 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/services/bulk_upsert": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Bulk upsert Services
+         * @description Create or update multiple services by external_id. Only attributes present in the payload are written (managed-fields semantics). Transactional: all succeed or all fail. Requires an API key with both create and update capability across the resource scope (team/org-scoped); record-scoped principals cannot use this endpoint (they receive 404), which also prevents the create-vs-update branch from leaking whether an external_id exists.
+         */
+        post: operations["bulkUpsertServices"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/services/bulk_delete": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Bulk delete Services
+         * @description Delete services by external_id list, or prune by managed_by source. Two mutually exclusive modes.
+         */
+        post: operations["bulkDeleteServices"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/severities": {
         parameters: {
             query?: never;
@@ -5769,6 +6273,58 @@ export interface paths {
          * @description Delete a specific severity by id
          */
         delete: operations["deleteSeverity"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/schedules/{schedule_id}/shift_coverage_requests": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                schedule_id: string;
+            };
+            cookie?: never;
+        };
+        /**
+         * list shift coverage requests
+         * @description List active shift coverage requests for a schedule.
+         */
+        get: operations["listShiftCoverageRequests"];
+        put?: never;
+        /**
+         * creates shift coverage requests
+         * @description Creates coverage requests for the shifts overlapping the requested time range. A range can span multiple consecutive shifts (e.g. across a handoff), so one or more coverage requests may be created; the response is always a list. A coverage request broadcasts to schedule members so someone can volunteer to cover the shift.
+         */
+        post: operations["createShiftCoverageRequest"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/shift_coverage_requests/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        /**
+         * retrieves a shift coverage request
+         * @description Retrieves a specific shift coverage request.
+         */
+        get: operations["getShiftCoverageRequest"];
+        put?: never;
+        post?: never;
+        /**
+         * deletes a shift coverage request
+         * @description Deletes a shift coverage request.
+         */
+        delete: operations["deleteShiftCoverageRequest"];
         options?: never;
         head?: never;
         patch?: never;
@@ -5843,6 +6399,174 @@ export interface paths {
          * @description Delete a specific SLA by id
          */
         delete: operations["deleteSLA"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/status-pages/{status_page_id}/announcements": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                status_page_id: string;
+            };
+            cookie?: never;
+        };
+        /**
+         * List status page announcements
+         * @description List status page announcements
+         */
+        get: operations["listStatusPageAnnouncements"];
+        put?: never;
+        /**
+         * Creates a status page announcement
+         * @description Posts an announcement to a status page and notifies its subscribers unless notify_subscribers is false
+         */
+        post: operations["createStatusPageAnnouncement"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/announcements/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        /**
+         * Retrieves a status page announcement
+         * @description Retrieves a specific status page announcement by id
+         */
+        get: operations["getStatusPageAnnouncement"];
+        /**
+         * Update a status page announcement
+         * @description Update a specific status page announcement by id
+         */
+        put: operations["updateStatusPageAnnouncement"];
+        post?: never;
+        /**
+         * Delete a status page announcement
+         * @description Delete a specific status page announcement by id
+         */
+        delete: operations["deleteStatusPageAnnouncement"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/status-pages/{status_page_id}/component-groups": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                status_page_id: string;
+            };
+            cookie?: never;
+        };
+        /**
+         * List status page component groups
+         * @description List status page component groups
+         */
+        get: operations["listStatusPageComponentGroups"];
+        put?: never;
+        /**
+         * Creates a status page component group
+         * @description Creates a new status page component group from provided data
+         */
+        post: operations["createStatusPageComponentGroup"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/component-groups/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        /**
+         * Retrieves a status page component group
+         * @description Retrieves a status page component group
+         */
+        get: operations["getStatusPageComponentGroup"];
+        /**
+         * Update a status page component group
+         * @description Update a status page component group
+         */
+        put: operations["updateStatusPageComponentGroup"];
+        post?: never;
+        /**
+         * Delete a status page component group
+         * @description Delete a status page component group together with its components
+         */
+        delete: operations["deleteStatusPageComponentGroup"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/status-pages/{status_page_id}/components": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                status_page_id: string;
+            };
+            cookie?: never;
+        };
+        /**
+         * List status page components
+         * @description List status page components
+         */
+        get: operations["listStatusPageComponents"];
+        put?: never;
+        /**
+         * Creates a status page component
+         * @description Creates a new status page component from provided data
+         */
+        post: operations["createStatusPageComponent"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/components/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        /**
+         * Retrieves a status page component
+         * @description Retrieves a status page component
+         */
+        get: operations["getStatusPageComponent"];
+        /**
+         * Update a status page component
+         * @description Update a status page component
+         */
+        put: operations["updateStatusPageComponent"];
+        post?: never;
+        /**
+         * Delete a status page component
+         * @description Delete a status page component
+         */
+        delete: operations["deleteStatusPageComponent"];
         options?: never;
         head?: never;
         patch?: never;
@@ -6154,6 +6878,46 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/teams/bulk_upsert": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Bulk upsert Teams
+         * @description Create or update multiple teams by external_id. Only attributes present in the payload are written (managed-fields semantics). Transactional: all succeed or all fail. Requires an API key with both create and update capability across the resource scope (team/org-scoped); record-scoped principals cannot use this endpoint (they receive 404), which also prevents the create-vs-update branch from leaking whether an external_id exists.
+         */
+        post: operations["bulkUpsertGroups"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/teams/bulk_delete": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Bulk delete Teams
+         * @description Delete teams by external_id list, or prune by managed_by source. Two mutually exclusive modes.
+         */
+        post: operations["bulkDeleteGroups"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/users/{user_id}/email_addresses": {
         parameters: {
             query?: never;
@@ -6436,6 +7200,129 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/verified_domains": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List verified domains */
+        get: {
+            parameters: {
+                query?: {
+                    "page[number]"?: number;
+                    "page[size]"?: number;
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description verified domains found */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/vnd.api+json": components["schemas"]["verified_domain_list"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        /** Create a verified domain */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/vnd.api+json": components["schemas"]["new_verified_domain"];
+                };
+            };
+            responses: {
+                /** @description verified domain created */
+                201: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/vnd.api+json": components["schemas"]["verified_domain_response"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/verified_domains/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Show a verified domain */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description verified domain found */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/vnd.api+json": components["schemas"]["verified_domain_response"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        /** Delete a verified domain */
+        delete: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description verified domain deleted */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/vnd.api+json": components["schemas"]["verified_domain_response"];
+                    };
+                };
+            };
+        };
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/webhooks/endpoints/{endpoint_id}/deliveries": {
         parameters: {
             query?: never;
@@ -6558,6 +7445,55 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
+        ai_chat_response: {
+            data: {
+                /**
+                 * Format: uuid
+                 * @description Session UUID
+                 */
+                id: string;
+                /** @enum {string} */
+                type: "ai_chat_responses";
+                attributes: {
+                    /**
+                     * Format: uuid
+                     * @description AI chat session UUID
+                     */
+                    session_id: string;
+                    /** @description Assistant reply text */
+                    reply?: string | null;
+                    /**
+                     * @description Response status (present when user input is required)
+                     * @enum {string|null}
+                     */
+                    status?: "user_input_required" | null;
+                };
+            };
+            included?: components["schemas"]["jsonapi_included_resource"][];
+        };
+        ai_chat_session_message: {
+            /**
+             * Format: uuid
+             * @description Message UUID
+             */
+            id: string;
+            /**
+             * @description Message author role
+             * @enum {string}
+             */
+            role: "user" | "assistant";
+            /** @description Message content */
+            content: string;
+            /**
+             * Format: date-time
+             * @description When the message was created
+             */
+            created_at: string;
+        };
+        ai_chat_session_message_list: {
+            messages: components["schemas"]["ai_chat_session_message"][];
+            meta?: Record<string, never>;
+        };
         attach_alert: {
             data: {
                 /** @enum {string} */
@@ -6579,10 +7515,10 @@ export interface components {
                      */
                     noise?: "noise" | "not_noise" | null;
                     /**
-                     * @description The source of the alert
-                     * @enum {string}
+                     * @deprecated
+                     * @description Deprecated. Accepted for backwards compatibility; new clients should omit. Defaults to `api`.
                      */
-                    source: "rootly" | "manual" | "api" | "heartbeat" | "web" | "slack" | "email" | "workflow" | "live_call_routing" | "mobile" | "pagerduty" | "opsgenie" | "victorops" | "pagertree" | "datadog" | "dynatrace" | "nobl9" | "zendesk" | "asana" | "clickup" | "sentry" | "rollbar" | "jira" | "honeycomb" | "service_now" | "linear" | "grafana" | "alertmanager" | "google_cloud" | "generic_webhook" | "cloud_watch" | "aws_sns" | "azure" | "splunk" | "chronosphere" | "app_optics" | "bug_snag" | "monte_carlo" | "nagios" | "prtg" | "catchpoint" | "app_dynamics" | "checkly" | "new_relic" | "gitlab";
+                    source?: string;
                     /**
                      * @description Only available for organizations with Rootly On-Call enabled. Can be one of open, triggered.
                      * @enum {string}
@@ -6596,6 +7532,8 @@ export interface components {
                     service_ids?: string[] | null;
                     /** @description The Group IDs to attach to the alert. If your organization has On-Call enabled and your notification target is a Group. This field will be automatically set for you. */
                     group_ids?: string[] | null;
+                    /** @description The Functionality IDs to attach to the alert */
+                    functionality_ids?: string[] | null;
                     /** @description The Environment IDs to attach to the alert */
                     environment_ids?: string[] | null;
                     /**
@@ -6621,6 +7559,16 @@ export interface components {
                     notification_target_type?: "User" | "Group" | "EscalationPolicy" | "Service" | "Functionality" | null;
                     /** @description Only available for organizations with Rootly On-Call enabled. The _identifier_ of the notification target object. */
                     notification_target_id?: string | null;
+                    /** @description Only available for organizations with Rootly On-Call enabled. Page multiple destinations (any combination of Group, Service, EscalationPolicy, Functionality, or User) in a single request. `Functionality` targets require the `enable_paging_functionalities` feature; a request that includes one while it is disabled is rejected. Applies to alert creation only. When provided, this takes precedence over the singular `notification_target_type` / `notification_target_id` fields. */
+                    notification_targets?: {
+                        /**
+                         * @description The type of the notification target. Can be one of Group, Service, EscalationPolicy, Functionality, User.
+                         * @enum {string}
+                         */
+                        type: "User" | "Group" | "EscalationPolicy" | "Service" | "Functionality";
+                        /** @description The identifier of the notification target object. */
+                        id: string;
+                    }[] | null;
                     labels?: ({
                         /** @description Key of the tag */
                         key: string;
@@ -6644,7 +7592,7 @@ export interface components {
         update_alert: {
             data: {
                 /** @enum {string} */
-                type?: "alerts";
+                type: "alerts";
                 attributes: {
                     /**
                      * @description Whether the alert is marked as noise
@@ -6652,10 +7600,10 @@ export interface components {
                      */
                     noise?: "noise" | "not_noise" | null;
                     /**
-                     * @description The source of the alert
-                     * @enum {string}
+                     * @deprecated
+                     * @description Deprecated. Accepted for backwards compatibility; new clients should omit. Defaults to `api`.
                      */
-                    source?: "rootly" | "manual" | "api" | "heartbeat" | "web" | "slack" | "email" | "workflow" | "live_call_routing" | "mobile" | "pagerduty" | "opsgenie" | "victorops" | "pagertree" | "datadog" | "dynatrace" | "nobl9" | "zendesk" | "asana" | "clickup" | "sentry" | "rollbar" | "jira" | "honeycomb" | "service_now" | "linear" | "grafana" | "alertmanager" | "google_cloud" | "generic_webhook" | "cloud_watch" | "aws_sns" | "azure" | "splunk" | "chronosphere" | "app_optics" | "bug_snag" | "monte_carlo" | "nagios" | "prtg" | "catchpoint" | "app_dynamics" | "checkly" | "new_relic" | "gitlab";
+                    source?: string;
                     /** @description The summary of the alert */
                     summary?: string;
                     /** @description The description of the alert */
@@ -6664,6 +7612,8 @@ export interface components {
                     service_ids?: string[] | null;
                     /** @description The Group IDs to attach to the alert */
                     group_ids?: string[] | null;
+                    /** @description The Functionality IDs to attach to the alert */
+                    functionality_ids?: string[] | null;
                     /** @description The Environment IDs to attach to the alert */
                     environment_ids?: string[] | null;
                     /**
@@ -6710,11 +7660,8 @@ export interface components {
              * @enum {string|null}
              */
             noise?: "noise" | "not_noise" | null;
-            /**
-             * @description The source of the alert
-             * @enum {string}
-             */
-            source: "rootly" | "manual" | "api" | "heartbeat" | "web" | "slack" | "email" | "workflow" | "live_call_routing" | "mobile" | "pagerduty" | "opsgenie" | "victorops" | "pagertree" | "datadog" | "dynatrace" | "nobl9" | "zendesk" | "asana" | "clickup" | "sentry" | "rollbar" | "jira" | "honeycomb" | "service_now" | "linear" | "grafana" | "alertmanager" | "google_cloud" | "generic_webhook" | "cloud_watch" | "aws_sns" | "azure" | "splunk" | "chronosphere" | "app_optics" | "bug_snag" | "monte_carlo" | "nagios" | "prtg" | "catchpoint" | "app_dynamics" | "checkly" | "new_relic" | "gitlab";
+            /** @description The source of the alert */
+            source: string;
             /**
              * @description The status of the alert
              * @enum {string}
@@ -6728,12 +7675,16 @@ export interface components {
             services?: components["schemas"]["service"][];
             /** @description Groups attached to the alert */
             groups?: components["schemas"]["team"][];
+            /** @description Functionalities attached to the alert */
+            functionalities?: components["schemas"]["functionality"][];
             /** @description Environments attached to the alert */
             environments?: components["schemas"]["environment"][];
             /** @description The Service IDs to attach to the alert. If your organization has On-Call enabled and your notification target is a Service. This field will be automatically set for you. */
             service_ids?: string[] | null;
             /** @description The Group IDs to attach to the alert. If your organization has On-Call enabled and your notification target is a Group. This field will be automatically set for you. */
             group_ids?: string[] | null;
+            /** @description The Functionality IDs to attach to the alert */
+            functionality_ids?: string[] | null;
             /** @description The Environment IDs to attach to the alert */
             environment_ids?: string[] | null;
             /** @description External ID */
@@ -6742,6 +7693,7 @@ export interface components {
             external_url?: string | null;
             /** @description The ID of the alert urgency */
             alert_urgency_id?: string | null;
+            alert_urgency?: components["schemas"]["alert_urgency"] | null;
             /** @description The ID of the group leader alert */
             group_leader_alert_id?: string | null;
             /** @description Whether the alert is a group leader alert */
@@ -6754,15 +7706,46 @@ export interface components {
             } | null)[];
             /** @description Additional data */
             data?: Record<string, never> | null;
+            /**
+             * @description Only available for organizations with Rootly On-Call enabled. Can be one of Group, Service, EscalationPolicy, Functionality, User.
+             * @enum {string|null}
+             */
+            notification_target_type?: "User" | "Group" | "EscalationPolicy" | "Service" | "Functionality" | null;
+            /** @description Only available for organizations with Rootly On-Call enabled. The identifier of the notification target object. */
+            notification_target_id?: string | null;
             /** @description Alerts sharing the same deduplication key are treated as a single alert. */
             deduplication_key?: string | null;
-            /** @description Custom alert field values to create with the alert */
-            alert_field_values_attributes?: ({
-                /** @description ID of the custom alert field */
-                alert_field_id: string;
+            /** @description Custom alert field values associated with the alert. Only present when the enable_alert_fields feature flag is enabled for the team. */
+            alert_field_values?: {
+                /** @description Unique ID of the alert field value */
+                id: string;
                 /** @description Value for the alert field */
                 value: string;
-            } | null)[];
+                /** @description ID of the custom alert field */
+                alert_field_id: string;
+                /** @description ID of the alert */
+                alert_id: string;
+                /** @description Date of creation */
+                created_at: string;
+                /** @description Date of last update */
+                updated_at: string;
+            }[] | null;
+            /** @description Users who responded to the alert. Included on all non-list responses (show, create, update, resolve, etc.); on list responses only when `include=responders` is requested. */
+            responders?: components["schemas"]["user_flat_response"][] | null;
+            /** @description Users who were notified about the alert. Included on all non-list responses (show, create, update, resolve, etc.); on list responses only when `include=notified_users` is requested. */
+            notified_users?: components["schemas"]["user"][] | null;
+            /** @description Alerting targets associated with the alert. Only present when advanced routing is enabled for the team. */
+            alerting_targets?: {
+                /** @description ID of the alerting target */
+                id: string;
+                /** @description Type of the alerting target (e.g. team, user, escalation_policy, service, functionality, slack_channel) */
+                type: string;
+            }[] | null;
+            /**
+             * Format: uri
+             * @description The Rootly dashboard URL for the alert
+             */
+            url?: string;
             /**
              * Format: date-time
              * @description When the alert started
@@ -6782,31 +7765,27 @@ export interface components {
             data: {
                 /** @description Unique ID of the alert */
                 id: string;
-                /**
-                 * @description The source of the alert
-                 * @enum {string}
-                 */
-                source?: "rootly" | "manual" | "api" | "heartbeat" | "web" | "slack" | "email" | "workflow" | "live_call_routing" | "mobile" | "pagerduty" | "opsgenie" | "victorops" | "pagertree" | "datadog" | "dynatrace" | "nobl9" | "zendesk" | "asana" | "clickup" | "sentry" | "rollbar" | "jira" | "honeycomb" | "service_now" | "linear" | "grafana" | "alertmanager" | "google_cloud" | "generic_webhook" | "cloud_watch" | "aws_sns" | "azure" | "splunk" | "chronosphere" | "app_optics" | "bug_snag" | "monte_carlo" | "nagios" | "prtg" | "catchpoint" | "app_dynamics" | "checkly" | "new_relic" | "gitlab";
+                /** @description The source of the alert */
+                source?: string;
                 /** @enum {string} */
                 type: "alerts";
                 attributes: components["schemas"]["alert"];
             };
+            included?: components["schemas"]["jsonapi_included_resource"][];
         };
         alert_list: {
             data: {
                 /** @description Unique ID of the alert */
                 id: string;
-                /**
-                 * @description The source of the alert
-                 * @enum {string}
-                 */
-                source?: "rootly" | "manual" | "api" | "heartbeat" | "web" | "slack" | "email" | "workflow" | "live_call_routing" | "mobile" | "pagerduty" | "opsgenie" | "victorops" | "pagertree" | "datadog" | "dynatrace" | "nobl9" | "zendesk" | "asana" | "clickup" | "sentry" | "rollbar" | "jira" | "honeycomb" | "service_now" | "linear" | "grafana" | "alertmanager" | "google_cloud" | "generic_webhook" | "cloud_watch" | "aws_sns" | "azure" | "splunk" | "chronosphere" | "app_optics" | "bug_snag" | "monte_carlo" | "nagios" | "prtg" | "catchpoint" | "app_dynamics" | "checkly" | "new_relic" | "gitlab";
+                /** @description The source of the alert */
+                source?: string;
                 /** @enum {string} */
                 type: "alerts";
                 attributes: components["schemas"]["alert"];
             }[];
             links: components["schemas"]["links"];
             meta: components["schemas"]["meta"];
+            included?: components["schemas"]["jsonapi_included_resource"][];
         };
         resolve_alert: {
             data?: {
@@ -6842,6 +7821,18 @@ export interface components {
                 };
             };
         };
+        alert_event_user: {
+            id: number;
+            name: string;
+            email: string;
+            first_name?: string | null;
+            last_name?: string | null;
+            preferred_name?: string | null;
+            full_name?: string | null;
+            time_zone?: string | null;
+            created_at: string;
+            updated_at: string;
+        };
         new_alert_event: {
             data: {
                 /** @enum {string} */
@@ -6870,15 +7861,61 @@ export interface components {
             };
         };
         alert_event: {
+            /** @description ID of the alert this event belongs to. */
+            alert_id: string;
             /** @enum {string} */
             kind: "informational" | "notification" | "action" | "status_update" | "recording" | "alert_grouping" | "alert_urgency" | "alert_routing" | "note" | "noise" | "maintenance" | "deferral";
             /** @enum {string} */
-            action: "created" | "escalation_policy_paged" | "ignored_alert_request" | "emailed" | "slacked" | "called" | "texted" | "notified" | "skipped" | "opened" | "retriggered" | "answered" | "acknowledged" | "escalated" | "paged" | "resolved" | "attached" | "snoozed" | "triggered" | "open" | "updated" | "added" | "removed" | "marked" | "not_marked" | "muted" | "deferred";
+            action: "created" | "escalation_policy_paged" | "ignored_alert_request" | "call_lifecycle" | "level_skipped" | "emailed" | "slacked" | "ms_teams_messaged" | "google_chat_messaged" | "called" | "texted" | "notified" | "skipped" | "opened" | "retriggered" | "ack_timeout_retriggered" | "answered" | "acknowledged" | "escalated" | "paged" | "resolved" | "attached" | "snoozed" | "retrigger_suppressed" | "triggered" | "open" | "updated" | "added" | "removed" | "marked" | "not_marked" | "cleared" | "muted" | "deferred";
             source: string;
             /** @description Author of the note. */
             user_id?: number | null;
             /** @description Note message. */
             details?: string | null;
+            user?: components["schemas"]["alert_event_user"] | null;
+            incident?: {
+                id?: string;
+                sequential_id?: number | null;
+                title?: string;
+                slug?: string;
+                kind?: string;
+                status?: string;
+                private?: boolean;
+                description?: string | null;
+                started_at?: string | null;
+                /** @description Duration in seconds. */
+                duration?: number | null;
+                url?: string;
+                created_at?: string;
+                updated_at?: string;
+            } | null;
+            schedule?: {
+                id?: string;
+                name?: string;
+                description?: string | null;
+                escalation_policies?: {
+                    id?: string;
+                    name?: string;
+                    created_at?: string;
+                    updated_at?: string;
+                }[];
+                created_at?: string;
+                updated_at?: string;
+            } | null;
+            escalation_level?: number | null;
+            /** @description e.g. EscalationPolicy, User. */
+            escalation_target_type?: string | null;
+            /** @description JSON:API-wrapped escalation target (User or EscalationPolicy). */
+            escalation_target?: {
+                data?: {
+                    id?: string;
+                    /** @description e.g. users, escalation_policies. */
+                    type?: string;
+                    attributes?: Record<string, never>;
+                };
+            } | null;
+            slack_channel?: components["schemas"]["slack_channel"] | null;
+            incident_ids?: string[] | null;
             created_at: string;
             updated_at: string;
         };
@@ -6890,6 +7927,7 @@ export interface components {
                 type: "alert_events";
                 attributes: components["schemas"]["alert_event"];
             };
+            included?: components["schemas"]["jsonapi_included_resource"][];
         };
         alert_event_list: {
             data: {
@@ -6901,6 +7939,29 @@ export interface components {
             }[];
             links: components["schemas"]["links"];
             meta: components["schemas"]["meta"];
+            included?: components["schemas"]["jsonapi_included_resource"][];
+        };
+        /** @description Cursor-pagination meta. `total_count` and `total_pages` are nullable because the feed does not run a COUNT query. */
+        alert_event_feed_meta: {
+            /** @description Pass as `page[after]` on the next request to fetch the following page. */
+            next_cursor: string | null;
+            current_page?: number | null;
+            next_page?: number | null;
+            prev_page?: number | null;
+            total_count?: number | null;
+            total_pages?: number | null;
+        };
+        alert_event_feed_list: {
+            data: {
+                /** @description Unique ID of the alert event */
+                id: string;
+                /** @enum {string} */
+                type: "alert_events";
+                attributes: components["schemas"]["alert_event"];
+            }[];
+            links?: components["schemas"]["links"];
+            meta: components["schemas"]["alert_event_feed_meta"];
+            included?: components["schemas"]["jsonapi_included_resource"][];
         };
         new_alerts_source: {
             data: {
@@ -6909,11 +7970,13 @@ export interface components {
                 attributes: {
                     /** @description The name of the alert source */
                     name: string;
+                    /** @description Whether the alert source is enabled. Disabled sources do not create alerts from incoming events. */
+                    enabled?: boolean;
                     /**
                      * @description The alert source type
                      * @enum {string}
                      */
-                    source_type?: "email" | "app_dynamics" | "catchpoint" | "datadog" | "dynatrace" | "alertmanager" | "google_cloud" | "grafana" | "sentry" | "generic_webhook" | "cloud_watch" | "aws_sns" | "checkly" | "azure" | "new_relic" | "splunk" | "chronosphere" | "app_optics" | "bug_snag" | "honeycomb" | "monte_carlo" | "nagios" | "prtg";
+                    source_type?: "email" | "app_dynamics" | "catchpoint" | "cloudflare" | "datadog" | "dynatrace" | "alertmanager" | "google_cloud" | "grafana" | "sentry" | "generic_webhook" | "cloud_watch" | "aws_sns" | "checkly" | "azure" | "new_relic" | "splunk" | "chronosphere" | "app_optics" | "bug_snag" | "honeycomb" | "monte_carlo" | "nagios" | "prtg";
                     /** @description ID for the default alert urgency assigned to this alert source */
                     alert_urgency_id?: string;
                     /** @description Toggle alert deduplication using deduplication key. If enabled, deduplication_key_kind and deduplication_key_path are required. */
@@ -6963,7 +8026,7 @@ export interface components {
                         /** @description The ID of the alert urgency */
                         alert_urgency_id?: string;
                     }[];
-                    /** @description Provide additional attributes for generic_webhook alerts source */
+                    /** @description Provide additional attributes for the underlying source. `auto_resolve`, `resolve_state` and `field_mappings_attributes` apply to generic_webhook sources; `accept_threaded_emails` applies to email sources. */
                     sourceable_attributes?: {
                         /** @description Set this to true to auto-resolve alerts based on field_mappings_attributes conditions */
                         auto_resolve?: boolean;
@@ -6978,7 +8041,7 @@ export interface components {
                              * @enum {string}
                              */
                             field?: "external_id" | "state" | "alert_title" | "alert_description" | "alert_external_url" | "notification_target_type" | "notification_target_id";
-                            /** @description JSON path expression to extract a specific value from the alert's payload for evaluation */
+                            /** @description JSON path expression to extract a specific value from the alert's payload for evaluation. For `notification_target_id` only: if your account has opted in to Dynamic Notification Targets, this may also be a Liquid template that resolves to a notification target id at routing time. */
                             json_path?: string;
                         }[];
                     } | null;
@@ -7049,11 +8112,13 @@ export interface components {
                 attributes: {
                     /** @description The name of the alert source */
                     name?: string;
+                    /** @description Whether the alert source is enabled. Disabled sources do not create alerts from incoming events. */
+                    enabled?: boolean;
                     /**
                      * @description The alert source type
                      * @enum {string}
                      */
-                    source_type?: "email" | "app_dynamics" | "catchpoint" | "datadog" | "dynatrace" | "alertmanager" | "google_cloud" | "grafana" | "sentry" | "generic_webhook" | "cloud_watch" | "aws_sns" | "checkly" | "azure" | "new_relic" | "splunk" | "chronosphere" | "app_optics" | "bug_snag" | "honeycomb" | "monte_carlo" | "nagios" | "prtg";
+                    source_type?: "email" | "app_dynamics" | "catchpoint" | "cloudflare" | "datadog" | "dynatrace" | "alertmanager" | "google_cloud" | "grafana" | "sentry" | "generic_webhook" | "cloud_watch" | "aws_sns" | "checkly" | "azure" | "new_relic" | "splunk" | "chronosphere" | "app_optics" | "bug_snag" | "honeycomb" | "monte_carlo" | "nagios" | "prtg";
                     /** @description ID for the default alert urgency assigned to this alert source */
                     alert_urgency_id?: string;
                     /** @description Toggle alert deduplication using deduplication key. If enabled, deduplication_key_kind and deduplication_key_path are required. */
@@ -7103,7 +8168,7 @@ export interface components {
                         /** @description The ID of the alert urgency */
                         alert_urgency_id?: string;
                     }[];
-                    /** @description Provide additional attributes for generic_webhook alerts source */
+                    /** @description Provide additional attributes for the underlying source. `auto_resolve`, `resolve_state` and `field_mappings_attributes` apply to generic_webhook sources; `accept_threaded_emails` applies to email sources. */
                     sourceable_attributes?: {
                         /** @description Set this to true to auto-resolve alerts based on field_mappings_attributes conditions */
                         auto_resolve?: boolean;
@@ -7118,7 +8183,7 @@ export interface components {
                              * @enum {string}
                              */
                             field?: "external_id" | "state" | "alert_title" | "alert_description" | "alert_external_url" | "notification_target_type" | "notification_target_id";
-                            /** @description JSON path expression to extract a specific value from the alert's payload for evaluation */
+                            /** @description JSON path expression to extract a specific value from the alert's payload for evaluation. For `notification_target_id` only: if your account has opted in to Dynamic Notification Targets, this may also be a Liquid template that resolves to a notification target id at routing time. */
                             json_path?: string;
                         }[];
                     } | null;
@@ -7185,11 +8250,13 @@ export interface components {
         alerts_source: {
             /** @description The name of the alert source */
             name: string;
+            /** @description Whether the alert source is enabled. Disabled sources do not create alerts from incoming events. */
+            enabled?: boolean;
             /**
              * @description The alert source type
              * @enum {string}
              */
-            source_type?: "email" | "app_dynamics" | "catchpoint" | "datadog" | "dynatrace" | "alertmanager" | "google_cloud" | "grafana" | "sentry" | "generic_webhook" | "cloud_watch" | "aws_sns" | "checkly" | "azure" | "new_relic" | "splunk" | "chronosphere" | "app_optics" | "bug_snag" | "honeycomb" | "monte_carlo" | "nagios" | "prtg";
+            source_type?: "email" | "app_dynamics" | "catchpoint" | "cloudflare" | "datadog" | "dynatrace" | "alertmanager" | "google_cloud" | "grafana" | "sentry" | "generic_webhook" | "cloud_watch" | "aws_sns" | "checkly" | "azure" | "new_relic" | "splunk" | "chronosphere" | "app_optics" | "bug_snag" | "honeycomb" | "monte_carlo" | "nagios" | "prtg";
             /** @description ID for the default alert urgency assigned to this alert source */
             alert_urgency_id?: string;
             /** @description Toggle alert deduplication using deduplication key. If enabled, deduplication_key_kind and deduplication_key_path are required. */
@@ -7239,8 +8306,13 @@ export interface components {
                 /** @description The ID of the alert urgency */
                 alert_urgency_id?: string;
             }[];
-            /** @description Provide additional attributes for generic_webhook alerts source */
+            /** @description Provide additional attributes for the underlying source. `auto_resolve`, `resolve_state` and `field_mappings_attributes` apply to generic_webhook sources; `accept_threaded_emails` applies to email sources. */
             sourceable_attributes?: {
+                /**
+                 * Format: uuid
+                 * @description Unique ID of the underlying source. Read-only; it is resolved from the alert source itself on update.
+                 */
+                id?: string;
                 /** @description Set this to true to auto-resolve alerts based on field_mappings_attributes conditions */
                 auto_resolve?: boolean;
                 /** @description This value is matched with the value extracted from alerts payload using JSON path in field_mappings_attributes */
@@ -7254,7 +8326,7 @@ export interface components {
                      * @enum {string}
                      */
                     field?: "external_id" | "state" | "alert_title" | "alert_description" | "alert_external_url" | "notification_target_type" | "notification_target_id";
-                    /** @description JSON path expression to extract a specific value from the alert's payload for evaluation */
+                    /** @description JSON path expression to extract a specific value from the alert's payload for evaluation. For `notification_target_id` only: if your account has opted in to Dynamic Notification Targets, this may also be a Liquid template that resolves to a notification target id at routing time. */
                     json_path?: string;
                 }[];
             } | null;
@@ -7339,6 +8411,7 @@ export interface components {
                 type: "alert_sources";
                 attributes: components["schemas"]["alerts_source"];
             };
+            included?: components["schemas"]["jsonapi_included_resource"][];
         };
         alerts_source_list: {
             data: {
@@ -7350,6 +8423,7 @@ export interface components {
             }[];
             links: components["schemas"]["links"];
             meta: components["schemas"]["meta"];
+            included?: components["schemas"]["jsonapi_included_resource"][];
         };
         new_alert_route: {
             data?: {
@@ -7877,6 +8951,7 @@ export interface components {
                 type: "alert_routing_rules";
                 attributes: components["schemas"]["alert_routing_rule"];
             };
+            included?: components["schemas"]["jsonapi_included_resource"][];
         };
         alert_routing_rule_list: {
             data: {
@@ -7888,6 +8963,7 @@ export interface components {
             }[];
             links: components["schemas"]["links"];
             meta: components["schemas"]["meta"];
+            included?: components["schemas"]["jsonapi_included_resource"][];
         };
         /** @description The destination target for the alert routing rule */
         alert_routing_rule_target: {
@@ -7953,11 +9029,161 @@ export interface components {
             /** @description Date of last update */
             updated_at?: string;
         };
+        new_alert_retrigger_rule: {
+            data: {
+                /** @enum {string} */
+                type: "alert_retrigger_rules";
+                attributes: {
+                    /** @description A human-readable name for the rule */
+                    name: string;
+                    /**
+                     * @description Whether all or any of the conditions must match
+                     * @enum {string}
+                     */
+                    match_mode?: "match-all-rules" | "match-any-rule";
+                    /**
+                     * @description Re-trigger the alert this many minutes after acknowledgment. Null means never re-trigger.
+                     * @enum {integer|null}
+                     */
+                    timeout_minutes?: 10 | 20 | 30 | 40 | 50 | 60 | 90 | 120 | 180 | 240 | 300 | 360 | 720 | 1440 | null;
+                    /** @description The position of the rule; the first matching rule (by position) decides the outcome */
+                    position?: number;
+                    /** @description The conditions that determine which alerts this rule applies to. An empty array applies to every alert. */
+                    conditions?: {
+                        /**
+                         * @description The operand the condition matches on. Native operands (urgency, source, service, group) match by record; alert_field/payload match a field value.
+                         * @enum {string}
+                         */
+                        kind: "urgency" | "source" | "service" | "group" | "alert_field" | "payload";
+                        /**
+                         * @description How the operand is compared. Native operands support is_one_of/is_not_one_of/is_set/is_not_set; alert_field/payload additionally support the string/regex operators.
+                         * @enum {string}
+                         */
+                        operator: "is_one_of" | "is_not_one_of" | "is_set" | "is_not_set" | "contains" | "does_not_contain" | "starts_with" | "ends_with" | "matches_regex";
+                        /** @description For urgency/service/group/source conditions: the IDs of the matched records (AlertUrgency, Service, Group, or Alerts::Source). */
+                        record_ids?: string[];
+                        /** @description For source conditions: non-integration source aliases (e.g. manual, api). For alert_field/payload conditions: the values to compare against. */
+                        values?: string[];
+                        /** @description For alert_field conditions: the alert field id. For payload conditions: a JSON Path (e.g. $.priority). */
+                        property_field_name?: string;
+                    }[];
+                };
+            };
+        };
+        update_alert_retrigger_rule: {
+            data: {
+                /** @enum {string} */
+                type: "alert_retrigger_rules";
+                attributes: {
+                    /** @description A human-readable name for the rule */
+                    name?: string;
+                    /**
+                     * @description Whether all or any of the conditions must match
+                     * @enum {string}
+                     */
+                    match_mode?: "match-all-rules" | "match-any-rule";
+                    /**
+                     * @description Re-trigger the alert this many minutes after acknowledgment. Null means never re-trigger.
+                     * @enum {integer|null}
+                     */
+                    timeout_minutes?: 10 | 20 | 30 | 40 | 50 | 60 | 90 | 120 | 180 | 240 | 300 | 360 | 720 | 1440 | null;
+                    /** @description The position of the rule for ordering evaluation */
+                    position?: number;
+                    /** @description The full desired set of conditions; replaces the rule's existing conditions. An empty array applies to every alert. */
+                    conditions?: {
+                        /**
+                         * @description The operand the condition matches on. Native operands (urgency, source, service, group) match by record; alert_field/payload match a field value.
+                         * @enum {string}
+                         */
+                        kind: "urgency" | "source" | "service" | "group" | "alert_field" | "payload";
+                        /**
+                         * @description How the operand is compared. Native operands support is_one_of/is_not_one_of/is_set/is_not_set; alert_field/payload additionally support the string/regex operators.
+                         * @enum {string}
+                         */
+                        operator: "is_one_of" | "is_not_one_of" | "is_set" | "is_not_set" | "contains" | "does_not_contain" | "starts_with" | "ends_with" | "matches_regex";
+                        /** @description For urgency/service/group/source conditions: the IDs of the matched records (AlertUrgency, Service, Group, or Alerts::Source). */
+                        record_ids?: string[];
+                        /** @description For source conditions: non-integration source aliases (e.g. manual, api). For alert_field/payload conditions: the values to compare against. */
+                        values?: string[];
+                        /** @description For alert_field conditions: the alert field id. For payload conditions: a JSON Path (e.g. $.priority). */
+                        property_field_name?: string;
+                    }[];
+                };
+            };
+        };
+        alert_retrigger_rule: {
+            /** @description A human-readable name for the rule */
+            name?: string;
+            /**
+             * @description Whether all or any of the conditions must match
+             * @enum {string}
+             */
+            match_mode?: "match-all-rules" | "match-any-rule";
+            /** @description Minutes after acknowledgment to re-trigger. Null means never re-trigger. */
+            timeout_minutes?: number | null;
+            /** @description The position of the rule for ordering evaluation */
+            position?: number;
+            /** @description The conditions for the rule */
+            conditions?: {
+                /**
+                 * Format: uuid
+                 * @description Unique ID of the condition
+                 */
+                id: string;
+                /**
+                 * @description The operand the condition matches on. Native operands (urgency, source, service, group) match by record; alert_field/payload match a field value.
+                 * @enum {string}
+                 */
+                kind: "urgency" | "source" | "service" | "group" | "alert_field" | "payload";
+                /**
+                 * @description How the operand is compared. Native operands support is_one_of/is_not_one_of/is_set/is_not_set; alert_field/payload additionally support the string/regex operators.
+                 * @enum {string}
+                 */
+                operator: "is_one_of" | "is_not_one_of" | "is_set" | "is_not_set" | "contains" | "does_not_contain" | "starts_with" | "ends_with" | "matches_regex";
+                /** @description For urgency/service/group/source conditions: the IDs of the matched records (AlertUrgency, Service, Group, or Alerts::Source). */
+                record_ids?: string[];
+                /** @description For source conditions: non-integration source aliases (e.g. manual, api). For alert_field/payload conditions: the values to compare against. */
+                values?: string[];
+                /** @description For alert_field conditions: the alert field id. For payload conditions: a JSON Path (e.g. $.priority). */
+                property_field_name?: string;
+            }[];
+            /** Format: date-time */
+            created_at?: string;
+            /** Format: date-time */
+            updated_at?: string;
+        };
+        alert_retrigger_rule_response: {
+            data: {
+                /** @description Unique ID of the alert_retrigger_rule */
+                id: string;
+                /** @enum {string} */
+                type: "alert_retrigger_rules";
+                attributes: components["schemas"]["alert_retrigger_rule"];
+            };
+            included?: components["schemas"]["jsonapi_included_resource"][];
+        };
+        alert_retrigger_rule_list: {
+            data: {
+                /** @description Unique ID of the alert_retrigger_rule */
+                id: string;
+                /** @enum {string} */
+                type: "alert_retrigger_rules";
+                attributes: components["schemas"]["alert_retrigger_rule"];
+            }[];
+            links: components["schemas"]["links"];
+            meta: components["schemas"]["meta"];
+            included?: components["schemas"]["jsonapi_included_resource"][];
+        };
         new_alert_field: {
             data: {
                 /** @enum {string} */
                 type: "alert_fields";
                 attributes: {
+                    /**
+                     * @deprecated
+                     * @description Deprecated. `slug` is derived from `name`; any submitted value is ignored. This property will be removed from the request schema in a future version.
+                     */
+                    slug?: string | null;
                     /** @description The name of the alert field */
                     name: string;
                 };
@@ -7968,6 +9194,11 @@ export interface components {
                 /** @enum {string} */
                 type: "alert_fields";
                 attributes: {
+                    /**
+                     * @deprecated
+                     * @description Deprecated. `slug` is derived from `name`; any submitted value is ignored. This property will be removed from the request schema in a future version.
+                     */
+                    slug?: string | null;
                     /** @description The name of the alert field */
                     name?: string;
                 };
@@ -7975,7 +9206,7 @@ export interface components {
         };
         alert_field: {
             /** @description The slug of the alert field */
-            slug?: string;
+            readonly slug?: string;
             /** @description The name of the alert field */
             name: string;
             /** @description The kind of alert field */
@@ -7993,6 +9224,7 @@ export interface components {
                 type: "alert_fields";
                 attributes: components["schemas"]["alert_field"];
             };
+            included?: components["schemas"]["jsonapi_included_resource"][];
         };
         alert_field_list: {
             data: {
@@ -8004,6 +9236,7 @@ export interface components {
             }[];
             links: components["schemas"]["links"];
             meta: components["schemas"]["meta"];
+            included?: components["schemas"]["jsonapi_included_resource"][];
         };
         new_alert_urgency: {
             data: {
@@ -8016,6 +9249,8 @@ export interface components {
                     description: string;
                     /** @description Position of the alert urgency */
                     position?: number | null;
+                    /** @description Re-trigger acknowledged alerts of this urgency after N minutes; null inherits the workspace default, negative = never. */
+                    retrigger_timeout_minutes?: number | null;
                 };
             };
         };
@@ -8030,16 +9265,30 @@ export interface components {
                     description?: string;
                     /** @description Position of the alert urgency */
                     position?: number | null;
+                    /** @description Re-trigger acknowledged alerts of this urgency after N minutes; null inherits the workspace default, negative = never. */
+                    retrigger_timeout_minutes?: number | null;
                 };
             };
         };
         alert_urgency: {
+            /** @description Unique ID of the alert urgency */
+            id?: string;
             /** @description The name of the alert urgency */
             name: string;
             /** @description The description of the alert urgency */
             description: string;
             /** @description Position of the alert urgency */
             position: number;
+            /** @description Re-trigger acknowledged alerts of this urgency after N minutes; null inherits the workspace default, negative = never. */
+            retrigger_timeout_minutes?: number | null;
+            /** @description The urgency level */
+            urgency?: string | null;
+            /** @description The color associated with this urgency level */
+            color?: string | null;
+            /** @description The ID of the team this urgency belongs to */
+            team_id?: number;
+            /** @description Date of deletion */
+            deleted_at?: string | null;
             /** @description Date of creation */
             created_at: string;
             /** @description Date of last update */
@@ -8053,6 +9302,7 @@ export interface components {
                 type: "alert_urgencies";
                 attributes: components["schemas"]["alert_urgency"];
             };
+            included?: components["schemas"]["jsonapi_included_resource"][];
         };
         alert_urgency_list: {
             data: {
@@ -8064,12 +9314,18 @@ export interface components {
             }[];
             links: components["schemas"]["links"];
             meta: components["schemas"]["meta"];
+            included?: components["schemas"]["jsonapi_included_resource"][];
         };
         new_alert_group: {
             data: {
                 /** @enum {string} */
                 type: "alert_groups";
                 attributes: {
+                    /**
+                     * @deprecated
+                     * @description Deprecated. `slug` is derived from `name`; any submitted value is ignored. This property will be removed from the request schema in a future version.
+                     */
+                    slug?: string | null;
                     /** @description The name of the alert group */
                     name: string;
                     /** @description The description of the alert urgency */
@@ -8148,6 +9404,11 @@ export interface components {
                 /** @enum {string} */
                 type: "alert_groups";
                 attributes: {
+                    /**
+                     * @deprecated
+                     * @description Deprecated. `slug` is derived from `name`; any submitted value is ignored. This property will be removed from the request schema in a future version.
+                     */
+                    slug?: string | null;
                     /** @description The name of the alert group */
                     name?: string;
                     /** @description The description of the alert group */
@@ -8227,7 +9488,7 @@ export interface components {
             /** @description The description of the alert group */
             description: string | null;
             /** @description The slug of the alert group */
-            slug?: string;
+            readonly slug?: string;
             /** @description Grouping condition for the alert group */
             condition_type: string;
             /** @description Time window for the alert grouping */
@@ -8311,6 +9572,7 @@ export interface components {
                 type: "alert_groups";
                 attributes: components["schemas"]["alert_group"];
             };
+            included?: components["schemas"]["jsonapi_included_resource"][];
         };
         alert_group_list: {
             data: {
@@ -8320,6 +9582,7 @@ export interface components {
                 type: "alert_groups";
                 attributes: components["schemas"]["alert_group"];
             }[];
+            included?: components["schemas"]["jsonapi_included_resource"][];
         };
         new_api_key: {
             data: {
@@ -8417,6 +9680,7 @@ export interface components {
                 type: "api_keys";
                 attributes: components["schemas"]["api_key"];
             };
+            included?: components["schemas"]["jsonapi_included_resource"][];
         };
         api_key_with_token_response: {
             data: {
@@ -8429,6 +9693,7 @@ export interface components {
                     token: string;
                 };
             };
+            included?: components["schemas"]["jsonapi_included_resource"][];
         };
         api_key_list: {
             data: {
@@ -8440,6 +9705,7 @@ export interface components {
             }[];
             links: components["schemas"]["links"];
             meta: components["schemas"]["meta"];
+            included?: components["schemas"]["jsonapi_included_resource"][];
         };
         audit: {
             /** @description Describes the action that was taken. */
@@ -8448,7 +9714,7 @@ export interface components {
              * @description Describes the object in which the action was taken on
              * @enum {string|null}
              */
-            item_type?: "AlertRoute" | "AlertRoutingRule" | "Alerts::Source" | "ApiKey" | "Catalog" | "CatalogEntity" | "CatalogEntityProperty" | "CatalogField" | "Cause" | "CustomField" | "CustomFieldOption" | "CustomForm" | "Dashboard" | "EdgeConnector" | "EdgeConnector::Action" | "Environment" | "EscalationPolicy" | "EscalationPolicyPath" | "ExportJob" | "FormField" | "Functionality" | "GeniusWorkflow" | "GeniusWorkflowGroup" | "GeniusWorkflowRun" | "Group" | "GroupUser" | "Heartbeat" | "Incident" | "LoginActivity" | "IncidentActionItem" | "IncidentEvent" | "IncidentFormFieldSelection" | "IncidentFormFieldSelectionUser" | "IncidentPermissionSet" | "IncidentPostMortem" | "IncidentRoleAssignment" | "IncidentRoleTask" | "IncidentStatusPageEvent" | "IncidentTask" | "IncidentType" | "Integrations::DatadogAccount" | "Integrations::GithubAccount" | "Integrations::GoogleMeetAccount" | "Integrations::JiraAccount" | "Integrations::MicrosoftTeamsAccount" | "Integrations::OpsgenieAccount" | "Integrations::PagerdutyAccount" | "Integrations::ServiceNowAccount" | "Integrations::SlackAccount" | "Integrations::StatusPageIoAccount" | "Integrations::ZendeskAccount" | "Integrations::ZoomAccount" | "LiveCallRouter" | "Membership" | "OnCallRole" | "Playbook" | "PlaybookTask" | "Role" | "Schedule" | "Secret" | "Service" | "Severity" | "StatusPage" | null;
+            item_type?: "AlertRoute" | "AlertRoutingRule" | "Alerts::Source" | "ApiKey" | "Catalog" | "CatalogEntity" | "CatalogEntityProperty" | "CatalogField" | "Cause" | "CustomField" | "CustomFieldOption" | "CustomForm" | "Dashboard" | "EdgeConnector" | "EdgeConnector::Action" | "Environment" | "EscalationPolicy" | "EscalationPolicyPath" | "ExportJob" | "FormField" | "Functionality" | "GeniusWorkflow" | "GeniusWorkflowGroup" | "GeniusWorkflowRun" | "Group" | "GroupUser" | "Heartbeat" | "Incident" | "IncidentActionItem" | "IncidentEvent" | "IncidentFormFieldSelection" | "IncidentFormFieldSelectionUser" | "IncidentPermissionSet" | "IncidentPostMortem" | "IncidentRoleAssignment" | "IncidentRoleTask" | "IncidentStatusPageEvent" | "IncidentTask" | "IncidentType" | "Integrations::DatadogAccount" | "Integrations::GithubAccount" | "Integrations::GoogleMeetAccount" | "Integrations::JiraAccount" | "Integrations::MicrosoftTeamsAccount" | "Integrations::NotionAccount" | "Integrations::OpsgenieAccount" | "Integrations::PagerdutyAccount" | "Integrations::ServiceNowAccount" | "Integrations::SlackAccount" | "Integrations::StatusPageIoAccount" | "Integrations::ZendeskAccount" | "Integrations::ZoomAccount" | "LiveCallRouter" | "LoginActivity" | "Membership" | "OnCallRole" | "Playbook" | "PlaybookTask" | "Role" | "Schedule" | "Secret" | "Service" | "Severity" | "StatusPage" | null;
             /** @description Human-friendly display name for the item type */
             item_type_display?: string | null;
             /** @description The object in which the action was taken on */
@@ -8457,6 +9723,18 @@ export interface components {
             object_changes?: Record<string, never> | null;
             /** @description The ID of who took action on the object. Together with whodunnit_type can be used to find the user */
             user_id?: number | null;
+            /** @description Display name of the user who performed the action */
+            user_name?: string | null;
+            /** @description Email address of the user who performed the action */
+            user_email?: string | null;
+            /** @description IP address of the client that performed the action */
+            ip_address?: string | null;
+            /** @description User-Agent header of the client that performed the action */
+            user_agent?: string | null;
+            /** @description Unique request ID (UUID) for the HTTP request that triggered the action */
+            request_id?: string | null;
+            /** @description SHA-256 fingerprint of the web session for correlating multiple actions within the same browser session */
+            session_id?: string | null;
             /** @description Date of creation */
             created_at: string;
             /** @description ID of the affected object */
@@ -8474,6 +9752,7 @@ export interface components {
             }[];
             links: components["schemas"]["links"];
             meta: components["schemas"]["meta"];
+            included?: components["schemas"]["jsonapi_included_resource"][];
         };
         new_authorization: {
             data: {
@@ -8534,6 +9813,7 @@ export interface components {
                 type: "authorizations";
                 attributes: components["schemas"]["authorization"];
             };
+            included?: components["schemas"]["jsonapi_included_resource"][];
         };
         authorization_list: {
             data: {
@@ -8545,18 +9825,113 @@ export interface components {
             }[];
             links: components["schemas"]["links"];
             meta: components["schemas"]["meta"];
+            included?: components["schemas"]["jsonapi_included_resource"][];
+        };
+        bulk_import_attributes: {
+            /**
+             * @description Type of entity being imported
+             * @enum {string}
+             */
+            entity_type?: "Incident";
+            /**
+             * @description Current status of the import
+             * @enum {string}
+             */
+            status: "pending" | "validating" | "validation_failed" | "importing" | "indexing" | "completed" | "failed";
+            /**
+             * Format: uri
+             * @description URL of the JSONL file being imported
+             */
+            file_url?: string;
+            /**
+             * Format: email
+             * @description Email address for notifications
+             */
+            notification_email?: string;
+            /** @description Total number of records in the file */
+            total_records?: number | null;
+            /** @description Number of records processed so far */
+            processed_records: number;
+            /** @description Number of records that failed to import */
+            failed_records: number;
+            /** @description Validation errors encountered during validation phase */
+            validation_errors?: Record<string, never> | null;
+            /** @description Error message if import failed */
+            error_message?: string | null;
+            /**
+             * Format: float
+             * @description Import progress percentage (0-100)
+             */
+            progress_percentage: number;
+            /**
+             * Format: date-time
+             * @description When import processing started
+             */
+            started_at?: string | null;
+            /**
+             * Format: date-time
+             * @description When import completed or failed
+             */
+            completed_at?: string | null;
+            /**
+             * Format: date-time
+             * @description When the bulk import was created
+             */
+            created_at?: string;
+            /**
+             * Format: date-time
+             * @description When the bulk import was last updated
+             */
+            updated_at?: string;
+        };
+        new_bulk_import: {
+            data: {
+                attributes: {
+                    /**
+                     * @description Type of entity to import (currently only 'Incident' is supported)
+                     * @enum {string}
+                     */
+                    entity_type: "Incident";
+                    /**
+                     * Format: uri
+                     * @description URL of the JSONL file to import. Must be accessible via HTTPS.
+                     */
+                    file_url: string;
+                    /**
+                     * Format: email
+                     * @description Email address to receive import status notifications
+                     */
+                    notification_email: string;
+                };
+            };
+        };
+        bulk_import_response: {
+            data: {
+                /** Format: uuid */
+                id: string;
+                /** @enum {string} */
+                type: "bulk_import";
+                attributes: components["schemas"]["bulk_import_attributes"];
+            };
         };
         new_catalog: {
             data: {
                 /** @enum {string} */
                 type: "catalogs";
                 attributes: {
+                    /**
+                     * @deprecated
+                     * @description Deprecated. `slug` is derived from `name`; any submitted value is ignored. This property will be removed from the request schema in a future version.
+                     */
+                    slug?: string | null;
                     name: string;
                     description?: string | null;
                     /** @enum {string} */
                     icon?: "globe-alt" | "server-stack" | "users" | "user-group" | "chart-bar" | "shapes" | "light-bulb" | "cursor-arrow-ripple";
                     /** @description Default position of the catalog when displayed in a list. */
                     position?: number | null;
+                    /** @description An external identifier for this catalog. Must be unique within the team. */
+                    external_id?: string | null;
                 };
             };
         };
@@ -8565,22 +9940,38 @@ export interface components {
                 /** @enum {string} */
                 type: "catalogs";
                 attributes: {
+                    /**
+                     * @deprecated
+                     * @description Deprecated. `slug` is derived from `name`; any submitted value is ignored. This property will be removed from the request schema in a future version.
+                     */
+                    slug?: string | null;
                     name?: string;
                     description?: string | null;
                     /** @enum {string} */
                     icon?: "globe-alt" | "server-stack" | "users" | "user-group" | "chart-bar" | "shapes" | "light-bulb" | "cursor-arrow-ripple";
                     /** @description Default position of the catalog when displayed in a list. */
                     position?: number | null;
+                    /** @description An external identifier for this catalog. Must be unique within the team. */
+                    external_id?: string | null;
                 };
             };
         };
         catalog: {
             name: string;
+            /** @description The slug of the catalog. Derived from `name`. */
+            readonly slug?: string;
             description?: string | null;
             /** @enum {string} */
             icon: "globe-alt" | "server-stack" | "users" | "user-group" | "chart-bar" | "shapes" | "light-bulb" | "cursor-arrow-ripple";
             /** @description Default position of the catalog when displayed in a list. */
             position: number | null;
+            /** @description An external identifier for this catalog. Must be unique within the team. */
+            external_id?: string | null;
+            /**
+             * @description Which source manages this resource (read-only).
+             * @enum {string}
+             */
+            managed_by?: "web" | "admin_web" | "api" | "terraform" | "pulumi" | "backstage" | "catalog_sync";
             created_at: string;
             updated_at: string;
         };
@@ -8592,6 +9983,7 @@ export interface components {
                 type: "catalogs";
                 attributes: components["schemas"]["catalog"];
             };
+            included?: components["schemas"]["jsonapi_included_resource"][];
         };
         catalog_list: {
             data: {
@@ -8603,6 +9995,7 @@ export interface components {
             }[];
             links: components["schemas"]["links"];
             meta: components["schemas"]["meta"];
+            included?: components["schemas"]["jsonapi_included_resource"][];
         };
         /** @description A catalog can have a maximum of 50 fields. */
         new_catalog_field: {
@@ -8610,9 +10003,14 @@ export interface components {
                 /** @enum {string} */
                 type: "catalog_properties";
                 attributes: {
+                    /**
+                     * @deprecated
+                     * @description Deprecated. `slug` is derived from `name`; any submitted value is ignored. This property will be removed from the request schema in a future version.
+                     */
+                    slug?: string | null;
                     name: string;
                     /** @enum {string} */
-                    kind: "text" | "reference" | "boolean" | "reference" | "service" | "functionality" | "environment" | "group" | "cause" | "incident_type" | "user";
+                    kind: "text" | "reference" | "boolean" | "service" | "functionality" | "environment" | "group" | "cause" | "incident_type" | "user";
                     /** @description Restricts values to items of specified catalog. */
                     kind_catalog_id?: string | null;
                     /** @description Whether the attribute accepts multiple values. */
@@ -8626,6 +10024,8 @@ export interface components {
                      * @enum {string}
                      */
                     catalog_type?: "catalog" | "cause" | "environment" | "functionality" | "incident_type" | "service" | "team";
+                    /** @description An external identifier for this catalog field. Must be unique within the scope. */
+                    external_id?: string | null;
                 };
             };
         };
@@ -8634,9 +10034,14 @@ export interface components {
                 /** @enum {string} */
                 type: "catalog_properties";
                 attributes: {
+                    /**
+                     * @deprecated
+                     * @description Deprecated. `slug` is derived from `name`; any submitted value is ignored. This property will be removed from the request schema in a future version.
+                     */
+                    slug?: string | null;
                     name?: string;
                     /** @enum {string} */
-                    kind?: "text" | "reference" | "boolean" | "reference" | "service" | "functionality" | "environment" | "group" | "cause" | "incident_type" | "user";
+                    kind?: "text" | "reference" | "boolean" | "service" | "functionality" | "environment" | "group" | "cause" | "incident_type" | "user";
                     /** @description Restricts values to items of specified catalog. */
                     kind_catalog_id?: string | null;
                     /** @description Default position of the item when displayed in a list. */
@@ -8648,13 +10053,15 @@ export interface components {
                      * @enum {string}
                      */
                     catalog_type?: "catalog" | "cause" | "environment" | "functionality" | "incident_type" | "service" | "team";
+                    /** @description An external identifier for this catalog field. Must be unique within the scope. */
+                    external_id?: string | null;
                 };
             };
         };
         catalog_field: {
             catalog_id: string | null;
             name: string;
-            slug?: string;
+            readonly slug?: string;
             /** @enum {string} */
             kind: "text" | "reference";
             /** @description Restricts values to items of specified catalog. */
@@ -8670,6 +10077,13 @@ export interface components {
              * @enum {string}
              */
             catalog_type?: "catalog" | "cause" | "environment" | "functionality" | "incident_type" | "service" | "team";
+            /** @description An external identifier for this catalog field. Must be unique within the scope. */
+            external_id?: string | null;
+            /**
+             * @description Which source manages this resource (read-only).
+             * @enum {string}
+             */
+            managed_by?: "web" | "admin_web" | "api" | "terraform" | "pulumi" | "backstage" | "catalog_sync";
             created_at: string;
             updated_at: string;
         };
@@ -8681,6 +10095,7 @@ export interface components {
                 type: "catalog_properties";
                 attributes: components["schemas"]["catalog_field"];
             };
+            included?: components["schemas"]["jsonapi_included_resource"][];
         };
         catalog_field_list: {
             data: {
@@ -8692,6 +10107,7 @@ export interface components {
             }[];
             links: components["schemas"]["links"];
             meta: components["schemas"]["meta"];
+            included?: components["schemas"]["jsonapi_included_resource"][];
         };
         /** @description A catalog can have a maximum of 50 properties. */
         new_catalog_property: {
@@ -8699,9 +10115,14 @@ export interface components {
                 /** @enum {string} */
                 type: "catalog_properties";
                 attributes: {
+                    /**
+                     * @deprecated
+                     * @description Deprecated. `slug` is derived from `name`; any submitted value is ignored. This property will be removed from the request schema in a future version.
+                     */
+                    slug?: string | null;
                     name: string;
                     /** @enum {string} */
-                    kind: "text" | "reference" | "boolean" | "reference" | "service" | "functionality" | "environment" | "group" | "cause" | "incident_type" | "user";
+                    kind: "text" | "reference" | "boolean" | "service" | "functionality" | "environment" | "group" | "cause" | "incident_type" | "user";
                     /** @description Restricts values to items of specified catalog. */
                     kind_catalog_id?: string | null;
                     /** @description Whether the attribute accepts multiple values. */
@@ -8715,6 +10136,8 @@ export interface components {
                      * @enum {string}
                      */
                     catalog_type?: "catalog" | "cause" | "environment" | "functionality" | "incident_type" | "service" | "team";
+                    /** @description An external identifier for this catalog property. Must be unique within the scope. */
+                    external_id?: string | null;
                 };
             };
         };
@@ -8723,9 +10146,14 @@ export interface components {
                 /** @enum {string} */
                 type: "catalog_properties";
                 attributes: {
+                    /**
+                     * @deprecated
+                     * @description Deprecated. `slug` is derived from `name`; any submitted value is ignored. This property will be removed from the request schema in a future version.
+                     */
+                    slug?: string | null;
                     name?: string;
                     /** @enum {string} */
-                    kind?: "text" | "reference" | "boolean" | "reference" | "service" | "functionality" | "environment" | "group" | "cause" | "incident_type" | "user";
+                    kind?: "text" | "reference" | "boolean" | "service" | "functionality" | "environment" | "group" | "cause" | "incident_type" | "user";
                     /** @description Restricts values to items of specified catalog. */
                     kind_catalog_id?: string | null;
                     /** @description Default position of the item when displayed in a list. */
@@ -8737,13 +10165,15 @@ export interface components {
                      * @enum {string}
                      */
                     catalog_type?: "catalog" | "cause" | "environment" | "functionality" | "incident_type" | "service" | "team";
+                    /** @description An external identifier for this catalog property. Must be unique within the scope. */
+                    external_id?: string | null;
                 };
             };
         };
         catalog_property: {
             catalog_id: string | null;
             name: string;
-            slug?: string;
+            readonly slug?: string;
             /** @enum {string} */
             kind: "text" | "reference";
             /** @description Restricts values to items of specified catalog. */
@@ -8759,6 +10189,13 @@ export interface components {
              * @enum {string}
              */
             catalog_type?: "catalog" | "cause" | "environment" | "functionality" | "incident_type" | "service" | "team";
+            /** @description An external identifier for this catalog property. Must be unique within the scope. */
+            external_id?: string | null;
+            /**
+             * @description Which source manages this resource (read-only).
+             * @enum {string}
+             */
+            managed_by?: "web" | "admin_web" | "api" | "terraform" | "pulumi" | "backstage" | "catalog_sync";
             created_at: string;
             updated_at: string;
         };
@@ -8770,6 +10207,7 @@ export interface components {
                 type: "catalog_properties";
                 attributes: components["schemas"]["catalog_property"];
             };
+            included?: components["schemas"]["jsonapi_included_resource"][];
         };
         catalog_property_list: {
             data: {
@@ -8781,18 +10219,28 @@ export interface components {
             }[];
             links: components["schemas"]["links"];
             meta: components["schemas"]["meta"];
+            included?: components["schemas"]["jsonapi_included_resource"][];
         };
         new_catalog_entity: {
             data: {
                 /** @enum {string} */
                 type: "catalog_entities";
                 attributes: {
+                    /**
+                     * @deprecated
+                     * @description Deprecated. `slug` is derived from `name`; any submitted value is ignored. This property will be removed from the request schema in a future version.
+                     */
+                    slug?: string | null;
                     name: string;
                     description?: string | null;
+                    /** @description The status page description of the catalog entity */
+                    public_description?: string | null;
                     /** @description Default position of the item when displayed in a list. */
                     position?: number | null;
                     /** @description The Backstage entity ID this catalog entity is linked to. */
                     backstage_id?: string | null;
+                    /** @description An external identifier for this catalog entity. Must be unique within the catalog. */
+                    external_id?: string | null;
                     /** @description Array of property values for this catalog entity */
                     properties?: {
                         /** @description Unique ID of the catalog property */
@@ -8808,12 +10256,21 @@ export interface components {
                 /** @enum {string} */
                 type: "catalog_entities";
                 attributes: {
+                    /**
+                     * @deprecated
+                     * @description Deprecated. `slug` is derived from `name`; any submitted value is ignored. This property will be removed from the request schema in a future version.
+                     */
+                    slug?: string | null;
                     name?: string;
                     description?: string | null;
+                    /** @description The status page description of the catalog entity */
+                    public_description?: string | null;
                     /** @description Default position of the item when displayed in a list. */
                     position?: number | null;
                     /** @description The Backstage entity ID this catalog entity is linked to. */
                     backstage_id?: string | null;
+                    /** @description An external identifier for this catalog entity. Must be unique within the catalog. */
+                    external_id?: string | null;
                     /** @description Array of property values for this catalog entity */
                     properties?: {
                         /** @description Unique ID of the catalog property */
@@ -8826,11 +10283,22 @@ export interface components {
         };
         catalog_entity: {
             name: string;
+            /** @description The slug of the catalog entity. Derived from `name`. */
+            readonly slug?: string;
             description?: string | null;
+            /** @description The status page description of the catalog entity */
+            public_description?: string | null;
             /** @description Default position of the item when displayed in a list. */
             position: number | null;
             /** @description The Backstage entity ID this catalog entity is linked to. */
             backstage_id?: string | null;
+            /** @description An external identifier for this catalog entity. Must be unique within the catalog. */
+            external_id?: string | null;
+            /**
+             * @description Which source manages this resource (read-only).
+             * @enum {string}
+             */
+            managed_by?: "web" | "admin_web" | "api" | "terraform" | "pulumi" | "backstage" | "catalog_sync";
             created_at: string;
             updated_at: string;
             /** @description Array of property values for this catalog entity */
@@ -8849,6 +10317,7 @@ export interface components {
                 type: "catalog_entities";
                 attributes: components["schemas"]["catalog_entity"];
             };
+            included?: components["schemas"]["jsonapi_included_resource"][];
         };
         catalog_entity_list: {
             data: {
@@ -8860,6 +10329,67 @@ export interface components {
             }[];
             links: components["schemas"]["links"];
             meta: components["schemas"]["meta"];
+            included?: components["schemas"]["jsonapi_included_resource"][];
+        };
+        bulk_upsert_catalog_entities: {
+            /** @description Array of catalog entities to upsert. Each must have an external_id. Max 100 per request. external_ids must be unique within a batch. */
+            entities: {
+                /** @description External identifier used as the upsert key. Must be unique within the catalog. */
+                external_id: string;
+                /** @description Required for new entities. Optional for updates (managed-fields: omitted attributes are preserved). */
+                name?: string;
+                description?: string | null;
+                public_description?: string | null;
+                backstage_id?: string | null;
+                /** @description Property values for this entity. Only mentioned fields are written; unmentioned fields are preserved. */
+                fields?: {
+                    /** @description UUID, slug, or external_id of the catalog field (required if catalog_property_id is absent) */
+                    catalog_field_id?: string;
+                    /** @description Alias for catalog_field_id (required if catalog_field_id is absent) */
+                    catalog_property_id?: string;
+                    /** @description The value for this field */
+                    value: string;
+                }[];
+            }[];
+        };
+        bulk_upsert_catalog_entities_response: {
+            data?: {
+                id?: string;
+                /** @enum {string} */
+                type?: "catalog_entities";
+                attributes?: components["schemas"]["catalog_entity"];
+            }[];
+        };
+        bulk_upsert_catalog_entities_error: {
+            errors: {
+                /** @description Position of the failed entity in the batch */
+                index: number;
+                external_id: string;
+                errors: string[];
+            }[];
+        };
+        /** @description Two mutually exclusive modes. Pass exactly one of: external_ids (delete specific entities) or managed_by (prune all managed entities not in keep set). */
+        bulk_destroy_catalog_entities: {
+            /** @description Array of external_ids to delete. Max 100 per request. */
+            external_ids: string[];
+        } | {
+            /**
+             * @description Delete all entities with this managed_by value (web/admin_web not allowed).
+             * @enum {string}
+             */
+            managed_by: "api" | "terraform" | "pulumi" | "backstage" | "catalog_sync";
+            /** @description Entities with these external_ids are preserved. */
+            keep_external_ids?: string[];
+        };
+        bulk_destroy_catalog_entities_response: {
+            data?: {
+                /** @description External IDs that were successfully deleted */
+                deleted_external_ids?: string[];
+                /** @description External IDs whose deletion the record itself blocked (e.g. minimum-one guard, restrict associations). Records the caller is not authorized to destroy are NOT listed here. */
+                failed_external_ids?: string[];
+                /** @description External IDs that were not found or not accessible to the caller (external_ids mode only) */
+                not_found_external_ids?: string[];
+            };
         };
         /**
          * @deprecated
@@ -8919,6 +10449,7 @@ export interface components {
                 type: "catalog_entity_properties";
                 attributes: components["schemas"]["catalog_entity_property"];
             };
+            included?: components["schemas"]["jsonapi_included_resource"][];
         };
         /**
          * @deprecated
@@ -8934,12 +10465,18 @@ export interface components {
             }[];
             links: components["schemas"]["links"];
             meta: components["schemas"]["meta"];
+            included?: components["schemas"]["jsonapi_included_resource"][];
         };
         new_catalog_checklist_template: {
             data: {
                 /** @enum {string} */
                 type: "catalog_checklist_templates";
                 attributes: {
+                    /**
+                     * @deprecated
+                     * @description Deprecated. `slug` is derived from `name`; any submitted value is ignored. This property will be removed from the request schema in a future version.
+                     */
+                    slug?: string | null;
                     /** @description The name of the checklist template */
                     name: string;
                     /** @description The description of the checklist template */
@@ -8988,6 +10525,11 @@ export interface components {
                 /** @enum {string} */
                 type: "catalog_checklist_templates";
                 attributes: {
+                    /**
+                     * @deprecated
+                     * @description Deprecated. `slug` is derived from `name`; any submitted value is ignored. This property will be removed from the request schema in a future version.
+                     */
+                    slug?: string | null;
                     /** @description The name of the checklist template */
                     name?: string;
                     /** @description The description of the checklist template */
@@ -9023,7 +10565,7 @@ export interface components {
             /** @description The name of the checklist template */
             name: string;
             /** @description The slug of the checklist template */
-            slug?: string;
+            readonly slug?: string;
             /** @description The description of the checklist template */
             description?: string | null;
             /**
@@ -9073,6 +10615,7 @@ export interface components {
                 type: "catalog_checklist_templates";
                 attributes: components["schemas"]["catalog_checklist_template"];
             };
+            included?: components["schemas"]["jsonapi_included_resource"][];
         };
         catalog_checklist_template_list: {
             data: {
@@ -9084,6 +10627,7 @@ export interface components {
             }[];
             links?: components["schemas"]["links"];
             meta?: components["schemas"]["meta"];
+            included?: components["schemas"]["jsonapi_included_resource"][];
         };
         catalog_entity_checklist: {
             /** @description The ID of the checklist template */
@@ -9167,6 +10711,7 @@ export interface components {
                 type: "catalog_entity_checklists";
                 attributes: components["schemas"]["catalog_entity_checklist"];
             };
+            included?: components["schemas"]["jsonapi_included_resource"][];
         };
         catalog_entity_checklist_list: {
             data: {
@@ -9178,16 +10723,24 @@ export interface components {
             }[];
             links?: components["schemas"]["links"];
             meta?: components["schemas"]["meta"];
+            included?: components["schemas"]["jsonapi_included_resource"][];
         };
         new_cause: {
             data: {
                 /** @enum {string} */
                 type: "causes";
                 attributes: {
+                    /**
+                     * @deprecated
+                     * @description Deprecated. `slug` is derived from `name`; any submitted value is ignored. This property will be removed from the request schema in a future version.
+                     */
+                    slug?: string | null;
                     /** @description The name of the cause */
                     name: string;
                     /** @description The description of the cause */
                     description?: string | null;
+                    /** @description The status page description of the cause */
+                    public_description?: string | null;
                     /** @description Position of the cause */
                     position?: number | null;
                     /** @description Array of property values for this cause. */
@@ -9205,10 +10758,17 @@ export interface components {
                 /** @enum {string} */
                 type: "causes";
                 attributes: {
+                    /**
+                     * @deprecated
+                     * @description Deprecated. `slug` is derived from `name`; any submitted value is ignored. This property will be removed from the request schema in a future version.
+                     */
+                    slug?: string | null;
                     /** @description The name of the cause */
                     name?: string;
                     /** @description The description of the cause */
                     description?: string | null;
+                    /** @description The status page description of the cause */
+                    public_description?: string | null;
                     /** @description Position of the cause */
                     position?: number | null;
                     /** @description Array of property values for this cause. */
@@ -9225,9 +10785,11 @@ export interface components {
             /** @description The name of the cause */
             name: string;
             /** @description The slug of the cause */
-            slug?: string;
+            readonly slug?: string;
             /** @description The description of the cause */
             description?: string | null;
+            /** @description The status page description of the cause */
+            public_description?: string | null;
             /** @description Position of the cause */
             position?: number | null;
             /** @description Array of property values for this cause. */
@@ -9250,6 +10812,7 @@ export interface components {
                 type: "causes";
                 attributes: components["schemas"]["cause"];
             };
+            included?: components["schemas"]["jsonapi_included_resource"][];
         };
         cause_list: {
             data: {
@@ -9261,12 +10824,24 @@ export interface components {
             }[];
             links: components["schemas"]["links"];
             meta: components["schemas"]["meta"];
+            included?: components["schemas"]["jsonapi_included_resource"][];
+        };
+        incidents_chart_response: {
+            data: Record<string, never>;
+        };
+        uptime_chart_response: {
+            data: Record<string, never>;
         };
         new_communications_stage: {
             data: {
                 /** @enum {string} */
                 type: "communications_stages";
                 attributes: {
+                    /**
+                     * @deprecated
+                     * @description Deprecated. `slug` is derived from `name`; any submitted value is ignored. This property will be removed from the request schema in a future version.
+                     */
+                    slug?: string | null;
                     /** @description The name of the communications stage */
                     name: string;
                     /** @description The description of the communications stage */
@@ -9281,6 +10856,11 @@ export interface components {
                 /** @enum {string} */
                 type: "communications_stages";
                 attributes: {
+                    /**
+                     * @deprecated
+                     * @description Deprecated. `slug` is derived from `name`; any submitted value is ignored. This property will be removed from the request schema in a future version.
+                     */
+                    slug?: string | null;
                     /** @description The name of the communications stage */
                     name?: string;
                     /** @description The description of the communications stage */
@@ -9294,7 +10874,7 @@ export interface components {
             /** @description The name of the communications stage */
             name: string;
             /** @description The slug of the communications stage */
-            slug?: string;
+            readonly slug?: string;
             /** @description The description of the communications stage */
             description?: string | null;
             /** @description Position of the communications stage */
@@ -9312,6 +10892,7 @@ export interface components {
                 type: "communications_stages";
                 attributes: components["schemas"]["communications_stage"];
             };
+            included?: components["schemas"]["jsonapi_included_resource"][];
         };
         communications_stages_response: {
             data: {
@@ -9323,12 +10904,18 @@ export interface components {
             }[];
             links?: components["schemas"]["links"];
             meta?: components["schemas"]["meta"];
+            included?: components["schemas"]["jsonapi_included_resource"][];
         };
         new_communications_type: {
             data: {
                 /** @enum {string} */
                 type: "communications_types";
                 attributes: {
+                    /**
+                     * @deprecated
+                     * @description Deprecated. `slug` is derived from `name`; any submitted value is ignored. This property will be removed from the request schema in a future version.
+                     */
+                    slug?: string | null;
                     /** @description The name of the communications type */
                     name: string;
                     /** @description The description of the communications type */
@@ -9345,6 +10932,11 @@ export interface components {
                 /** @enum {string} */
                 type: "communications_types";
                 attributes: {
+                    /**
+                     * @deprecated
+                     * @description Deprecated. `slug` is derived from `name`; any submitted value is ignored. This property will be removed from the request schema in a future version.
+                     */
+                    slug?: string | null;
                     /** @description The name of the communications type */
                     name?: string;
                     /** @description The description of the communications type */
@@ -9360,7 +10952,7 @@ export interface components {
             /** @description The name of the communications type */
             name: string;
             /** @description The slug of the communications type */
-            slug?: string;
+            readonly slug?: string;
             /** @description The description of the communications type */
             description?: string | null;
             /** @description The color of the communications type */
@@ -9380,6 +10972,7 @@ export interface components {
                 type: "communications_types";
                 attributes: components["schemas"]["communications_type"];
             };
+            included?: components["schemas"]["jsonapi_included_resource"][];
         };
         communications_types_response: {
             data: {
@@ -9391,6 +10984,7 @@ export interface components {
             }[];
             links?: components["schemas"]["links"];
             meta?: components["schemas"]["meta"];
+            included?: components["schemas"]["jsonapi_included_resource"][];
         };
         new_communications_template: {
             data: {
@@ -9454,7 +11048,7 @@ export interface components {
             /** @description The name of the communications template */
             name: string;
             /** @description The slug of the communications template */
-            slug?: string;
+            readonly slug?: string;
             /** @description The description of the communications template */
             description?: string | null;
             /** @description Position of the communications template */
@@ -9515,6 +11109,7 @@ export interface components {
                 type: "communications_templates";
                 attributes: components["schemas"]["communications_template"];
             };
+            included?: components["schemas"]["jsonapi_included_resource"][];
         };
         communications_templates_response: {
             data: {
@@ -9526,6 +11121,7 @@ export interface components {
             }[];
             links?: components["schemas"]["links"];
             meta?: components["schemas"]["meta"];
+            included?: components["schemas"]["jsonapi_included_resource"][];
         };
         new_communications_group: {
             data: {
@@ -9647,7 +11243,7 @@ export interface components {
             /** @description The name of the communications group */
             name: string;
             /** @description The slug of the communications group */
-            slug?: string;
+            readonly slug?: string;
             /** @description The description of the communications group */
             description?: string | null;
             /** @description The communication type ID */
@@ -9709,6 +11305,7 @@ export interface components {
                 type: "communications_groups";
                 attributes: components["schemas"]["communications_group"];
             };
+            included?: components["schemas"]["jsonapi_included_resource"][];
         };
         communications_groups_response: {
             data: {
@@ -9720,6 +11317,7 @@ export interface components {
             }[];
             links?: components["schemas"]["links"];
             meta?: components["schemas"]["meta"];
+            included?: components["schemas"]["jsonapi_included_resource"][];
         };
         new_custom_field_option: {
             data: {
@@ -9774,6 +11372,7 @@ export interface components {
                 type: "custom_field_options";
                 attributes: components["schemas"]["custom_field_option"];
             };
+            included?: components["schemas"]["jsonapi_included_resource"][];
         };
         custom_field_option_list: {
             data: {
@@ -9785,6 +11384,7 @@ export interface components {
             }[];
             links: components["schemas"]["links"];
             meta: components["schemas"]["meta"];
+            included?: components["schemas"]["jsonapi_included_resource"][];
         };
         new_custom_field: {
             data: {
@@ -9830,7 +11430,12 @@ export interface components {
             /** @description Whether the custom_field is enabled */
             enabled?: boolean;
             /** @description The slug of the custom_field */
-            slug?: string;
+            readonly slug?: string;
+            /**
+             * @description The resource type this field belongs to
+             * @enum {string}
+             */
+            resource_type?: "incident" | "problem";
             /** @description The description of the custom_field */
             description?: string | null;
             shown: ("incident_form" | "incident_mitigation_form" | "incident_resolution_form" | "incident_post_mortem_form" | "incident_slack_form" | "incident_mitigation_slack_form" | "incident_resolution_slack_form" | "incident_post_mortem")[];
@@ -9852,6 +11457,7 @@ export interface components {
                 type: "custom_fields";
                 attributes: components["schemas"]["custom_field"];
             };
+            included?: components["schemas"]["jsonapi_included_resource"][];
         };
         custom_field_list: {
             data: {
@@ -9863,12 +11469,18 @@ export interface components {
             }[];
             links: components["schemas"]["links"];
             meta: components["schemas"]["meta"];
+            included?: components["schemas"]["jsonapi_included_resource"][];
         };
         new_custom_form: {
             data: {
                 /** @enum {string} */
                 type: "custom_forms";
                 attributes: {
+                    /**
+                     * @deprecated
+                     * @description Deprecated. `slug` is derived from `name`; any submitted value is ignored. This property will be removed from the request schema in a future version.
+                     */
+                    slug?: string | null;
                     /** @description The name of the custom form. */
                     name: string;
                     description?: string | null;
@@ -9883,6 +11495,11 @@ export interface components {
                 /** @enum {string} */
                 type: "custom_forms";
                 attributes: {
+                    /**
+                     * @deprecated
+                     * @description Deprecated. `slug` is derived from `name`; any submitted value is ignored. This property will be removed from the request schema in a future version.
+                     */
+                    slug?: string | null;
                     /** @description The name of the custom form. */
                     name?: string;
                     description?: string | null;
@@ -9896,7 +11513,7 @@ export interface components {
             /** @description The name of the custom form. */
             name: string;
             /** @description The custom form slug. Add this to form_field.shown or form_field.required to associate form fields with custom forms. */
-            slug?: string;
+            readonly slug?: string;
             description?: string | null;
             enabled: boolean;
             /** @description The Slack command used to trigger this form. */
@@ -9914,6 +11531,7 @@ export interface components {
                 type: "custom_forms";
                 attributes: components["schemas"]["custom_form"];
             };
+            included?: components["schemas"]["jsonapi_included_resource"][];
         };
         custom_form_list: {
             data: {
@@ -9925,6 +11543,7 @@ export interface components {
             }[];
             links: components["schemas"]["links"];
             meta: components["schemas"]["meta"];
+            included?: components["schemas"]["jsonapi_included_resource"][];
         };
         new_dashboard_panel: {
             data: {
@@ -10111,6 +11730,7 @@ export interface components {
                 type: "dashboard_panels";
                 attributes: components["schemas"]["dashboard_panel"];
             };
+            included?: components["schemas"]["jsonapi_included_resource"][];
         };
         dashboard_panel_list: {
             data: {
@@ -10122,6 +11742,7 @@ export interface components {
             }[];
             links: components["schemas"]["links"];
             meta: components["schemas"]["meta"];
+            included?: components["schemas"]["jsonapi_included_resource"][];
         };
         new_dashboard: {
             data: {
@@ -10235,6 +11856,7 @@ export interface components {
                 type: "dashboards";
                 attributes: components["schemas"]["dashboard"];
             };
+            included?: components["schemas"]["jsonapi_included_resource"][];
         };
         dashboard_list: {
             data: {
@@ -10246,6 +11868,7 @@ export interface components {
             }[];
             links: components["schemas"]["links"];
             meta: components["schemas"]["meta"];
+            included?: components["schemas"]["jsonapi_included_resource"][];
         };
         edge_connector: {
             data: {
@@ -10398,14 +12021,23 @@ export interface components {
                 /** @enum {string} */
                 type: "environments";
                 attributes: {
+                    /**
+                     * @deprecated
+                     * @description Deprecated. `slug` is derived from `name`; any submitted value is ignored. This property will be removed from the request schema in a future version.
+                     */
+                    slug?: string | null;
                     /** @description The name of the environment */
                     name: string;
                     /** @description The description of the environment */
                     description?: string | null;
+                    /** @description The status page description of the environment */
+                    public_description?: string | null;
                     /** @description The hex color of the environment */
                     color?: string | null;
                     /** @description Position of the environment */
                     position?: number | null;
+                    /** @description The external id associated to this environment */
+                    external_id?: string | null;
                     /** @description Emails to attach to the environment */
                     notify_emails?: string[] | null;
                     /** @description Slack Channels associated with this environment */
@@ -10437,14 +12069,23 @@ export interface components {
                 /** @enum {string} */
                 type: "environments";
                 attributes: {
+                    /**
+                     * @deprecated
+                     * @description Deprecated. `slug` is derived from `name`; any submitted value is ignored. This property will be removed from the request schema in a future version.
+                     */
+                    slug?: string | null;
                     /** @description The name of the environment */
                     name?: string;
                     /** @description The description of the environment */
                     description?: string | null;
+                    /** @description The status page description of the environment */
+                    public_description?: string | null;
                     /** @description The hex color of the environment */
                     color?: string | null;
                     /** @description Position of the environment */
                     position?: number | null;
+                    /** @description The external id associated to this environment */
+                    external_id?: string | null;
                     /** @description Emails to attach to the environment */
                     notify_emails?: string[] | null;
                     /** @description Slack Channels associated with this environment */
@@ -10475,9 +12116,18 @@ export interface components {
             /** @description The name of the environment */
             name: string;
             /** @description The slug of the environment */
-            slug?: string;
+            readonly slug?: string;
+            /**
+             * @description How this environment is managed (provenance): web, api, terraform, etc. Read-only.
+             * @enum {string}
+             */
+            managed_by?: "web" | "admin_web" | "api" | "terraform" | "pulumi" | "backstage" | "catalog_sync";
+            /** @description The external id associated to this environment */
+            external_id?: string | null;
             /** @description The description of the environment */
             description?: string | null;
+            /** @description The status page description of the environment */
+            public_description?: string | null;
             /** @description Emails attached to the environment */
             notify_emails?: string[] | null;
             /** @description The hex color of the environment */
@@ -10518,6 +12168,7 @@ export interface components {
                 type: "environments";
                 attributes: components["schemas"]["environment"];
             };
+            included?: components["schemas"]["jsonapi_included_resource"][];
         };
         environment_list: {
             data: {
@@ -10529,6 +12180,69 @@ export interface components {
             }[];
             links: components["schemas"]["links"];
             meta: components["schemas"]["meta"];
+            included?: components["schemas"]["jsonapi_included_resource"][];
+        };
+        bulk_upsert_environments: {
+            /** @description Environments to upsert, matched by external_id. Max 100 per request; external_ids unique within a batch. Only attributes present are written (managed-fields semantics). */
+            entities: {
+                /** @description External identifier used as the upsert key. Unique per team. */
+                external_id: string;
+                /** @description Required for new records. Optional for updates. */
+                name?: string;
+                description?: string | null;
+                public_description?: string | null;
+                color?: string | null;
+                position?: number | null;
+                notify_emails?: string[] | null;
+                /** @description Catalog property values (merge semantics: only mentioned fields written). */
+                fields?: {
+                    /** @description UUID, slug, or external_id of the catalog field (required if catalog_property_id is absent) */
+                    catalog_field_id?: string;
+                    /** @description Alias for catalog_field_id (required if catalog_field_id is absent) */
+                    catalog_property_id?: string;
+                    /** @description The value for this field */
+                    value: string;
+                }[];
+            }[];
+        };
+        bulk_upsert_environments_response: {
+            data?: {
+                id?: string;
+                /** @enum {string} */
+                type?: "environments";
+                attributes?: components["schemas"]["environment"];
+            }[];
+        };
+        bulk_upsert_environments_error: {
+            errors: {
+                /** @description Position of the failed record in the batch */
+                index: number;
+                external_id: string;
+                errors: string[];
+            }[];
+        };
+        /** @description Two mutually exclusive modes. Pass exactly one of: external_ids (delete specific records) or managed_by (prune all managed records not in keep set). */
+        bulk_destroy_environments: {
+            /** @description Array of external_ids to delete. Max 100 per request. */
+            external_ids: string[];
+        } | {
+            /**
+             * @description Delete all records with this managed_by value (web/admin_web not allowed).
+             * @enum {string}
+             */
+            managed_by: "api" | "terraform" | "pulumi" | "backstage" | "catalog_sync";
+            /** @description Records with these external_ids are preserved. */
+            keep_external_ids?: string[];
+        };
+        bulk_destroy_environments_response: {
+            data?: {
+                /** @description External IDs that were successfully deleted */
+                deleted_external_ids?: string[];
+                /** @description External IDs whose deletion the record itself blocked (e.g. minimum-one guard, restrict associations). Records the caller is not authorized to destroy are NOT listed here. */
+                failed_external_ids?: string[];
+                /** @description External IDs that were not found or not accessible to the caller (external_ids mode only) */
+                not_found_external_ids?: string[];
+            };
         };
         errors_list: {
             errors?: {
@@ -10553,12 +12267,13 @@ export interface components {
                     group_ids?: string[];
                     /** @description Associated services (alerting the service will trigger escalation policy) */
                     service_ids?: string[];
+                    /** @deprecated */
                     business_hours?: {
                         /**
                          * @description Time zone for business hours
                          * @enum {string|null}
                          */
-                        time_zone?: "International Date Line West" | "Etc/GMT+12" | "American Samoa" | "Pacific/Pago_Pago" | "Midway Island" | "Pacific/Midway" | "Hawaii" | "Pacific/Honolulu" | "Alaska" | "America/Juneau" | "Pacific Time (US & Canada)" | "America/Los_Angeles" | "Tijuana" | "America/Tijuana" | "Arizona" | "America/Phoenix" | "Mazatlan" | "America/Mazatlan" | "Mountain Time (US & Canada)" | "America/Denver" | "Central America" | "America/Guatemala" | "Central Time (US & Canada)" | "America/Chicago" | "Chihuahua" | "America/Chihuahua" | "Guadalajara" | "America/Mexico_City" | "Mexico City" | "America/Mexico_City" | "Monterrey" | "America/Monterrey" | "Saskatchewan" | "America/Regina" | "Bogota" | "America/Bogota" | "Eastern Time (US & Canada)" | "America/New_York" | "Indiana (East)" | "America/Indiana/Indianapolis" | "Lima" | "America/Lima" | "Quito" | "America/Lima" | "Atlantic Time (Canada)" | "America/Halifax" | "Caracas" | "America/Caracas" | "Georgetown" | "America/Guyana" | "La Paz" | "America/La_Paz" | "Puerto Rico" | "America/Puerto_Rico" | "Santiago" | "America/Santiago" | "Newfoundland" | "America/St_Johns" | "Asuncion" | "America/Asuncion" | "Brasilia" | "America/Sao_Paulo" | "Buenos Aires" | "America/Argentina/Buenos_Aires" | "Montevideo" | "America/Montevideo" | "Greenland" | "America/Nuuk" | "Mid-Atlantic" | "Atlantic/South_Georgia" | "Azores" | "Atlantic/Azores" | "Cape Verde Is." | "Atlantic/Cape_Verde" | "Edinburgh" | "Europe/London" | "Lisbon" | "Europe/Lisbon" | "London" | "Europe/London" | "Monrovia" | "Africa/Monrovia" | "UTC" | "Etc/UTC" | "Amsterdam" | "Europe/Amsterdam" | "Belgrade" | "Europe/Belgrade" | "Berlin" | "Europe/Berlin" | "Bern" | "Europe/Zurich" | "Bratislava" | "Europe/Bratislava" | "Brussels" | "Europe/Brussels" | "Budapest" | "Europe/Budapest" | "Casablanca" | "Africa/Casablanca" | "Copenhagen" | "Europe/Copenhagen" | "Dublin" | "Europe/Dublin" | "Ljubljana" | "Europe/Ljubljana" | "Madrid" | "Europe/Madrid" | "Paris" | "Europe/Paris" | "Prague" | "Europe/Prague" | "Rome" | "Europe/Rome" | "Sarajevo" | "Europe/Sarajevo" | "Skopje" | "Europe/Skopje" | "Stockholm" | "Europe/Stockholm" | "Vienna" | "Europe/Vienna" | "Warsaw" | "Europe/Warsaw" | "West Central Africa" | "Africa/Algiers" | "Zagreb" | "Europe/Zagreb" | "Zurich" | "Europe/Zurich" | "Athens" | "Europe/Athens" | "Bucharest" | "Europe/Bucharest" | "Cairo" | "Africa/Cairo" | "Harare" | "Africa/Harare" | "Helsinki" | "Europe/Helsinki" | "Jerusalem" | "Asia/Jerusalem" | "Kaliningrad" | "Europe/Kaliningrad" | "Kyiv" | "Europe/Kiev" | "Pretoria" | "Africa/Johannesburg" | "Riga" | "Europe/Riga" | "Sofia" | "Europe/Sofia" | "Tallinn" | "Europe/Tallinn" | "Vilnius" | "Europe/Vilnius" | "Baghdad" | "Asia/Baghdad" | "Istanbul" | "Europe/Istanbul" | "Kuwait" | "Asia/Kuwait" | "Minsk" | "Europe/Minsk" | "Moscow" | "Europe/Moscow" | "Nairobi" | "Africa/Nairobi" | "Riyadh" | "Asia/Riyadh" | "St. Petersburg" | "Europe/Moscow" | "Volgograd" | "Europe/Volgograd" | "Tehran" | "Asia/Tehran" | "Abu Dhabi" | "Asia/Muscat" | "Baku" | "Asia/Baku" | "Muscat" | "Asia/Muscat" | "Samara" | "Europe/Samara" | "Tbilisi" | "Asia/Tbilisi" | "Yerevan" | "Asia/Yerevan" | "Kabul" | "Asia/Kabul" | "Almaty" | "Asia/Almaty" | "Astana" | "Asia/Almaty" | "Ekaterinburg" | "Asia/Yekaterinburg" | "Islamabad" | "Asia/Karachi" | "Karachi" | "Asia/Karachi" | "Tashkent" | "Asia/Tashkent" | "Chennai" | "Asia/Kolkata" | "Kolkata" | "Asia/Kolkata" | "Mumbai" | "Asia/Kolkata" | "New Delhi" | "Asia/Kolkata" | "Sri Jayawardenepura" | "Asia/Colombo" | "Kathmandu" | "Asia/Kathmandu" | "Dhaka" | "Asia/Dhaka" | "Urumqi" | "Asia/Urumqi" | "Rangoon" | "Asia/Rangoon" | "Bangkok" | "Asia/Bangkok" | "Hanoi" | "Asia/Bangkok" | "Jakarta" | "Asia/Jakarta" | "Krasnoyarsk" | "Asia/Krasnoyarsk" | "Novosibirsk" | "Asia/Novosibirsk" | "Beijing" | "Asia/Shanghai" | "Chongqing" | "Asia/Chongqing" | "Hong Kong" | "Asia/Hong_Kong" | "Irkutsk" | "Asia/Irkutsk" | "Kuala Lumpur" | "Asia/Kuala_Lumpur" | "Perth" | "Australia/Perth" | "Singapore" | "Asia/Singapore" | "Taipei" | "Asia/Taipei" | "Ulaanbaatar" | "Asia/Ulaanbaatar" | "Osaka" | "Asia/Tokyo" | "Sapporo" | "Asia/Tokyo" | "Seoul" | "Asia/Seoul" | "Tokyo" | "Asia/Tokyo" | "Yakutsk" | "Asia/Yakutsk" | "Adelaide" | "Australia/Adelaide" | "Darwin" | "Australia/Darwin" | "Brisbane" | "Australia/Brisbane" | "Canberra" | "Australia/Canberra" | "Guam" | "Pacific/Guam" | "Hobart" | "Australia/Hobart" | "Melbourne" | "Australia/Melbourne" | "Port Moresby" | "Pacific/Port_Moresby" | "Sydney" | "Australia/Sydney" | "Vladivostok" | "Asia/Vladivostok" | "Magadan" | "Asia/Magadan" | "New Caledonia" | "Pacific/Noumea" | "Solomon Is." | "Pacific/Guadalcanal" | "Srednekolymsk" | "Asia/Srednekolymsk" | "Auckland" | "Pacific/Auckland" | "Fiji" | "Pacific/Fiji" | "Kamchatka" | "Asia/Kamchatka" | "Marshall Is." | "Pacific/Majuro" | "Wellington" | "Pacific/Auckland" | "Chatham Is." | "Pacific/Chatham" | "Nuku'alofa" | "Pacific/Tongatapu" | "Samoa" | "Pacific/Apia" | "Tokelau Is." | "Pacific/Fakaofo" | null;
+                        time_zone?: "International Date Line West" | "Etc/GMT+12" | "American Samoa" | "Pacific/Pago_Pago" | "Midway Island" | "Pacific/Midway" | "Hawaii" | "Pacific/Honolulu" | "Alaska" | "America/Juneau" | "Pacific Time (US & Canada)" | "America/Los_Angeles" | "Tijuana" | "America/Tijuana" | "Arizona" | "America/Phoenix" | "Mazatlan" | "America/Mazatlan" | "Mountain Time (US & Canada)" | "America/Denver" | "Central America" | "America/Guatemala" | "Central Time (US & Canada)" | "America/Chicago" | "Chihuahua" | "America/Chihuahua" | "Guadalajara" | "America/Mexico_City" | "Mexico City" | "Monterrey" | "America/Monterrey" | "Saskatchewan" | "America/Regina" | "Bogota" | "America/Bogota" | "Eastern Time (US & Canada)" | "America/New_York" | "Indiana (East)" | "America/Indiana/Indianapolis" | "Lima" | "America/Lima" | "Quito" | "Atlantic Time (Canada)" | "America/Halifax" | "Caracas" | "America/Caracas" | "Georgetown" | "America/Guyana" | "La Paz" | "America/La_Paz" | "Puerto Rico" | "America/Puerto_Rico" | "Santiago" | "America/Santiago" | "Newfoundland" | "America/St_Johns" | "Asuncion" | "America/Asuncion" | "Brasilia" | "America/Sao_Paulo" | "Buenos Aires" | "America/Argentina/Buenos_Aires" | "Montevideo" | "America/Montevideo" | "Greenland" | "America/Nuuk" | "Mid-Atlantic" | "Atlantic/South_Georgia" | "Azores" | "Atlantic/Azores" | "Cape Verde Is." | "Atlantic/Cape_Verde" | "Edinburgh" | "Europe/London" | "Lisbon" | "Europe/Lisbon" | "London" | "Monrovia" | "Africa/Monrovia" | "UTC" | "Etc/UTC" | "Amsterdam" | "Europe/Amsterdam" | "Belgrade" | "Europe/Belgrade" | "Berlin" | "Europe/Berlin" | "Bern" | "Europe/Zurich" | "Bratislava" | "Europe/Bratislava" | "Brussels" | "Europe/Brussels" | "Budapest" | "Europe/Budapest" | "Casablanca" | "Africa/Casablanca" | "Copenhagen" | "Europe/Copenhagen" | "Dublin" | "Europe/Dublin" | "Ljubljana" | "Europe/Ljubljana" | "Madrid" | "Europe/Madrid" | "Paris" | "Europe/Paris" | "Prague" | "Europe/Prague" | "Rome" | "Europe/Rome" | "Sarajevo" | "Europe/Sarajevo" | "Skopje" | "Europe/Skopje" | "Stockholm" | "Europe/Stockholm" | "Vienna" | "Europe/Vienna" | "Warsaw" | "Europe/Warsaw" | "West Central Africa" | "Africa/Algiers" | "Zagreb" | "Europe/Zagreb" | "Zurich" | "Athens" | "Europe/Athens" | "Bucharest" | "Europe/Bucharest" | "Cairo" | "Africa/Cairo" | "Harare" | "Africa/Harare" | "Helsinki" | "Europe/Helsinki" | "Jerusalem" | "Asia/Jerusalem" | "Kaliningrad" | "Europe/Kaliningrad" | "Pretoria" | "Africa/Johannesburg" | "Riga" | "Europe/Riga" | "Sofia" | "Europe/Sofia" | "Tallinn" | "Europe/Tallinn" | "Vilnius" | "Europe/Vilnius" | "Baghdad" | "Asia/Baghdad" | "Istanbul" | "Europe/Istanbul" | "Kuwait" | "Asia/Kuwait" | "Minsk" | "Europe/Minsk" | "Moscow" | "Europe/Moscow" | "Nairobi" | "Africa/Nairobi" | "Riyadh" | "Asia/Riyadh" | "St. Petersburg" | "Volgograd" | "Europe/Volgograd" | "Tehran" | "Asia/Tehran" | "Abu Dhabi" | "Asia/Muscat" | "Baku" | "Asia/Baku" | "Muscat" | "Samara" | "Europe/Samara" | "Tbilisi" | "Asia/Tbilisi" | "Yerevan" | "Asia/Yerevan" | "Kabul" | "Asia/Kabul" | "Almaty" | "Asia/Almaty" | "Astana" | "Ekaterinburg" | "Asia/Yekaterinburg" | "Islamabad" | "Asia/Karachi" | "Karachi" | "Tashkent" | "Asia/Tashkent" | "Chennai" | "Asia/Kolkata" | "Kolkata" | "Mumbai" | "New Delhi" | "Sri Jayawardenepura" | "Asia/Colombo" | "Kathmandu" | "Asia/Kathmandu" | "Dhaka" | "Asia/Dhaka" | "Urumqi" | "Asia/Urumqi" | "Bangkok" | "Asia/Bangkok" | "Hanoi" | "Jakarta" | "Asia/Jakarta" | "Krasnoyarsk" | "Asia/Krasnoyarsk" | "Novosibirsk" | "Asia/Novosibirsk" | "Beijing" | "Asia/Shanghai" | "Chongqing" | "Asia/Chongqing" | "Hong Kong" | "Asia/Hong_Kong" | "Irkutsk" | "Asia/Irkutsk" | "Kuala Lumpur" | "Asia/Kuala_Lumpur" | "Perth" | "Australia/Perth" | "Singapore" | "Asia/Singapore" | "Taipei" | "Asia/Taipei" | "Ulaanbaatar" | "Asia/Ulaanbaatar" | "Osaka" | "Asia/Tokyo" | "Sapporo" | "Seoul" | "Asia/Seoul" | "Tokyo" | "Yakutsk" | "Asia/Yakutsk" | "Adelaide" | "Australia/Adelaide" | "Darwin" | "Australia/Darwin" | "Brisbane" | "Australia/Brisbane" | "Canberra" | "Australia/Canberra" | "Guam" | "Pacific/Guam" | "Hobart" | "Australia/Hobart" | "Melbourne" | "Australia/Melbourne" | "Port Moresby" | "Pacific/Port_Moresby" | "Sydney" | "Australia/Sydney" | "Vladivostok" | "Asia/Vladivostok" | "Magadan" | "Asia/Magadan" | "New Caledonia" | "Pacific/Noumea" | "Solomon Is." | "Pacific/Guadalcanal" | "Srednekolymsk" | "Asia/Srednekolymsk" | "Auckland" | "Pacific/Auckland" | "Fiji" | "Pacific/Fiji" | "Kamchatka" | "Asia/Kamchatka" | "Marshall Is." | "Pacific/Majuro" | "Wellington" | "Chatham Is." | "Pacific/Chatham" | "Nuku'alofa" | "Pacific/Tongatapu" | "Samoa" | "Pacific/Apia" | "Tokelau Is." | "Pacific/Fakaofo" | "America/Adak" | "America/Atka" | "US/Aleutian" | "America/Vancouver" | "Canada/Pacific" | "America/Miquelon" | "Australia/Eucla" | "Australia/LHI" | "Australia/Lord_Howe" | "Chile/EasterIsland" | "Pacific/Easter" | "Pacific/Gambier" | "Pacific/Pitcairn" | "Pacific/Marquesas" | "Pacific/Kiritimati" | "Pacific/Norfolk" | null;
                         /** @description Business days */
                         days?: ("M" | "T" | "W" | "R" | "F" | "U" | "S")[] | null;
                         /** @description Start time for business hours (HH:MM) */
@@ -10584,12 +12299,13 @@ export interface components {
                     group_ids?: string[];
                     /** @description Associated services (alerting the service will trigger escalation policy) */
                     service_ids?: string[];
+                    /** @deprecated */
                     business_hours?: {
                         /**
                          * @description Time zone for business hours
                          * @enum {string|null}
                          */
-                        time_zone?: "International Date Line West" | "Etc/GMT+12" | "American Samoa" | "Pacific/Pago_Pago" | "Midway Island" | "Pacific/Midway" | "Hawaii" | "Pacific/Honolulu" | "Alaska" | "America/Juneau" | "Pacific Time (US & Canada)" | "America/Los_Angeles" | "Tijuana" | "America/Tijuana" | "Arizona" | "America/Phoenix" | "Mazatlan" | "America/Mazatlan" | "Mountain Time (US & Canada)" | "America/Denver" | "Central America" | "America/Guatemala" | "Central Time (US & Canada)" | "America/Chicago" | "Chihuahua" | "America/Chihuahua" | "Guadalajara" | "America/Mexico_City" | "Mexico City" | "America/Mexico_City" | "Monterrey" | "America/Monterrey" | "Saskatchewan" | "America/Regina" | "Bogota" | "America/Bogota" | "Eastern Time (US & Canada)" | "America/New_York" | "Indiana (East)" | "America/Indiana/Indianapolis" | "Lima" | "America/Lima" | "Quito" | "America/Lima" | "Atlantic Time (Canada)" | "America/Halifax" | "Caracas" | "America/Caracas" | "Georgetown" | "America/Guyana" | "La Paz" | "America/La_Paz" | "Puerto Rico" | "America/Puerto_Rico" | "Santiago" | "America/Santiago" | "Newfoundland" | "America/St_Johns" | "Asuncion" | "America/Asuncion" | "Brasilia" | "America/Sao_Paulo" | "Buenos Aires" | "America/Argentina/Buenos_Aires" | "Montevideo" | "America/Montevideo" | "Greenland" | "America/Nuuk" | "Mid-Atlantic" | "Atlantic/South_Georgia" | "Azores" | "Atlantic/Azores" | "Cape Verde Is." | "Atlantic/Cape_Verde" | "Edinburgh" | "Europe/London" | "Lisbon" | "Europe/Lisbon" | "London" | "Europe/London" | "Monrovia" | "Africa/Monrovia" | "UTC" | "Etc/UTC" | "Amsterdam" | "Europe/Amsterdam" | "Belgrade" | "Europe/Belgrade" | "Berlin" | "Europe/Berlin" | "Bern" | "Europe/Zurich" | "Bratislava" | "Europe/Bratislava" | "Brussels" | "Europe/Brussels" | "Budapest" | "Europe/Budapest" | "Casablanca" | "Africa/Casablanca" | "Copenhagen" | "Europe/Copenhagen" | "Dublin" | "Europe/Dublin" | "Ljubljana" | "Europe/Ljubljana" | "Madrid" | "Europe/Madrid" | "Paris" | "Europe/Paris" | "Prague" | "Europe/Prague" | "Rome" | "Europe/Rome" | "Sarajevo" | "Europe/Sarajevo" | "Skopje" | "Europe/Skopje" | "Stockholm" | "Europe/Stockholm" | "Vienna" | "Europe/Vienna" | "Warsaw" | "Europe/Warsaw" | "West Central Africa" | "Africa/Algiers" | "Zagreb" | "Europe/Zagreb" | "Zurich" | "Europe/Zurich" | "Athens" | "Europe/Athens" | "Bucharest" | "Europe/Bucharest" | "Cairo" | "Africa/Cairo" | "Harare" | "Africa/Harare" | "Helsinki" | "Europe/Helsinki" | "Jerusalem" | "Asia/Jerusalem" | "Kaliningrad" | "Europe/Kaliningrad" | "Kyiv" | "Europe/Kiev" | "Pretoria" | "Africa/Johannesburg" | "Riga" | "Europe/Riga" | "Sofia" | "Europe/Sofia" | "Tallinn" | "Europe/Tallinn" | "Vilnius" | "Europe/Vilnius" | "Baghdad" | "Asia/Baghdad" | "Istanbul" | "Europe/Istanbul" | "Kuwait" | "Asia/Kuwait" | "Minsk" | "Europe/Minsk" | "Moscow" | "Europe/Moscow" | "Nairobi" | "Africa/Nairobi" | "Riyadh" | "Asia/Riyadh" | "St. Petersburg" | "Europe/Moscow" | "Volgograd" | "Europe/Volgograd" | "Tehran" | "Asia/Tehran" | "Abu Dhabi" | "Asia/Muscat" | "Baku" | "Asia/Baku" | "Muscat" | "Asia/Muscat" | "Samara" | "Europe/Samara" | "Tbilisi" | "Asia/Tbilisi" | "Yerevan" | "Asia/Yerevan" | "Kabul" | "Asia/Kabul" | "Almaty" | "Asia/Almaty" | "Astana" | "Asia/Almaty" | "Ekaterinburg" | "Asia/Yekaterinburg" | "Islamabad" | "Asia/Karachi" | "Karachi" | "Asia/Karachi" | "Tashkent" | "Asia/Tashkent" | "Chennai" | "Asia/Kolkata" | "Kolkata" | "Asia/Kolkata" | "Mumbai" | "Asia/Kolkata" | "New Delhi" | "Asia/Kolkata" | "Sri Jayawardenepura" | "Asia/Colombo" | "Kathmandu" | "Asia/Kathmandu" | "Dhaka" | "Asia/Dhaka" | "Urumqi" | "Asia/Urumqi" | "Rangoon" | "Asia/Rangoon" | "Bangkok" | "Asia/Bangkok" | "Hanoi" | "Asia/Bangkok" | "Jakarta" | "Asia/Jakarta" | "Krasnoyarsk" | "Asia/Krasnoyarsk" | "Novosibirsk" | "Asia/Novosibirsk" | "Beijing" | "Asia/Shanghai" | "Chongqing" | "Asia/Chongqing" | "Hong Kong" | "Asia/Hong_Kong" | "Irkutsk" | "Asia/Irkutsk" | "Kuala Lumpur" | "Asia/Kuala_Lumpur" | "Perth" | "Australia/Perth" | "Singapore" | "Asia/Singapore" | "Taipei" | "Asia/Taipei" | "Ulaanbaatar" | "Asia/Ulaanbaatar" | "Osaka" | "Asia/Tokyo" | "Sapporo" | "Asia/Tokyo" | "Seoul" | "Asia/Seoul" | "Tokyo" | "Asia/Tokyo" | "Yakutsk" | "Asia/Yakutsk" | "Adelaide" | "Australia/Adelaide" | "Darwin" | "Australia/Darwin" | "Brisbane" | "Australia/Brisbane" | "Canberra" | "Australia/Canberra" | "Guam" | "Pacific/Guam" | "Hobart" | "Australia/Hobart" | "Melbourne" | "Australia/Melbourne" | "Port Moresby" | "Pacific/Port_Moresby" | "Sydney" | "Australia/Sydney" | "Vladivostok" | "Asia/Vladivostok" | "Magadan" | "Asia/Magadan" | "New Caledonia" | "Pacific/Noumea" | "Solomon Is." | "Pacific/Guadalcanal" | "Srednekolymsk" | "Asia/Srednekolymsk" | "Auckland" | "Pacific/Auckland" | "Fiji" | "Pacific/Fiji" | "Kamchatka" | "Asia/Kamchatka" | "Marshall Is." | "Pacific/Majuro" | "Wellington" | "Pacific/Auckland" | "Chatham Is." | "Pacific/Chatham" | "Nuku'alofa" | "Pacific/Tongatapu" | "Samoa" | "Pacific/Apia" | "Tokelau Is." | "Pacific/Fakaofo" | null;
+                        time_zone?: "International Date Line West" | "Etc/GMT+12" | "American Samoa" | "Pacific/Pago_Pago" | "Midway Island" | "Pacific/Midway" | "Hawaii" | "Pacific/Honolulu" | "Alaska" | "America/Juneau" | "Pacific Time (US & Canada)" | "America/Los_Angeles" | "Tijuana" | "America/Tijuana" | "Arizona" | "America/Phoenix" | "Mazatlan" | "America/Mazatlan" | "Mountain Time (US & Canada)" | "America/Denver" | "Central America" | "America/Guatemala" | "Central Time (US & Canada)" | "America/Chicago" | "Chihuahua" | "America/Chihuahua" | "Guadalajara" | "America/Mexico_City" | "Mexico City" | "Monterrey" | "America/Monterrey" | "Saskatchewan" | "America/Regina" | "Bogota" | "America/Bogota" | "Eastern Time (US & Canada)" | "America/New_York" | "Indiana (East)" | "America/Indiana/Indianapolis" | "Lima" | "America/Lima" | "Quito" | "Atlantic Time (Canada)" | "America/Halifax" | "Caracas" | "America/Caracas" | "Georgetown" | "America/Guyana" | "La Paz" | "America/La_Paz" | "Puerto Rico" | "America/Puerto_Rico" | "Santiago" | "America/Santiago" | "Newfoundland" | "America/St_Johns" | "Asuncion" | "America/Asuncion" | "Brasilia" | "America/Sao_Paulo" | "Buenos Aires" | "America/Argentina/Buenos_Aires" | "Montevideo" | "America/Montevideo" | "Greenland" | "America/Nuuk" | "Mid-Atlantic" | "Atlantic/South_Georgia" | "Azores" | "Atlantic/Azores" | "Cape Verde Is." | "Atlantic/Cape_Verde" | "Edinburgh" | "Europe/London" | "Lisbon" | "Europe/Lisbon" | "London" | "Monrovia" | "Africa/Monrovia" | "UTC" | "Etc/UTC" | "Amsterdam" | "Europe/Amsterdam" | "Belgrade" | "Europe/Belgrade" | "Berlin" | "Europe/Berlin" | "Bern" | "Europe/Zurich" | "Bratislava" | "Europe/Bratislava" | "Brussels" | "Europe/Brussels" | "Budapest" | "Europe/Budapest" | "Casablanca" | "Africa/Casablanca" | "Copenhagen" | "Europe/Copenhagen" | "Dublin" | "Europe/Dublin" | "Ljubljana" | "Europe/Ljubljana" | "Madrid" | "Europe/Madrid" | "Paris" | "Europe/Paris" | "Prague" | "Europe/Prague" | "Rome" | "Europe/Rome" | "Sarajevo" | "Europe/Sarajevo" | "Skopje" | "Europe/Skopje" | "Stockholm" | "Europe/Stockholm" | "Vienna" | "Europe/Vienna" | "Warsaw" | "Europe/Warsaw" | "West Central Africa" | "Africa/Algiers" | "Zagreb" | "Europe/Zagreb" | "Zurich" | "Athens" | "Europe/Athens" | "Bucharest" | "Europe/Bucharest" | "Cairo" | "Africa/Cairo" | "Harare" | "Africa/Harare" | "Helsinki" | "Europe/Helsinki" | "Jerusalem" | "Asia/Jerusalem" | "Kaliningrad" | "Europe/Kaliningrad" | "Pretoria" | "Africa/Johannesburg" | "Riga" | "Europe/Riga" | "Sofia" | "Europe/Sofia" | "Tallinn" | "Europe/Tallinn" | "Vilnius" | "Europe/Vilnius" | "Baghdad" | "Asia/Baghdad" | "Istanbul" | "Europe/Istanbul" | "Kuwait" | "Asia/Kuwait" | "Minsk" | "Europe/Minsk" | "Moscow" | "Europe/Moscow" | "Nairobi" | "Africa/Nairobi" | "Riyadh" | "Asia/Riyadh" | "St. Petersburg" | "Volgograd" | "Europe/Volgograd" | "Tehran" | "Asia/Tehran" | "Abu Dhabi" | "Asia/Muscat" | "Baku" | "Asia/Baku" | "Muscat" | "Samara" | "Europe/Samara" | "Tbilisi" | "Asia/Tbilisi" | "Yerevan" | "Asia/Yerevan" | "Kabul" | "Asia/Kabul" | "Almaty" | "Asia/Almaty" | "Astana" | "Ekaterinburg" | "Asia/Yekaterinburg" | "Islamabad" | "Asia/Karachi" | "Karachi" | "Tashkent" | "Asia/Tashkent" | "Chennai" | "Asia/Kolkata" | "Kolkata" | "Mumbai" | "New Delhi" | "Sri Jayawardenepura" | "Asia/Colombo" | "Kathmandu" | "Asia/Kathmandu" | "Dhaka" | "Asia/Dhaka" | "Urumqi" | "Asia/Urumqi" | "Bangkok" | "Asia/Bangkok" | "Hanoi" | "Jakarta" | "Asia/Jakarta" | "Krasnoyarsk" | "Asia/Krasnoyarsk" | "Novosibirsk" | "Asia/Novosibirsk" | "Beijing" | "Asia/Shanghai" | "Chongqing" | "Asia/Chongqing" | "Hong Kong" | "Asia/Hong_Kong" | "Irkutsk" | "Asia/Irkutsk" | "Kuala Lumpur" | "Asia/Kuala_Lumpur" | "Perth" | "Australia/Perth" | "Singapore" | "Asia/Singapore" | "Taipei" | "Asia/Taipei" | "Ulaanbaatar" | "Asia/Ulaanbaatar" | "Osaka" | "Asia/Tokyo" | "Sapporo" | "Seoul" | "Asia/Seoul" | "Tokyo" | "Yakutsk" | "Asia/Yakutsk" | "Adelaide" | "Australia/Adelaide" | "Darwin" | "Australia/Darwin" | "Brisbane" | "Australia/Brisbane" | "Canberra" | "Australia/Canberra" | "Guam" | "Pacific/Guam" | "Hobart" | "Australia/Hobart" | "Melbourne" | "Australia/Melbourne" | "Port Moresby" | "Pacific/Port_Moresby" | "Sydney" | "Australia/Sydney" | "Vladivostok" | "Asia/Vladivostok" | "Magadan" | "Asia/Magadan" | "New Caledonia" | "Pacific/Noumea" | "Solomon Is." | "Pacific/Guadalcanal" | "Srednekolymsk" | "Asia/Srednekolymsk" | "Auckland" | "Pacific/Auckland" | "Fiji" | "Pacific/Fiji" | "Kamchatka" | "Asia/Kamchatka" | "Marshall Is." | "Pacific/Majuro" | "Wellington" | "Chatham Is." | "Pacific/Chatham" | "Nuku'alofa" | "Pacific/Tongatapu" | "Samoa" | "Pacific/Apia" | "Tokelau Is." | "Pacific/Fakaofo" | "America/Adak" | "America/Atka" | "US/Aleutian" | "America/Vancouver" | "Canada/Pacific" | "America/Miquelon" | "Australia/Eucla" | "Australia/LHI" | "Australia/Lord_Howe" | "Chile/EasterIsland" | "Pacific/Easter" | "Pacific/Gambier" | "Pacific/Pitcairn" | "Pacific/Marquesas" | "Pacific/Kiritimati" | "Pacific/Norfolk" | null;
                         /** @description Business days */
                         days?: ("M" | "T" | "W" | "R" | "F" | "U" | "S")[] | null;
                         /** @description Start time for business hours (HH:MM) */
@@ -10615,12 +12331,13 @@ export interface components {
             group_ids?: string[];
             /** @description Associated services (alerting the service will trigger escalation policy) */
             service_ids?: string[];
+            /** @deprecated */
             business_hours?: {
                 /**
                  * @description Time zone for business hours
                  * @enum {string|null}
                  */
-                time_zone?: "International Date Line West" | "Etc/GMT+12" | "American Samoa" | "Pacific/Pago_Pago" | "Midway Island" | "Pacific/Midway" | "Hawaii" | "Pacific/Honolulu" | "Alaska" | "America/Juneau" | "Pacific Time (US & Canada)" | "America/Los_Angeles" | "Tijuana" | "America/Tijuana" | "Arizona" | "America/Phoenix" | "Mazatlan" | "America/Mazatlan" | "Mountain Time (US & Canada)" | "America/Denver" | "Central America" | "America/Guatemala" | "Central Time (US & Canada)" | "America/Chicago" | "Chihuahua" | "America/Chihuahua" | "Guadalajara" | "America/Mexico_City" | "Mexico City" | "America/Mexico_City" | "Monterrey" | "America/Monterrey" | "Saskatchewan" | "America/Regina" | "Bogota" | "America/Bogota" | "Eastern Time (US & Canada)" | "America/New_York" | "Indiana (East)" | "America/Indiana/Indianapolis" | "Lima" | "America/Lima" | "Quito" | "America/Lima" | "Atlantic Time (Canada)" | "America/Halifax" | "Caracas" | "America/Caracas" | "Georgetown" | "America/Guyana" | "La Paz" | "America/La_Paz" | "Puerto Rico" | "America/Puerto_Rico" | "Santiago" | "America/Santiago" | "Newfoundland" | "America/St_Johns" | "Asuncion" | "America/Asuncion" | "Brasilia" | "America/Sao_Paulo" | "Buenos Aires" | "America/Argentina/Buenos_Aires" | "Montevideo" | "America/Montevideo" | "Greenland" | "America/Nuuk" | "Mid-Atlantic" | "Atlantic/South_Georgia" | "Azores" | "Atlantic/Azores" | "Cape Verde Is." | "Atlantic/Cape_Verde" | "Edinburgh" | "Europe/London" | "Lisbon" | "Europe/Lisbon" | "London" | "Europe/London" | "Monrovia" | "Africa/Monrovia" | "UTC" | "Etc/UTC" | "Amsterdam" | "Europe/Amsterdam" | "Belgrade" | "Europe/Belgrade" | "Berlin" | "Europe/Berlin" | "Bern" | "Europe/Zurich" | "Bratislava" | "Europe/Bratislava" | "Brussels" | "Europe/Brussels" | "Budapest" | "Europe/Budapest" | "Casablanca" | "Africa/Casablanca" | "Copenhagen" | "Europe/Copenhagen" | "Dublin" | "Europe/Dublin" | "Ljubljana" | "Europe/Ljubljana" | "Madrid" | "Europe/Madrid" | "Paris" | "Europe/Paris" | "Prague" | "Europe/Prague" | "Rome" | "Europe/Rome" | "Sarajevo" | "Europe/Sarajevo" | "Skopje" | "Europe/Skopje" | "Stockholm" | "Europe/Stockholm" | "Vienna" | "Europe/Vienna" | "Warsaw" | "Europe/Warsaw" | "West Central Africa" | "Africa/Algiers" | "Zagreb" | "Europe/Zagreb" | "Zurich" | "Europe/Zurich" | "Athens" | "Europe/Athens" | "Bucharest" | "Europe/Bucharest" | "Cairo" | "Africa/Cairo" | "Harare" | "Africa/Harare" | "Helsinki" | "Europe/Helsinki" | "Jerusalem" | "Asia/Jerusalem" | "Kaliningrad" | "Europe/Kaliningrad" | "Kyiv" | "Europe/Kiev" | "Pretoria" | "Africa/Johannesburg" | "Riga" | "Europe/Riga" | "Sofia" | "Europe/Sofia" | "Tallinn" | "Europe/Tallinn" | "Vilnius" | "Europe/Vilnius" | "Baghdad" | "Asia/Baghdad" | "Istanbul" | "Europe/Istanbul" | "Kuwait" | "Asia/Kuwait" | "Minsk" | "Europe/Minsk" | "Moscow" | "Europe/Moscow" | "Nairobi" | "Africa/Nairobi" | "Riyadh" | "Asia/Riyadh" | "St. Petersburg" | "Europe/Moscow" | "Volgograd" | "Europe/Volgograd" | "Tehran" | "Asia/Tehran" | "Abu Dhabi" | "Asia/Muscat" | "Baku" | "Asia/Baku" | "Muscat" | "Asia/Muscat" | "Samara" | "Europe/Samara" | "Tbilisi" | "Asia/Tbilisi" | "Yerevan" | "Asia/Yerevan" | "Kabul" | "Asia/Kabul" | "Almaty" | "Asia/Almaty" | "Astana" | "Asia/Almaty" | "Ekaterinburg" | "Asia/Yekaterinburg" | "Islamabad" | "Asia/Karachi" | "Karachi" | "Asia/Karachi" | "Tashkent" | "Asia/Tashkent" | "Chennai" | "Asia/Kolkata" | "Kolkata" | "Asia/Kolkata" | "Mumbai" | "Asia/Kolkata" | "New Delhi" | "Asia/Kolkata" | "Sri Jayawardenepura" | "Asia/Colombo" | "Kathmandu" | "Asia/Kathmandu" | "Dhaka" | "Asia/Dhaka" | "Urumqi" | "Asia/Urumqi" | "Rangoon" | "Asia/Rangoon" | "Bangkok" | "Asia/Bangkok" | "Hanoi" | "Asia/Bangkok" | "Jakarta" | "Asia/Jakarta" | "Krasnoyarsk" | "Asia/Krasnoyarsk" | "Novosibirsk" | "Asia/Novosibirsk" | "Beijing" | "Asia/Shanghai" | "Chongqing" | "Asia/Chongqing" | "Hong Kong" | "Asia/Hong_Kong" | "Irkutsk" | "Asia/Irkutsk" | "Kuala Lumpur" | "Asia/Kuala_Lumpur" | "Perth" | "Australia/Perth" | "Singapore" | "Asia/Singapore" | "Taipei" | "Asia/Taipei" | "Ulaanbaatar" | "Asia/Ulaanbaatar" | "Osaka" | "Asia/Tokyo" | "Sapporo" | "Asia/Tokyo" | "Seoul" | "Asia/Seoul" | "Tokyo" | "Asia/Tokyo" | "Yakutsk" | "Asia/Yakutsk" | "Adelaide" | "Australia/Adelaide" | "Darwin" | "Australia/Darwin" | "Brisbane" | "Australia/Brisbane" | "Canberra" | "Australia/Canberra" | "Guam" | "Pacific/Guam" | "Hobart" | "Australia/Hobart" | "Melbourne" | "Australia/Melbourne" | "Port Moresby" | "Pacific/Port_Moresby" | "Sydney" | "Australia/Sydney" | "Vladivostok" | "Asia/Vladivostok" | "Magadan" | "Asia/Magadan" | "New Caledonia" | "Pacific/Noumea" | "Solomon Is." | "Pacific/Guadalcanal" | "Srednekolymsk" | "Asia/Srednekolymsk" | "Auckland" | "Pacific/Auckland" | "Fiji" | "Pacific/Fiji" | "Kamchatka" | "Asia/Kamchatka" | "Marshall Is." | "Pacific/Majuro" | "Wellington" | "Pacific/Auckland" | "Chatham Is." | "Pacific/Chatham" | "Nuku'alofa" | "Pacific/Tongatapu" | "Samoa" | "Pacific/Apia" | "Tokelau Is." | "Pacific/Fakaofo" | null;
+                time_zone?: "International Date Line West" | "Etc/GMT+12" | "American Samoa" | "Pacific/Pago_Pago" | "Midway Island" | "Pacific/Midway" | "Hawaii" | "Pacific/Honolulu" | "Alaska" | "America/Juneau" | "Pacific Time (US & Canada)" | "America/Los_Angeles" | "Tijuana" | "America/Tijuana" | "Arizona" | "America/Phoenix" | "Mazatlan" | "America/Mazatlan" | "Mountain Time (US & Canada)" | "America/Denver" | "Central America" | "America/Guatemala" | "Central Time (US & Canada)" | "America/Chicago" | "Chihuahua" | "America/Chihuahua" | "Guadalajara" | "America/Mexico_City" | "Mexico City" | "Monterrey" | "America/Monterrey" | "Saskatchewan" | "America/Regina" | "Bogota" | "America/Bogota" | "Eastern Time (US & Canada)" | "America/New_York" | "Indiana (East)" | "America/Indiana/Indianapolis" | "Lima" | "America/Lima" | "Quito" | "Atlantic Time (Canada)" | "America/Halifax" | "Caracas" | "America/Caracas" | "Georgetown" | "America/Guyana" | "La Paz" | "America/La_Paz" | "Puerto Rico" | "America/Puerto_Rico" | "Santiago" | "America/Santiago" | "Newfoundland" | "America/St_Johns" | "Asuncion" | "America/Asuncion" | "Brasilia" | "America/Sao_Paulo" | "Buenos Aires" | "America/Argentina/Buenos_Aires" | "Montevideo" | "America/Montevideo" | "Greenland" | "America/Nuuk" | "Mid-Atlantic" | "Atlantic/South_Georgia" | "Azores" | "Atlantic/Azores" | "Cape Verde Is." | "Atlantic/Cape_Verde" | "Edinburgh" | "Europe/London" | "Lisbon" | "Europe/Lisbon" | "London" | "Monrovia" | "Africa/Monrovia" | "UTC" | "Etc/UTC" | "Amsterdam" | "Europe/Amsterdam" | "Belgrade" | "Europe/Belgrade" | "Berlin" | "Europe/Berlin" | "Bern" | "Europe/Zurich" | "Bratislava" | "Europe/Bratislava" | "Brussels" | "Europe/Brussels" | "Budapest" | "Europe/Budapest" | "Casablanca" | "Africa/Casablanca" | "Copenhagen" | "Europe/Copenhagen" | "Dublin" | "Europe/Dublin" | "Ljubljana" | "Europe/Ljubljana" | "Madrid" | "Europe/Madrid" | "Paris" | "Europe/Paris" | "Prague" | "Europe/Prague" | "Rome" | "Europe/Rome" | "Sarajevo" | "Europe/Sarajevo" | "Skopje" | "Europe/Skopje" | "Stockholm" | "Europe/Stockholm" | "Vienna" | "Europe/Vienna" | "Warsaw" | "Europe/Warsaw" | "West Central Africa" | "Africa/Algiers" | "Zagreb" | "Europe/Zagreb" | "Zurich" | "Athens" | "Europe/Athens" | "Bucharest" | "Europe/Bucharest" | "Cairo" | "Africa/Cairo" | "Harare" | "Africa/Harare" | "Helsinki" | "Europe/Helsinki" | "Jerusalem" | "Asia/Jerusalem" | "Kaliningrad" | "Europe/Kaliningrad" | "Pretoria" | "Africa/Johannesburg" | "Riga" | "Europe/Riga" | "Sofia" | "Europe/Sofia" | "Tallinn" | "Europe/Tallinn" | "Vilnius" | "Europe/Vilnius" | "Baghdad" | "Asia/Baghdad" | "Istanbul" | "Europe/Istanbul" | "Kuwait" | "Asia/Kuwait" | "Minsk" | "Europe/Minsk" | "Moscow" | "Europe/Moscow" | "Nairobi" | "Africa/Nairobi" | "Riyadh" | "Asia/Riyadh" | "St. Petersburg" | "Volgograd" | "Europe/Volgograd" | "Tehran" | "Asia/Tehran" | "Abu Dhabi" | "Asia/Muscat" | "Baku" | "Asia/Baku" | "Muscat" | "Samara" | "Europe/Samara" | "Tbilisi" | "Asia/Tbilisi" | "Yerevan" | "Asia/Yerevan" | "Kabul" | "Asia/Kabul" | "Almaty" | "Asia/Almaty" | "Astana" | "Ekaterinburg" | "Asia/Yekaterinburg" | "Islamabad" | "Asia/Karachi" | "Karachi" | "Tashkent" | "Asia/Tashkent" | "Chennai" | "Asia/Kolkata" | "Kolkata" | "Mumbai" | "New Delhi" | "Sri Jayawardenepura" | "Asia/Colombo" | "Kathmandu" | "Asia/Kathmandu" | "Dhaka" | "Asia/Dhaka" | "Urumqi" | "Asia/Urumqi" | "Bangkok" | "Asia/Bangkok" | "Hanoi" | "Jakarta" | "Asia/Jakarta" | "Krasnoyarsk" | "Asia/Krasnoyarsk" | "Novosibirsk" | "Asia/Novosibirsk" | "Beijing" | "Asia/Shanghai" | "Chongqing" | "Asia/Chongqing" | "Hong Kong" | "Asia/Hong_Kong" | "Irkutsk" | "Asia/Irkutsk" | "Kuala Lumpur" | "Asia/Kuala_Lumpur" | "Perth" | "Australia/Perth" | "Singapore" | "Asia/Singapore" | "Taipei" | "Asia/Taipei" | "Ulaanbaatar" | "Asia/Ulaanbaatar" | "Osaka" | "Asia/Tokyo" | "Sapporo" | "Seoul" | "Asia/Seoul" | "Tokyo" | "Yakutsk" | "Asia/Yakutsk" | "Adelaide" | "Australia/Adelaide" | "Darwin" | "Australia/Darwin" | "Brisbane" | "Australia/Brisbane" | "Canberra" | "Australia/Canberra" | "Guam" | "Pacific/Guam" | "Hobart" | "Australia/Hobart" | "Melbourne" | "Australia/Melbourne" | "Port Moresby" | "Pacific/Port_Moresby" | "Sydney" | "Australia/Sydney" | "Vladivostok" | "Asia/Vladivostok" | "Magadan" | "Asia/Magadan" | "New Caledonia" | "Pacific/Noumea" | "Solomon Is." | "Pacific/Guadalcanal" | "Srednekolymsk" | "Asia/Srednekolymsk" | "Auckland" | "Pacific/Auckland" | "Fiji" | "Pacific/Fiji" | "Kamchatka" | "Asia/Kamchatka" | "Marshall Is." | "Pacific/Majuro" | "Wellington" | "Chatham Is." | "Pacific/Chatham" | "Nuku'alofa" | "Pacific/Tongatapu" | "Samoa" | "Pacific/Apia" | "Tokelau Is." | "Pacific/Fakaofo" | "America/Adak" | "America/Atka" | "US/Aleutian" | "America/Vancouver" | "Canada/Pacific" | "America/Miquelon" | "Australia/Eucla" | "Australia/LHI" | "Australia/Lord_Howe" | "Chile/EasterIsland" | "Pacific/Easter" | "Pacific/Gambier" | "Pacific/Pitcairn" | "Pacific/Marquesas" | "Pacific/Kiritimati" | "Pacific/Norfolk" | null;
                 /** @description Business days */
                 days?: ("M" | "T" | "W" | "R" | "F" | "U" | "S")[] | null;
                 /** @description Start time for business hours (HH:MM) */
@@ -10641,6 +12358,7 @@ export interface components {
                 type: "escalation_policies";
                 attributes: components["schemas"]["escalation_policy"];
             };
+            included?: components["schemas"]["jsonapi_included_resource"][];
         };
         escalation_policy_list: {
             data: {
@@ -10652,6 +12370,7 @@ export interface components {
             }[];
             links: components["schemas"]["links"];
             meta: components["schemas"]["meta"];
+            included?: components["schemas"]["jsonapi_included_resource"][];
         };
         new_escalation_policy_path: {
             data: {
@@ -10695,6 +12414,8 @@ export interface components {
                     repeat_count?: number | null;
                     /** @description Initial delay for escalation path in minutes. Maximum 1 week (10080). */
                     initial_delay?: number;
+                    /** @description Re-trigger acknowledged alerts on this path after N minutes; null inherits the urgency/workspace default, negative = never. */
+                    retrigger_timeout_minutes?: number | null;
                     /** @description Escalation path conditions */
                     rules?: ({
                         /**
@@ -10724,7 +12445,7 @@ export interface components {
                          * @description How JSON path value should be matched
                          * @enum {string}
                          */
-                        operator: "is" | "is_not" | "contains" | "does_not_contain" | "is_one_of" | "is_not_one_of" | "is_set" | "is_not_set";
+                        operator: "is" | "is_not" | "contains" | "does_not_contain" | "contains_key" | "does_not_contain_key" | "starts_with" | "does_not_start_with" | "matches" | "does_not_match" | "is_one_of" | "is_not_one_of" | "is_set" | "is_not_set";
                         /** @description Value with which JSON path value should be matched */
                         value?: string | null;
                         /** @description Values to match against (for is_one_of / is_not_one_of operators) */
@@ -10764,7 +12485,7 @@ export interface components {
                          * @description Time zone for the deferral window
                          * @enum {string}
                          */
-                        time_zone: "International Date Line West" | "Etc/GMT+12" | "American Samoa" | "Pacific/Pago_Pago" | "Midway Island" | "Pacific/Midway" | "Hawaii" | "Pacific/Honolulu" | "Alaska" | "America/Juneau" | "Pacific Time (US & Canada)" | "America/Los_Angeles" | "Tijuana" | "America/Tijuana" | "Arizona" | "America/Phoenix" | "Mazatlan" | "America/Mazatlan" | "Mountain Time (US & Canada)" | "America/Denver" | "Central America" | "America/Guatemala" | "Central Time (US & Canada)" | "America/Chicago" | "Chihuahua" | "America/Chihuahua" | "Guadalajara" | "America/Mexico_City" | "Mexico City" | "America/Mexico_City" | "Monterrey" | "America/Monterrey" | "Saskatchewan" | "America/Regina" | "Bogota" | "America/Bogota" | "Eastern Time (US & Canada)" | "America/New_York" | "Indiana (East)" | "America/Indiana/Indianapolis" | "Lima" | "America/Lima" | "Quito" | "America/Lima" | "Atlantic Time (Canada)" | "America/Halifax" | "Caracas" | "America/Caracas" | "Georgetown" | "America/Guyana" | "La Paz" | "America/La_Paz" | "Puerto Rico" | "America/Puerto_Rico" | "Santiago" | "America/Santiago" | "Newfoundland" | "America/St_Johns" | "Asuncion" | "America/Asuncion" | "Brasilia" | "America/Sao_Paulo" | "Buenos Aires" | "America/Argentina/Buenos_Aires" | "Montevideo" | "America/Montevideo" | "Greenland" | "America/Nuuk" | "Mid-Atlantic" | "Atlantic/South_Georgia" | "Azores" | "Atlantic/Azores" | "Cape Verde Is." | "Atlantic/Cape_Verde" | "Edinburgh" | "Europe/London" | "Lisbon" | "Europe/Lisbon" | "London" | "Europe/London" | "Monrovia" | "Africa/Monrovia" | "UTC" | "Etc/UTC" | "Amsterdam" | "Europe/Amsterdam" | "Belgrade" | "Europe/Belgrade" | "Berlin" | "Europe/Berlin" | "Bern" | "Europe/Zurich" | "Bratislava" | "Europe/Bratislava" | "Brussels" | "Europe/Brussels" | "Budapest" | "Europe/Budapest" | "Casablanca" | "Africa/Casablanca" | "Copenhagen" | "Europe/Copenhagen" | "Dublin" | "Europe/Dublin" | "Ljubljana" | "Europe/Ljubljana" | "Madrid" | "Europe/Madrid" | "Paris" | "Europe/Paris" | "Prague" | "Europe/Prague" | "Rome" | "Europe/Rome" | "Sarajevo" | "Europe/Sarajevo" | "Skopje" | "Europe/Skopje" | "Stockholm" | "Europe/Stockholm" | "Vienna" | "Europe/Vienna" | "Warsaw" | "Europe/Warsaw" | "West Central Africa" | "Africa/Algiers" | "Zagreb" | "Europe/Zagreb" | "Zurich" | "Europe/Zurich" | "Athens" | "Europe/Athens" | "Bucharest" | "Europe/Bucharest" | "Cairo" | "Africa/Cairo" | "Harare" | "Africa/Harare" | "Helsinki" | "Europe/Helsinki" | "Jerusalem" | "Asia/Jerusalem" | "Kaliningrad" | "Europe/Kaliningrad" | "Kyiv" | "Europe/Kiev" | "Pretoria" | "Africa/Johannesburg" | "Riga" | "Europe/Riga" | "Sofia" | "Europe/Sofia" | "Tallinn" | "Europe/Tallinn" | "Vilnius" | "Europe/Vilnius" | "Baghdad" | "Asia/Baghdad" | "Istanbul" | "Europe/Istanbul" | "Kuwait" | "Asia/Kuwait" | "Minsk" | "Europe/Minsk" | "Moscow" | "Europe/Moscow" | "Nairobi" | "Africa/Nairobi" | "Riyadh" | "Asia/Riyadh" | "St. Petersburg" | "Europe/Moscow" | "Volgograd" | "Europe/Volgograd" | "Tehran" | "Asia/Tehran" | "Abu Dhabi" | "Asia/Muscat" | "Baku" | "Asia/Baku" | "Muscat" | "Asia/Muscat" | "Samara" | "Europe/Samara" | "Tbilisi" | "Asia/Tbilisi" | "Yerevan" | "Asia/Yerevan" | "Kabul" | "Asia/Kabul" | "Almaty" | "Asia/Almaty" | "Astana" | "Asia/Almaty" | "Ekaterinburg" | "Asia/Yekaterinburg" | "Islamabad" | "Asia/Karachi" | "Karachi" | "Asia/Karachi" | "Tashkent" | "Asia/Tashkent" | "Chennai" | "Asia/Kolkata" | "Kolkata" | "Asia/Kolkata" | "Mumbai" | "Asia/Kolkata" | "New Delhi" | "Asia/Kolkata" | "Sri Jayawardenepura" | "Asia/Colombo" | "Kathmandu" | "Asia/Kathmandu" | "Dhaka" | "Asia/Dhaka" | "Urumqi" | "Asia/Urumqi" | "Rangoon" | "Asia/Rangoon" | "Bangkok" | "Asia/Bangkok" | "Hanoi" | "Asia/Bangkok" | "Jakarta" | "Asia/Jakarta" | "Krasnoyarsk" | "Asia/Krasnoyarsk" | "Novosibirsk" | "Asia/Novosibirsk" | "Beijing" | "Asia/Shanghai" | "Chongqing" | "Asia/Chongqing" | "Hong Kong" | "Asia/Hong_Kong" | "Irkutsk" | "Asia/Irkutsk" | "Kuala Lumpur" | "Asia/Kuala_Lumpur" | "Perth" | "Australia/Perth" | "Singapore" | "Asia/Singapore" | "Taipei" | "Asia/Taipei" | "Ulaanbaatar" | "Asia/Ulaanbaatar" | "Osaka" | "Asia/Tokyo" | "Sapporo" | "Asia/Tokyo" | "Seoul" | "Asia/Seoul" | "Tokyo" | "Asia/Tokyo" | "Yakutsk" | "Asia/Yakutsk" | "Adelaide" | "Australia/Adelaide" | "Darwin" | "Australia/Darwin" | "Brisbane" | "Australia/Brisbane" | "Canberra" | "Australia/Canberra" | "Guam" | "Pacific/Guam" | "Hobart" | "Australia/Hobart" | "Melbourne" | "Australia/Melbourne" | "Port Moresby" | "Pacific/Port_Moresby" | "Sydney" | "Australia/Sydney" | "Vladivostok" | "Asia/Vladivostok" | "Magadan" | "Asia/Magadan" | "New Caledonia" | "Pacific/Noumea" | "Solomon Is." | "Pacific/Guadalcanal" | "Srednekolymsk" | "Asia/Srednekolymsk" | "Auckland" | "Pacific/Auckland" | "Fiji" | "Pacific/Fiji" | "Kamchatka" | "Asia/Kamchatka" | "Marshall Is." | "Pacific/Majuro" | "Wellington" | "Pacific/Auckland" | "Chatham Is." | "Pacific/Chatham" | "Nuku'alofa" | "Pacific/Tongatapu" | "Samoa" | "Pacific/Apia" | "Tokelau Is." | "Pacific/Fakaofo";
+                        time_zone: "International Date Line West" | "Etc/GMT+12" | "American Samoa" | "Pacific/Pago_Pago" | "Midway Island" | "Pacific/Midway" | "Hawaii" | "Pacific/Honolulu" | "Alaska" | "America/Juneau" | "Pacific Time (US & Canada)" | "America/Los_Angeles" | "Tijuana" | "America/Tijuana" | "Arizona" | "America/Phoenix" | "Mazatlan" | "America/Mazatlan" | "Mountain Time (US & Canada)" | "America/Denver" | "Central America" | "America/Guatemala" | "Central Time (US & Canada)" | "America/Chicago" | "Chihuahua" | "America/Chihuahua" | "Guadalajara" | "America/Mexico_City" | "Mexico City" | "Monterrey" | "America/Monterrey" | "Saskatchewan" | "America/Regina" | "Bogota" | "America/Bogota" | "Eastern Time (US & Canada)" | "America/New_York" | "Indiana (East)" | "America/Indiana/Indianapolis" | "Lima" | "America/Lima" | "Quito" | "Atlantic Time (Canada)" | "America/Halifax" | "Caracas" | "America/Caracas" | "Georgetown" | "America/Guyana" | "La Paz" | "America/La_Paz" | "Puerto Rico" | "America/Puerto_Rico" | "Santiago" | "America/Santiago" | "Newfoundland" | "America/St_Johns" | "Asuncion" | "America/Asuncion" | "Brasilia" | "America/Sao_Paulo" | "Buenos Aires" | "America/Argentina/Buenos_Aires" | "Montevideo" | "America/Montevideo" | "Greenland" | "America/Nuuk" | "Mid-Atlantic" | "Atlantic/South_Georgia" | "Azores" | "Atlantic/Azores" | "Cape Verde Is." | "Atlantic/Cape_Verde" | "Edinburgh" | "Europe/London" | "Lisbon" | "Europe/Lisbon" | "London" | "Monrovia" | "Africa/Monrovia" | "UTC" | "Etc/UTC" | "Amsterdam" | "Europe/Amsterdam" | "Belgrade" | "Europe/Belgrade" | "Berlin" | "Europe/Berlin" | "Bern" | "Europe/Zurich" | "Bratislava" | "Europe/Bratislava" | "Brussels" | "Europe/Brussels" | "Budapest" | "Europe/Budapest" | "Casablanca" | "Africa/Casablanca" | "Copenhagen" | "Europe/Copenhagen" | "Dublin" | "Europe/Dublin" | "Ljubljana" | "Europe/Ljubljana" | "Madrid" | "Europe/Madrid" | "Paris" | "Europe/Paris" | "Prague" | "Europe/Prague" | "Rome" | "Europe/Rome" | "Sarajevo" | "Europe/Sarajevo" | "Skopje" | "Europe/Skopje" | "Stockholm" | "Europe/Stockholm" | "Vienna" | "Europe/Vienna" | "Warsaw" | "Europe/Warsaw" | "West Central Africa" | "Africa/Algiers" | "Zagreb" | "Europe/Zagreb" | "Zurich" | "Athens" | "Europe/Athens" | "Bucharest" | "Europe/Bucharest" | "Cairo" | "Africa/Cairo" | "Harare" | "Africa/Harare" | "Helsinki" | "Europe/Helsinki" | "Jerusalem" | "Asia/Jerusalem" | "Kaliningrad" | "Europe/Kaliningrad" | "Pretoria" | "Africa/Johannesburg" | "Riga" | "Europe/Riga" | "Sofia" | "Europe/Sofia" | "Tallinn" | "Europe/Tallinn" | "Vilnius" | "Europe/Vilnius" | "Baghdad" | "Asia/Baghdad" | "Istanbul" | "Europe/Istanbul" | "Kuwait" | "Asia/Kuwait" | "Minsk" | "Europe/Minsk" | "Moscow" | "Europe/Moscow" | "Nairobi" | "Africa/Nairobi" | "Riyadh" | "Asia/Riyadh" | "St. Petersburg" | "Volgograd" | "Europe/Volgograd" | "Tehran" | "Asia/Tehran" | "Abu Dhabi" | "Asia/Muscat" | "Baku" | "Asia/Baku" | "Muscat" | "Samara" | "Europe/Samara" | "Tbilisi" | "Asia/Tbilisi" | "Yerevan" | "Asia/Yerevan" | "Kabul" | "Asia/Kabul" | "Almaty" | "Asia/Almaty" | "Astana" | "Ekaterinburg" | "Asia/Yekaterinburg" | "Islamabad" | "Asia/Karachi" | "Karachi" | "Tashkent" | "Asia/Tashkent" | "Chennai" | "Asia/Kolkata" | "Kolkata" | "Mumbai" | "New Delhi" | "Sri Jayawardenepura" | "Asia/Colombo" | "Kathmandu" | "Asia/Kathmandu" | "Dhaka" | "Asia/Dhaka" | "Urumqi" | "Asia/Urumqi" | "Bangkok" | "Asia/Bangkok" | "Hanoi" | "Jakarta" | "Asia/Jakarta" | "Krasnoyarsk" | "Asia/Krasnoyarsk" | "Novosibirsk" | "Asia/Novosibirsk" | "Beijing" | "Asia/Shanghai" | "Chongqing" | "Asia/Chongqing" | "Hong Kong" | "Asia/Hong_Kong" | "Irkutsk" | "Asia/Irkutsk" | "Kuala Lumpur" | "Asia/Kuala_Lumpur" | "Perth" | "Australia/Perth" | "Singapore" | "Asia/Singapore" | "Taipei" | "Asia/Taipei" | "Ulaanbaatar" | "Asia/Ulaanbaatar" | "Osaka" | "Asia/Tokyo" | "Sapporo" | "Seoul" | "Asia/Seoul" | "Tokyo" | "Yakutsk" | "Asia/Yakutsk" | "Adelaide" | "Australia/Adelaide" | "Darwin" | "Australia/Darwin" | "Brisbane" | "Australia/Brisbane" | "Canberra" | "Australia/Canberra" | "Guam" | "Pacific/Guam" | "Hobart" | "Australia/Hobart" | "Melbourne" | "Australia/Melbourne" | "Port Moresby" | "Pacific/Port_Moresby" | "Sydney" | "Australia/Sydney" | "Vladivostok" | "Asia/Vladivostok" | "Magadan" | "Asia/Magadan" | "New Caledonia" | "Pacific/Noumea" | "Solomon Is." | "Pacific/Guadalcanal" | "Srednekolymsk" | "Asia/Srednekolymsk" | "Auckland" | "Pacific/Auckland" | "Fiji" | "Pacific/Fiji" | "Kamchatka" | "Asia/Kamchatka" | "Marshall Is." | "Pacific/Majuro" | "Wellington" | "Chatham Is." | "Pacific/Chatham" | "Nuku'alofa" | "Pacific/Tongatapu" | "Samoa" | "Pacific/Apia" | "Tokelau Is." | "Pacific/Fakaofo" | "America/Adak" | "America/Atka" | "US/Aleutian" | "America/Vancouver" | "Canada/Pacific" | "America/Miquelon" | "Australia/Eucla" | "Australia/LHI" | "Australia/Lord_Howe" | "Chile/EasterIsland" | "Pacific/Easter" | "Pacific/Gambier" | "Pacific/Pitcairn" | "Pacific/Marquesas" | "Pacific/Kiritimati" | "Pacific/Norfolk";
                         /** @description Time windows during which alerts are deferred */
                         time_blocks: {
                             /** @default false */
@@ -10789,12 +12510,36 @@ export interface components {
                             all_day: boolean;
                             position?: number | null;
                         }[];
+                    } | {
+                        /**
+                         * @description The type of the escalation path rule
+                         * @enum {string}
+                         */
+                        rule_type: "source";
+                        /**
+                         * @description How the alert source should be matched
+                         * @enum {string}
+                         */
+                        operator: "is" | "is_not" | "is_one_of" | "is_not_one_of";
+                        /** @description Alert source values to match against (e.g., manual, datadog) */
+                        values: string[];
+                    } | {
+                        /**
+                         * @description The type of the escalation path rule
+                         * @enum {string}
+                         */
+                        rule_type: "related_incidents";
+                        /**
+                         * @description Whether the alert must (or must not) have related incidents
+                         * @enum {string}
+                         */
+                        operator: "is_set" | "is_not_set";
                     })[];
                     /**
                      * @description Time zone used for time restrictions.
                      * @enum {string|null}
                      */
-                    time_restriction_time_zone?: "International Date Line West" | "Etc/GMT+12" | "American Samoa" | "Pacific/Pago_Pago" | "Midway Island" | "Pacific/Midway" | "Hawaii" | "Pacific/Honolulu" | "Alaska" | "America/Juneau" | "Pacific Time (US & Canada)" | "America/Los_Angeles" | "Tijuana" | "America/Tijuana" | "Arizona" | "America/Phoenix" | "Mazatlan" | "America/Mazatlan" | "Mountain Time (US & Canada)" | "America/Denver" | "Central America" | "America/Guatemala" | "Central Time (US & Canada)" | "America/Chicago" | "Chihuahua" | "America/Chihuahua" | "Guadalajara" | "America/Mexico_City" | "Mexico City" | "America/Mexico_City" | "Monterrey" | "America/Monterrey" | "Saskatchewan" | "America/Regina" | "Bogota" | "America/Bogota" | "Eastern Time (US & Canada)" | "America/New_York" | "Indiana (East)" | "America/Indiana/Indianapolis" | "Lima" | "America/Lima" | "Quito" | "America/Lima" | "Atlantic Time (Canada)" | "America/Halifax" | "Caracas" | "America/Caracas" | "Georgetown" | "America/Guyana" | "La Paz" | "America/La_Paz" | "Puerto Rico" | "America/Puerto_Rico" | "Santiago" | "America/Santiago" | "Newfoundland" | "America/St_Johns" | "Asuncion" | "America/Asuncion" | "Brasilia" | "America/Sao_Paulo" | "Buenos Aires" | "America/Argentina/Buenos_Aires" | "Montevideo" | "America/Montevideo" | "Greenland" | "America/Nuuk" | "Mid-Atlantic" | "Atlantic/South_Georgia" | "Azores" | "Atlantic/Azores" | "Cape Verde Is." | "Atlantic/Cape_Verde" | "Edinburgh" | "Europe/London" | "Lisbon" | "Europe/Lisbon" | "London" | "Europe/London" | "Monrovia" | "Africa/Monrovia" | "UTC" | "Etc/UTC" | "Amsterdam" | "Europe/Amsterdam" | "Belgrade" | "Europe/Belgrade" | "Berlin" | "Europe/Berlin" | "Bern" | "Europe/Zurich" | "Bratislava" | "Europe/Bratislava" | "Brussels" | "Europe/Brussels" | "Budapest" | "Europe/Budapest" | "Casablanca" | "Africa/Casablanca" | "Copenhagen" | "Europe/Copenhagen" | "Dublin" | "Europe/Dublin" | "Ljubljana" | "Europe/Ljubljana" | "Madrid" | "Europe/Madrid" | "Paris" | "Europe/Paris" | "Prague" | "Europe/Prague" | "Rome" | "Europe/Rome" | "Sarajevo" | "Europe/Sarajevo" | "Skopje" | "Europe/Skopje" | "Stockholm" | "Europe/Stockholm" | "Vienna" | "Europe/Vienna" | "Warsaw" | "Europe/Warsaw" | "West Central Africa" | "Africa/Algiers" | "Zagreb" | "Europe/Zagreb" | "Zurich" | "Europe/Zurich" | "Athens" | "Europe/Athens" | "Bucharest" | "Europe/Bucharest" | "Cairo" | "Africa/Cairo" | "Harare" | "Africa/Harare" | "Helsinki" | "Europe/Helsinki" | "Jerusalem" | "Asia/Jerusalem" | "Kaliningrad" | "Europe/Kaliningrad" | "Kyiv" | "Europe/Kiev" | "Pretoria" | "Africa/Johannesburg" | "Riga" | "Europe/Riga" | "Sofia" | "Europe/Sofia" | "Tallinn" | "Europe/Tallinn" | "Vilnius" | "Europe/Vilnius" | "Baghdad" | "Asia/Baghdad" | "Istanbul" | "Europe/Istanbul" | "Kuwait" | "Asia/Kuwait" | "Minsk" | "Europe/Minsk" | "Moscow" | "Europe/Moscow" | "Nairobi" | "Africa/Nairobi" | "Riyadh" | "Asia/Riyadh" | "St. Petersburg" | "Europe/Moscow" | "Volgograd" | "Europe/Volgograd" | "Tehran" | "Asia/Tehran" | "Abu Dhabi" | "Asia/Muscat" | "Baku" | "Asia/Baku" | "Muscat" | "Asia/Muscat" | "Samara" | "Europe/Samara" | "Tbilisi" | "Asia/Tbilisi" | "Yerevan" | "Asia/Yerevan" | "Kabul" | "Asia/Kabul" | "Almaty" | "Asia/Almaty" | "Astana" | "Asia/Almaty" | "Ekaterinburg" | "Asia/Yekaterinburg" | "Islamabad" | "Asia/Karachi" | "Karachi" | "Asia/Karachi" | "Tashkent" | "Asia/Tashkent" | "Chennai" | "Asia/Kolkata" | "Kolkata" | "Asia/Kolkata" | "Mumbai" | "Asia/Kolkata" | "New Delhi" | "Asia/Kolkata" | "Sri Jayawardenepura" | "Asia/Colombo" | "Kathmandu" | "Asia/Kathmandu" | "Dhaka" | "Asia/Dhaka" | "Urumqi" | "Asia/Urumqi" | "Rangoon" | "Asia/Rangoon" | "Bangkok" | "Asia/Bangkok" | "Hanoi" | "Asia/Bangkok" | "Jakarta" | "Asia/Jakarta" | "Krasnoyarsk" | "Asia/Krasnoyarsk" | "Novosibirsk" | "Asia/Novosibirsk" | "Beijing" | "Asia/Shanghai" | "Chongqing" | "Asia/Chongqing" | "Hong Kong" | "Asia/Hong_Kong" | "Irkutsk" | "Asia/Irkutsk" | "Kuala Lumpur" | "Asia/Kuala_Lumpur" | "Perth" | "Australia/Perth" | "Singapore" | "Asia/Singapore" | "Taipei" | "Asia/Taipei" | "Ulaanbaatar" | "Asia/Ulaanbaatar" | "Osaka" | "Asia/Tokyo" | "Sapporo" | "Asia/Tokyo" | "Seoul" | "Asia/Seoul" | "Tokyo" | "Asia/Tokyo" | "Yakutsk" | "Asia/Yakutsk" | "Adelaide" | "Australia/Adelaide" | "Darwin" | "Australia/Darwin" | "Brisbane" | "Australia/Brisbane" | "Canberra" | "Australia/Canberra" | "Guam" | "Pacific/Guam" | "Hobart" | "Australia/Hobart" | "Melbourne" | "Australia/Melbourne" | "Port Moresby" | "Pacific/Port_Moresby" | "Sydney" | "Australia/Sydney" | "Vladivostok" | "Asia/Vladivostok" | "Magadan" | "Asia/Magadan" | "New Caledonia" | "Pacific/Noumea" | "Solomon Is." | "Pacific/Guadalcanal" | "Srednekolymsk" | "Asia/Srednekolymsk" | "Auckland" | "Pacific/Auckland" | "Fiji" | "Pacific/Fiji" | "Kamchatka" | "Asia/Kamchatka" | "Marshall Is." | "Pacific/Majuro" | "Wellington" | "Pacific/Auckland" | "Chatham Is." | "Pacific/Chatham" | "Nuku'alofa" | "Pacific/Tongatapu" | "Samoa" | "Pacific/Apia" | "Tokelau Is." | "Pacific/Fakaofo" | null;
+                    time_restriction_time_zone?: "International Date Line West" | "Etc/GMT+12" | "American Samoa" | "Pacific/Pago_Pago" | "Midway Island" | "Pacific/Midway" | "Hawaii" | "Pacific/Honolulu" | "Alaska" | "America/Juneau" | "Pacific Time (US & Canada)" | "America/Los_Angeles" | "Tijuana" | "America/Tijuana" | "Arizona" | "America/Phoenix" | "Mazatlan" | "America/Mazatlan" | "Mountain Time (US & Canada)" | "America/Denver" | "Central America" | "America/Guatemala" | "Central Time (US & Canada)" | "America/Chicago" | "Chihuahua" | "America/Chihuahua" | "Guadalajara" | "America/Mexico_City" | "Mexico City" | "Monterrey" | "America/Monterrey" | "Saskatchewan" | "America/Regina" | "Bogota" | "America/Bogota" | "Eastern Time (US & Canada)" | "America/New_York" | "Indiana (East)" | "America/Indiana/Indianapolis" | "Lima" | "America/Lima" | "Quito" | "Atlantic Time (Canada)" | "America/Halifax" | "Caracas" | "America/Caracas" | "Georgetown" | "America/Guyana" | "La Paz" | "America/La_Paz" | "Puerto Rico" | "America/Puerto_Rico" | "Santiago" | "America/Santiago" | "Newfoundland" | "America/St_Johns" | "Asuncion" | "America/Asuncion" | "Brasilia" | "America/Sao_Paulo" | "Buenos Aires" | "America/Argentina/Buenos_Aires" | "Montevideo" | "America/Montevideo" | "Greenland" | "America/Nuuk" | "Mid-Atlantic" | "Atlantic/South_Georgia" | "Azores" | "Atlantic/Azores" | "Cape Verde Is." | "Atlantic/Cape_Verde" | "Edinburgh" | "Europe/London" | "Lisbon" | "Europe/Lisbon" | "London" | "Monrovia" | "Africa/Monrovia" | "UTC" | "Etc/UTC" | "Amsterdam" | "Europe/Amsterdam" | "Belgrade" | "Europe/Belgrade" | "Berlin" | "Europe/Berlin" | "Bern" | "Europe/Zurich" | "Bratislava" | "Europe/Bratislava" | "Brussels" | "Europe/Brussels" | "Budapest" | "Europe/Budapest" | "Casablanca" | "Africa/Casablanca" | "Copenhagen" | "Europe/Copenhagen" | "Dublin" | "Europe/Dublin" | "Ljubljana" | "Europe/Ljubljana" | "Madrid" | "Europe/Madrid" | "Paris" | "Europe/Paris" | "Prague" | "Europe/Prague" | "Rome" | "Europe/Rome" | "Sarajevo" | "Europe/Sarajevo" | "Skopje" | "Europe/Skopje" | "Stockholm" | "Europe/Stockholm" | "Vienna" | "Europe/Vienna" | "Warsaw" | "Europe/Warsaw" | "West Central Africa" | "Africa/Algiers" | "Zagreb" | "Europe/Zagreb" | "Zurich" | "Athens" | "Europe/Athens" | "Bucharest" | "Europe/Bucharest" | "Cairo" | "Africa/Cairo" | "Harare" | "Africa/Harare" | "Helsinki" | "Europe/Helsinki" | "Jerusalem" | "Asia/Jerusalem" | "Kaliningrad" | "Europe/Kaliningrad" | "Pretoria" | "Africa/Johannesburg" | "Riga" | "Europe/Riga" | "Sofia" | "Europe/Sofia" | "Tallinn" | "Europe/Tallinn" | "Vilnius" | "Europe/Vilnius" | "Baghdad" | "Asia/Baghdad" | "Istanbul" | "Europe/Istanbul" | "Kuwait" | "Asia/Kuwait" | "Minsk" | "Europe/Minsk" | "Moscow" | "Europe/Moscow" | "Nairobi" | "Africa/Nairobi" | "Riyadh" | "Asia/Riyadh" | "St. Petersburg" | "Volgograd" | "Europe/Volgograd" | "Tehran" | "Asia/Tehran" | "Abu Dhabi" | "Asia/Muscat" | "Baku" | "Asia/Baku" | "Muscat" | "Samara" | "Europe/Samara" | "Tbilisi" | "Asia/Tbilisi" | "Yerevan" | "Asia/Yerevan" | "Kabul" | "Asia/Kabul" | "Almaty" | "Asia/Almaty" | "Astana" | "Ekaterinburg" | "Asia/Yekaterinburg" | "Islamabad" | "Asia/Karachi" | "Karachi" | "Tashkent" | "Asia/Tashkent" | "Chennai" | "Asia/Kolkata" | "Kolkata" | "Mumbai" | "New Delhi" | "Sri Jayawardenepura" | "Asia/Colombo" | "Kathmandu" | "Asia/Kathmandu" | "Dhaka" | "Asia/Dhaka" | "Urumqi" | "Asia/Urumqi" | "Bangkok" | "Asia/Bangkok" | "Hanoi" | "Jakarta" | "Asia/Jakarta" | "Krasnoyarsk" | "Asia/Krasnoyarsk" | "Novosibirsk" | "Asia/Novosibirsk" | "Beijing" | "Asia/Shanghai" | "Chongqing" | "Asia/Chongqing" | "Hong Kong" | "Asia/Hong_Kong" | "Irkutsk" | "Asia/Irkutsk" | "Kuala Lumpur" | "Asia/Kuala_Lumpur" | "Perth" | "Australia/Perth" | "Singapore" | "Asia/Singapore" | "Taipei" | "Asia/Taipei" | "Ulaanbaatar" | "Asia/Ulaanbaatar" | "Osaka" | "Asia/Tokyo" | "Sapporo" | "Seoul" | "Asia/Seoul" | "Tokyo" | "Yakutsk" | "Asia/Yakutsk" | "Adelaide" | "Australia/Adelaide" | "Darwin" | "Australia/Darwin" | "Brisbane" | "Australia/Brisbane" | "Canberra" | "Australia/Canberra" | "Guam" | "Pacific/Guam" | "Hobart" | "Australia/Hobart" | "Melbourne" | "Australia/Melbourne" | "Port Moresby" | "Pacific/Port_Moresby" | "Sydney" | "Australia/Sydney" | "Vladivostok" | "Asia/Vladivostok" | "Magadan" | "Asia/Magadan" | "New Caledonia" | "Pacific/Noumea" | "Solomon Is." | "Pacific/Guadalcanal" | "Srednekolymsk" | "Asia/Srednekolymsk" | "Auckland" | "Pacific/Auckland" | "Fiji" | "Pacific/Fiji" | "Kamchatka" | "Asia/Kamchatka" | "Marshall Is." | "Pacific/Majuro" | "Wellington" | "Chatham Is." | "Pacific/Chatham" | "Nuku'alofa" | "Pacific/Tongatapu" | "Samoa" | "Pacific/Apia" | "Tokelau Is." | "Pacific/Fakaofo" | "America/Adak" | "America/Atka" | "US/Aleutian" | "America/Vancouver" | "Canada/Pacific" | "America/Miquelon" | "Australia/Eucla" | "Australia/LHI" | "Australia/Lord_Howe" | "Chile/EasterIsland" | "Pacific/Easter" | "Pacific/Gambier" | "Pacific/Pitcairn" | "Pacific/Marquesas" | "Pacific/Kiritimati" | "Pacific/Norfolk" | null;
                     /** @description If time restrictions are set, alerts will follow this path when they arrive within the specified time ranges and meet the rules. */
                     time_restrictions?: {
                         /** @enum {string} */
@@ -10850,6 +12595,8 @@ export interface components {
                     repeat_count?: number | null;
                     /** @description Initial delay for escalation path in minutes. Maximum 1 week (10080). */
                     initial_delay?: number;
+                    /** @description Re-trigger acknowledged alerts on this path after N minutes; null inherits the urgency/workspace default, negative = never. */
+                    retrigger_timeout_minutes?: number | null;
                     /** @description Escalation path conditions */
                     rules?: (({
                         /**
@@ -10879,7 +12626,7 @@ export interface components {
                          * @description How JSON path value should be matched
                          * @enum {string}
                          */
-                        operator: "is" | "is_not" | "contains" | "does_not_contain" | "is_one_of" | "is_not_one_of" | "is_set" | "is_not_set";
+                        operator: "is" | "is_not" | "contains" | "does_not_contain" | "contains_key" | "does_not_contain_key" | "starts_with" | "does_not_start_with" | "matches" | "does_not_match" | "is_one_of" | "is_not_one_of" | "is_set" | "is_not_set";
                         /** @description Value with which JSON path value should be matched */
                         value?: string | null;
                         /** @description Values to match against (for is_one_of / is_not_one_of operators) */
@@ -10919,7 +12666,7 @@ export interface components {
                          * @description Time zone for the deferral window
                          * @enum {string}
                          */
-                        time_zone: "International Date Line West" | "Etc/GMT+12" | "American Samoa" | "Pacific/Pago_Pago" | "Midway Island" | "Pacific/Midway" | "Hawaii" | "Pacific/Honolulu" | "Alaska" | "America/Juneau" | "Pacific Time (US & Canada)" | "America/Los_Angeles" | "Tijuana" | "America/Tijuana" | "Arizona" | "America/Phoenix" | "Mazatlan" | "America/Mazatlan" | "Mountain Time (US & Canada)" | "America/Denver" | "Central America" | "America/Guatemala" | "Central Time (US & Canada)" | "America/Chicago" | "Chihuahua" | "America/Chihuahua" | "Guadalajara" | "America/Mexico_City" | "Mexico City" | "America/Mexico_City" | "Monterrey" | "America/Monterrey" | "Saskatchewan" | "America/Regina" | "Bogota" | "America/Bogota" | "Eastern Time (US & Canada)" | "America/New_York" | "Indiana (East)" | "America/Indiana/Indianapolis" | "Lima" | "America/Lima" | "Quito" | "America/Lima" | "Atlantic Time (Canada)" | "America/Halifax" | "Caracas" | "America/Caracas" | "Georgetown" | "America/Guyana" | "La Paz" | "America/La_Paz" | "Puerto Rico" | "America/Puerto_Rico" | "Santiago" | "America/Santiago" | "Newfoundland" | "America/St_Johns" | "Asuncion" | "America/Asuncion" | "Brasilia" | "America/Sao_Paulo" | "Buenos Aires" | "America/Argentina/Buenos_Aires" | "Montevideo" | "America/Montevideo" | "Greenland" | "America/Nuuk" | "Mid-Atlantic" | "Atlantic/South_Georgia" | "Azores" | "Atlantic/Azores" | "Cape Verde Is." | "Atlantic/Cape_Verde" | "Edinburgh" | "Europe/London" | "Lisbon" | "Europe/Lisbon" | "London" | "Europe/London" | "Monrovia" | "Africa/Monrovia" | "UTC" | "Etc/UTC" | "Amsterdam" | "Europe/Amsterdam" | "Belgrade" | "Europe/Belgrade" | "Berlin" | "Europe/Berlin" | "Bern" | "Europe/Zurich" | "Bratislava" | "Europe/Bratislava" | "Brussels" | "Europe/Brussels" | "Budapest" | "Europe/Budapest" | "Casablanca" | "Africa/Casablanca" | "Copenhagen" | "Europe/Copenhagen" | "Dublin" | "Europe/Dublin" | "Ljubljana" | "Europe/Ljubljana" | "Madrid" | "Europe/Madrid" | "Paris" | "Europe/Paris" | "Prague" | "Europe/Prague" | "Rome" | "Europe/Rome" | "Sarajevo" | "Europe/Sarajevo" | "Skopje" | "Europe/Skopje" | "Stockholm" | "Europe/Stockholm" | "Vienna" | "Europe/Vienna" | "Warsaw" | "Europe/Warsaw" | "West Central Africa" | "Africa/Algiers" | "Zagreb" | "Europe/Zagreb" | "Zurich" | "Europe/Zurich" | "Athens" | "Europe/Athens" | "Bucharest" | "Europe/Bucharest" | "Cairo" | "Africa/Cairo" | "Harare" | "Africa/Harare" | "Helsinki" | "Europe/Helsinki" | "Jerusalem" | "Asia/Jerusalem" | "Kaliningrad" | "Europe/Kaliningrad" | "Kyiv" | "Europe/Kiev" | "Pretoria" | "Africa/Johannesburg" | "Riga" | "Europe/Riga" | "Sofia" | "Europe/Sofia" | "Tallinn" | "Europe/Tallinn" | "Vilnius" | "Europe/Vilnius" | "Baghdad" | "Asia/Baghdad" | "Istanbul" | "Europe/Istanbul" | "Kuwait" | "Asia/Kuwait" | "Minsk" | "Europe/Minsk" | "Moscow" | "Europe/Moscow" | "Nairobi" | "Africa/Nairobi" | "Riyadh" | "Asia/Riyadh" | "St. Petersburg" | "Europe/Moscow" | "Volgograd" | "Europe/Volgograd" | "Tehran" | "Asia/Tehran" | "Abu Dhabi" | "Asia/Muscat" | "Baku" | "Asia/Baku" | "Muscat" | "Asia/Muscat" | "Samara" | "Europe/Samara" | "Tbilisi" | "Asia/Tbilisi" | "Yerevan" | "Asia/Yerevan" | "Kabul" | "Asia/Kabul" | "Almaty" | "Asia/Almaty" | "Astana" | "Asia/Almaty" | "Ekaterinburg" | "Asia/Yekaterinburg" | "Islamabad" | "Asia/Karachi" | "Karachi" | "Asia/Karachi" | "Tashkent" | "Asia/Tashkent" | "Chennai" | "Asia/Kolkata" | "Kolkata" | "Asia/Kolkata" | "Mumbai" | "Asia/Kolkata" | "New Delhi" | "Asia/Kolkata" | "Sri Jayawardenepura" | "Asia/Colombo" | "Kathmandu" | "Asia/Kathmandu" | "Dhaka" | "Asia/Dhaka" | "Urumqi" | "Asia/Urumqi" | "Rangoon" | "Asia/Rangoon" | "Bangkok" | "Asia/Bangkok" | "Hanoi" | "Asia/Bangkok" | "Jakarta" | "Asia/Jakarta" | "Krasnoyarsk" | "Asia/Krasnoyarsk" | "Novosibirsk" | "Asia/Novosibirsk" | "Beijing" | "Asia/Shanghai" | "Chongqing" | "Asia/Chongqing" | "Hong Kong" | "Asia/Hong_Kong" | "Irkutsk" | "Asia/Irkutsk" | "Kuala Lumpur" | "Asia/Kuala_Lumpur" | "Perth" | "Australia/Perth" | "Singapore" | "Asia/Singapore" | "Taipei" | "Asia/Taipei" | "Ulaanbaatar" | "Asia/Ulaanbaatar" | "Osaka" | "Asia/Tokyo" | "Sapporo" | "Asia/Tokyo" | "Seoul" | "Asia/Seoul" | "Tokyo" | "Asia/Tokyo" | "Yakutsk" | "Asia/Yakutsk" | "Adelaide" | "Australia/Adelaide" | "Darwin" | "Australia/Darwin" | "Brisbane" | "Australia/Brisbane" | "Canberra" | "Australia/Canberra" | "Guam" | "Pacific/Guam" | "Hobart" | "Australia/Hobart" | "Melbourne" | "Australia/Melbourne" | "Port Moresby" | "Pacific/Port_Moresby" | "Sydney" | "Australia/Sydney" | "Vladivostok" | "Asia/Vladivostok" | "Magadan" | "Asia/Magadan" | "New Caledonia" | "Pacific/Noumea" | "Solomon Is." | "Pacific/Guadalcanal" | "Srednekolymsk" | "Asia/Srednekolymsk" | "Auckland" | "Pacific/Auckland" | "Fiji" | "Pacific/Fiji" | "Kamchatka" | "Asia/Kamchatka" | "Marshall Is." | "Pacific/Majuro" | "Wellington" | "Pacific/Auckland" | "Chatham Is." | "Pacific/Chatham" | "Nuku'alofa" | "Pacific/Tongatapu" | "Samoa" | "Pacific/Apia" | "Tokelau Is." | "Pacific/Fakaofo";
+                        time_zone: "International Date Line West" | "Etc/GMT+12" | "American Samoa" | "Pacific/Pago_Pago" | "Midway Island" | "Pacific/Midway" | "Hawaii" | "Pacific/Honolulu" | "Alaska" | "America/Juneau" | "Pacific Time (US & Canada)" | "America/Los_Angeles" | "Tijuana" | "America/Tijuana" | "Arizona" | "America/Phoenix" | "Mazatlan" | "America/Mazatlan" | "Mountain Time (US & Canada)" | "America/Denver" | "Central America" | "America/Guatemala" | "Central Time (US & Canada)" | "America/Chicago" | "Chihuahua" | "America/Chihuahua" | "Guadalajara" | "America/Mexico_City" | "Mexico City" | "Monterrey" | "America/Monterrey" | "Saskatchewan" | "America/Regina" | "Bogota" | "America/Bogota" | "Eastern Time (US & Canada)" | "America/New_York" | "Indiana (East)" | "America/Indiana/Indianapolis" | "Lima" | "America/Lima" | "Quito" | "Atlantic Time (Canada)" | "America/Halifax" | "Caracas" | "America/Caracas" | "Georgetown" | "America/Guyana" | "La Paz" | "America/La_Paz" | "Puerto Rico" | "America/Puerto_Rico" | "Santiago" | "America/Santiago" | "Newfoundland" | "America/St_Johns" | "Asuncion" | "America/Asuncion" | "Brasilia" | "America/Sao_Paulo" | "Buenos Aires" | "America/Argentina/Buenos_Aires" | "Montevideo" | "America/Montevideo" | "Greenland" | "America/Nuuk" | "Mid-Atlantic" | "Atlantic/South_Georgia" | "Azores" | "Atlantic/Azores" | "Cape Verde Is." | "Atlantic/Cape_Verde" | "Edinburgh" | "Europe/London" | "Lisbon" | "Europe/Lisbon" | "London" | "Monrovia" | "Africa/Monrovia" | "UTC" | "Etc/UTC" | "Amsterdam" | "Europe/Amsterdam" | "Belgrade" | "Europe/Belgrade" | "Berlin" | "Europe/Berlin" | "Bern" | "Europe/Zurich" | "Bratislava" | "Europe/Bratislava" | "Brussels" | "Europe/Brussels" | "Budapest" | "Europe/Budapest" | "Casablanca" | "Africa/Casablanca" | "Copenhagen" | "Europe/Copenhagen" | "Dublin" | "Europe/Dublin" | "Ljubljana" | "Europe/Ljubljana" | "Madrid" | "Europe/Madrid" | "Paris" | "Europe/Paris" | "Prague" | "Europe/Prague" | "Rome" | "Europe/Rome" | "Sarajevo" | "Europe/Sarajevo" | "Skopje" | "Europe/Skopje" | "Stockholm" | "Europe/Stockholm" | "Vienna" | "Europe/Vienna" | "Warsaw" | "Europe/Warsaw" | "West Central Africa" | "Africa/Algiers" | "Zagreb" | "Europe/Zagreb" | "Zurich" | "Athens" | "Europe/Athens" | "Bucharest" | "Europe/Bucharest" | "Cairo" | "Africa/Cairo" | "Harare" | "Africa/Harare" | "Helsinki" | "Europe/Helsinki" | "Jerusalem" | "Asia/Jerusalem" | "Kaliningrad" | "Europe/Kaliningrad" | "Pretoria" | "Africa/Johannesburg" | "Riga" | "Europe/Riga" | "Sofia" | "Europe/Sofia" | "Tallinn" | "Europe/Tallinn" | "Vilnius" | "Europe/Vilnius" | "Baghdad" | "Asia/Baghdad" | "Istanbul" | "Europe/Istanbul" | "Kuwait" | "Asia/Kuwait" | "Minsk" | "Europe/Minsk" | "Moscow" | "Europe/Moscow" | "Nairobi" | "Africa/Nairobi" | "Riyadh" | "Asia/Riyadh" | "St. Petersburg" | "Volgograd" | "Europe/Volgograd" | "Tehran" | "Asia/Tehran" | "Abu Dhabi" | "Asia/Muscat" | "Baku" | "Asia/Baku" | "Muscat" | "Samara" | "Europe/Samara" | "Tbilisi" | "Asia/Tbilisi" | "Yerevan" | "Asia/Yerevan" | "Kabul" | "Asia/Kabul" | "Almaty" | "Asia/Almaty" | "Astana" | "Ekaterinburg" | "Asia/Yekaterinburg" | "Islamabad" | "Asia/Karachi" | "Karachi" | "Tashkent" | "Asia/Tashkent" | "Chennai" | "Asia/Kolkata" | "Kolkata" | "Mumbai" | "New Delhi" | "Sri Jayawardenepura" | "Asia/Colombo" | "Kathmandu" | "Asia/Kathmandu" | "Dhaka" | "Asia/Dhaka" | "Urumqi" | "Asia/Urumqi" | "Bangkok" | "Asia/Bangkok" | "Hanoi" | "Jakarta" | "Asia/Jakarta" | "Krasnoyarsk" | "Asia/Krasnoyarsk" | "Novosibirsk" | "Asia/Novosibirsk" | "Beijing" | "Asia/Shanghai" | "Chongqing" | "Asia/Chongqing" | "Hong Kong" | "Asia/Hong_Kong" | "Irkutsk" | "Asia/Irkutsk" | "Kuala Lumpur" | "Asia/Kuala_Lumpur" | "Perth" | "Australia/Perth" | "Singapore" | "Asia/Singapore" | "Taipei" | "Asia/Taipei" | "Ulaanbaatar" | "Asia/Ulaanbaatar" | "Osaka" | "Asia/Tokyo" | "Sapporo" | "Seoul" | "Asia/Seoul" | "Tokyo" | "Yakutsk" | "Asia/Yakutsk" | "Adelaide" | "Australia/Adelaide" | "Darwin" | "Australia/Darwin" | "Brisbane" | "Australia/Brisbane" | "Canberra" | "Australia/Canberra" | "Guam" | "Pacific/Guam" | "Hobart" | "Australia/Hobart" | "Melbourne" | "Australia/Melbourne" | "Port Moresby" | "Pacific/Port_Moresby" | "Sydney" | "Australia/Sydney" | "Vladivostok" | "Asia/Vladivostok" | "Magadan" | "Asia/Magadan" | "New Caledonia" | "Pacific/Noumea" | "Solomon Is." | "Pacific/Guadalcanal" | "Srednekolymsk" | "Asia/Srednekolymsk" | "Auckland" | "Pacific/Auckland" | "Fiji" | "Pacific/Fiji" | "Kamchatka" | "Asia/Kamchatka" | "Marshall Is." | "Pacific/Majuro" | "Wellington" | "Chatham Is." | "Pacific/Chatham" | "Nuku'alofa" | "Pacific/Tongatapu" | "Samoa" | "Pacific/Apia" | "Tokelau Is." | "Pacific/Fakaofo" | "America/Adak" | "America/Atka" | "US/Aleutian" | "America/Vancouver" | "Canada/Pacific" | "America/Miquelon" | "Australia/Eucla" | "Australia/LHI" | "Australia/Lord_Howe" | "Chile/EasterIsland" | "Pacific/Easter" | "Pacific/Gambier" | "Pacific/Pitcairn" | "Pacific/Marquesas" | "Pacific/Kiritimati" | "Pacific/Norfolk";
                         /** @description Time windows during which alerts are deferred */
                         time_blocks: {
                             /** @default false */
@@ -10944,12 +12691,36 @@ export interface components {
                             all_day: boolean;
                             position?: number | null;
                         }[];
+                    } | {
+                        /**
+                         * @description The type of the escalation path rule
+                         * @enum {string}
+                         */
+                        rule_type: "source";
+                        /**
+                         * @description How the alert source should be matched
+                         * @enum {string}
+                         */
+                        operator: "is" | "is_not" | "is_one_of" | "is_not_one_of";
+                        /** @description Alert source values to match against (e.g., manual, datadog) */
+                        values: string[];
+                    } | {
+                        /**
+                         * @description The type of the escalation path rule
+                         * @enum {string}
+                         */
+                        rule_type: "related_incidents";
+                        /**
+                         * @description Whether the alert must (or must not) have related incidents
+                         * @enum {string}
+                         */
+                        operator: "is_set" | "is_not_set";
                     }) | null)[];
                     /**
                      * @description Time zone used for time restrictions.
                      * @enum {string|null}
                      */
-                    time_restriction_time_zone?: "International Date Line West" | "Etc/GMT+12" | "American Samoa" | "Pacific/Pago_Pago" | "Midway Island" | "Pacific/Midway" | "Hawaii" | "Pacific/Honolulu" | "Alaska" | "America/Juneau" | "Pacific Time (US & Canada)" | "America/Los_Angeles" | "Tijuana" | "America/Tijuana" | "Arizona" | "America/Phoenix" | "Mazatlan" | "America/Mazatlan" | "Mountain Time (US & Canada)" | "America/Denver" | "Central America" | "America/Guatemala" | "Central Time (US & Canada)" | "America/Chicago" | "Chihuahua" | "America/Chihuahua" | "Guadalajara" | "America/Mexico_City" | "Mexico City" | "America/Mexico_City" | "Monterrey" | "America/Monterrey" | "Saskatchewan" | "America/Regina" | "Bogota" | "America/Bogota" | "Eastern Time (US & Canada)" | "America/New_York" | "Indiana (East)" | "America/Indiana/Indianapolis" | "Lima" | "America/Lima" | "Quito" | "America/Lima" | "Atlantic Time (Canada)" | "America/Halifax" | "Caracas" | "America/Caracas" | "Georgetown" | "America/Guyana" | "La Paz" | "America/La_Paz" | "Puerto Rico" | "America/Puerto_Rico" | "Santiago" | "America/Santiago" | "Newfoundland" | "America/St_Johns" | "Asuncion" | "America/Asuncion" | "Brasilia" | "America/Sao_Paulo" | "Buenos Aires" | "America/Argentina/Buenos_Aires" | "Montevideo" | "America/Montevideo" | "Greenland" | "America/Nuuk" | "Mid-Atlantic" | "Atlantic/South_Georgia" | "Azores" | "Atlantic/Azores" | "Cape Verde Is." | "Atlantic/Cape_Verde" | "Edinburgh" | "Europe/London" | "Lisbon" | "Europe/Lisbon" | "London" | "Europe/London" | "Monrovia" | "Africa/Monrovia" | "UTC" | "Etc/UTC" | "Amsterdam" | "Europe/Amsterdam" | "Belgrade" | "Europe/Belgrade" | "Berlin" | "Europe/Berlin" | "Bern" | "Europe/Zurich" | "Bratislava" | "Europe/Bratislava" | "Brussels" | "Europe/Brussels" | "Budapest" | "Europe/Budapest" | "Casablanca" | "Africa/Casablanca" | "Copenhagen" | "Europe/Copenhagen" | "Dublin" | "Europe/Dublin" | "Ljubljana" | "Europe/Ljubljana" | "Madrid" | "Europe/Madrid" | "Paris" | "Europe/Paris" | "Prague" | "Europe/Prague" | "Rome" | "Europe/Rome" | "Sarajevo" | "Europe/Sarajevo" | "Skopje" | "Europe/Skopje" | "Stockholm" | "Europe/Stockholm" | "Vienna" | "Europe/Vienna" | "Warsaw" | "Europe/Warsaw" | "West Central Africa" | "Africa/Algiers" | "Zagreb" | "Europe/Zagreb" | "Zurich" | "Europe/Zurich" | "Athens" | "Europe/Athens" | "Bucharest" | "Europe/Bucharest" | "Cairo" | "Africa/Cairo" | "Harare" | "Africa/Harare" | "Helsinki" | "Europe/Helsinki" | "Jerusalem" | "Asia/Jerusalem" | "Kaliningrad" | "Europe/Kaliningrad" | "Kyiv" | "Europe/Kiev" | "Pretoria" | "Africa/Johannesburg" | "Riga" | "Europe/Riga" | "Sofia" | "Europe/Sofia" | "Tallinn" | "Europe/Tallinn" | "Vilnius" | "Europe/Vilnius" | "Baghdad" | "Asia/Baghdad" | "Istanbul" | "Europe/Istanbul" | "Kuwait" | "Asia/Kuwait" | "Minsk" | "Europe/Minsk" | "Moscow" | "Europe/Moscow" | "Nairobi" | "Africa/Nairobi" | "Riyadh" | "Asia/Riyadh" | "St. Petersburg" | "Europe/Moscow" | "Volgograd" | "Europe/Volgograd" | "Tehran" | "Asia/Tehran" | "Abu Dhabi" | "Asia/Muscat" | "Baku" | "Asia/Baku" | "Muscat" | "Asia/Muscat" | "Samara" | "Europe/Samara" | "Tbilisi" | "Asia/Tbilisi" | "Yerevan" | "Asia/Yerevan" | "Kabul" | "Asia/Kabul" | "Almaty" | "Asia/Almaty" | "Astana" | "Asia/Almaty" | "Ekaterinburg" | "Asia/Yekaterinburg" | "Islamabad" | "Asia/Karachi" | "Karachi" | "Asia/Karachi" | "Tashkent" | "Asia/Tashkent" | "Chennai" | "Asia/Kolkata" | "Kolkata" | "Asia/Kolkata" | "Mumbai" | "Asia/Kolkata" | "New Delhi" | "Asia/Kolkata" | "Sri Jayawardenepura" | "Asia/Colombo" | "Kathmandu" | "Asia/Kathmandu" | "Dhaka" | "Asia/Dhaka" | "Urumqi" | "Asia/Urumqi" | "Rangoon" | "Asia/Rangoon" | "Bangkok" | "Asia/Bangkok" | "Hanoi" | "Asia/Bangkok" | "Jakarta" | "Asia/Jakarta" | "Krasnoyarsk" | "Asia/Krasnoyarsk" | "Novosibirsk" | "Asia/Novosibirsk" | "Beijing" | "Asia/Shanghai" | "Chongqing" | "Asia/Chongqing" | "Hong Kong" | "Asia/Hong_Kong" | "Irkutsk" | "Asia/Irkutsk" | "Kuala Lumpur" | "Asia/Kuala_Lumpur" | "Perth" | "Australia/Perth" | "Singapore" | "Asia/Singapore" | "Taipei" | "Asia/Taipei" | "Ulaanbaatar" | "Asia/Ulaanbaatar" | "Osaka" | "Asia/Tokyo" | "Sapporo" | "Asia/Tokyo" | "Seoul" | "Asia/Seoul" | "Tokyo" | "Asia/Tokyo" | "Yakutsk" | "Asia/Yakutsk" | "Adelaide" | "Australia/Adelaide" | "Darwin" | "Australia/Darwin" | "Brisbane" | "Australia/Brisbane" | "Canberra" | "Australia/Canberra" | "Guam" | "Pacific/Guam" | "Hobart" | "Australia/Hobart" | "Melbourne" | "Australia/Melbourne" | "Port Moresby" | "Pacific/Port_Moresby" | "Sydney" | "Australia/Sydney" | "Vladivostok" | "Asia/Vladivostok" | "Magadan" | "Asia/Magadan" | "New Caledonia" | "Pacific/Noumea" | "Solomon Is." | "Pacific/Guadalcanal" | "Srednekolymsk" | "Asia/Srednekolymsk" | "Auckland" | "Pacific/Auckland" | "Fiji" | "Pacific/Fiji" | "Kamchatka" | "Asia/Kamchatka" | "Marshall Is." | "Pacific/Majuro" | "Wellington" | "Pacific/Auckland" | "Chatham Is." | "Pacific/Chatham" | "Nuku'alofa" | "Pacific/Tongatapu" | "Samoa" | "Pacific/Apia" | "Tokelau Is." | "Pacific/Fakaofo" | null;
+                    time_restriction_time_zone?: "International Date Line West" | "Etc/GMT+12" | "American Samoa" | "Pacific/Pago_Pago" | "Midway Island" | "Pacific/Midway" | "Hawaii" | "Pacific/Honolulu" | "Alaska" | "America/Juneau" | "Pacific Time (US & Canada)" | "America/Los_Angeles" | "Tijuana" | "America/Tijuana" | "Arizona" | "America/Phoenix" | "Mazatlan" | "America/Mazatlan" | "Mountain Time (US & Canada)" | "America/Denver" | "Central America" | "America/Guatemala" | "Central Time (US & Canada)" | "America/Chicago" | "Chihuahua" | "America/Chihuahua" | "Guadalajara" | "America/Mexico_City" | "Mexico City" | "Monterrey" | "America/Monterrey" | "Saskatchewan" | "America/Regina" | "Bogota" | "America/Bogota" | "Eastern Time (US & Canada)" | "America/New_York" | "Indiana (East)" | "America/Indiana/Indianapolis" | "Lima" | "America/Lima" | "Quito" | "Atlantic Time (Canada)" | "America/Halifax" | "Caracas" | "America/Caracas" | "Georgetown" | "America/Guyana" | "La Paz" | "America/La_Paz" | "Puerto Rico" | "America/Puerto_Rico" | "Santiago" | "America/Santiago" | "Newfoundland" | "America/St_Johns" | "Asuncion" | "America/Asuncion" | "Brasilia" | "America/Sao_Paulo" | "Buenos Aires" | "America/Argentina/Buenos_Aires" | "Montevideo" | "America/Montevideo" | "Greenland" | "America/Nuuk" | "Mid-Atlantic" | "Atlantic/South_Georgia" | "Azores" | "Atlantic/Azores" | "Cape Verde Is." | "Atlantic/Cape_Verde" | "Edinburgh" | "Europe/London" | "Lisbon" | "Europe/Lisbon" | "London" | "Monrovia" | "Africa/Monrovia" | "UTC" | "Etc/UTC" | "Amsterdam" | "Europe/Amsterdam" | "Belgrade" | "Europe/Belgrade" | "Berlin" | "Europe/Berlin" | "Bern" | "Europe/Zurich" | "Bratislava" | "Europe/Bratislava" | "Brussels" | "Europe/Brussels" | "Budapest" | "Europe/Budapest" | "Casablanca" | "Africa/Casablanca" | "Copenhagen" | "Europe/Copenhagen" | "Dublin" | "Europe/Dublin" | "Ljubljana" | "Europe/Ljubljana" | "Madrid" | "Europe/Madrid" | "Paris" | "Europe/Paris" | "Prague" | "Europe/Prague" | "Rome" | "Europe/Rome" | "Sarajevo" | "Europe/Sarajevo" | "Skopje" | "Europe/Skopje" | "Stockholm" | "Europe/Stockholm" | "Vienna" | "Europe/Vienna" | "Warsaw" | "Europe/Warsaw" | "West Central Africa" | "Africa/Algiers" | "Zagreb" | "Europe/Zagreb" | "Zurich" | "Athens" | "Europe/Athens" | "Bucharest" | "Europe/Bucharest" | "Cairo" | "Africa/Cairo" | "Harare" | "Africa/Harare" | "Helsinki" | "Europe/Helsinki" | "Jerusalem" | "Asia/Jerusalem" | "Kaliningrad" | "Europe/Kaliningrad" | "Pretoria" | "Africa/Johannesburg" | "Riga" | "Europe/Riga" | "Sofia" | "Europe/Sofia" | "Tallinn" | "Europe/Tallinn" | "Vilnius" | "Europe/Vilnius" | "Baghdad" | "Asia/Baghdad" | "Istanbul" | "Europe/Istanbul" | "Kuwait" | "Asia/Kuwait" | "Minsk" | "Europe/Minsk" | "Moscow" | "Europe/Moscow" | "Nairobi" | "Africa/Nairobi" | "Riyadh" | "Asia/Riyadh" | "St. Petersburg" | "Volgograd" | "Europe/Volgograd" | "Tehran" | "Asia/Tehran" | "Abu Dhabi" | "Asia/Muscat" | "Baku" | "Asia/Baku" | "Muscat" | "Samara" | "Europe/Samara" | "Tbilisi" | "Asia/Tbilisi" | "Yerevan" | "Asia/Yerevan" | "Kabul" | "Asia/Kabul" | "Almaty" | "Asia/Almaty" | "Astana" | "Ekaterinburg" | "Asia/Yekaterinburg" | "Islamabad" | "Asia/Karachi" | "Karachi" | "Tashkent" | "Asia/Tashkent" | "Chennai" | "Asia/Kolkata" | "Kolkata" | "Mumbai" | "New Delhi" | "Sri Jayawardenepura" | "Asia/Colombo" | "Kathmandu" | "Asia/Kathmandu" | "Dhaka" | "Asia/Dhaka" | "Urumqi" | "Asia/Urumqi" | "Bangkok" | "Asia/Bangkok" | "Hanoi" | "Jakarta" | "Asia/Jakarta" | "Krasnoyarsk" | "Asia/Krasnoyarsk" | "Novosibirsk" | "Asia/Novosibirsk" | "Beijing" | "Asia/Shanghai" | "Chongqing" | "Asia/Chongqing" | "Hong Kong" | "Asia/Hong_Kong" | "Irkutsk" | "Asia/Irkutsk" | "Kuala Lumpur" | "Asia/Kuala_Lumpur" | "Perth" | "Australia/Perth" | "Singapore" | "Asia/Singapore" | "Taipei" | "Asia/Taipei" | "Ulaanbaatar" | "Asia/Ulaanbaatar" | "Osaka" | "Asia/Tokyo" | "Sapporo" | "Seoul" | "Asia/Seoul" | "Tokyo" | "Yakutsk" | "Asia/Yakutsk" | "Adelaide" | "Australia/Adelaide" | "Darwin" | "Australia/Darwin" | "Brisbane" | "Australia/Brisbane" | "Canberra" | "Australia/Canberra" | "Guam" | "Pacific/Guam" | "Hobart" | "Australia/Hobart" | "Melbourne" | "Australia/Melbourne" | "Port Moresby" | "Pacific/Port_Moresby" | "Sydney" | "Australia/Sydney" | "Vladivostok" | "Asia/Vladivostok" | "Magadan" | "Asia/Magadan" | "New Caledonia" | "Pacific/Noumea" | "Solomon Is." | "Pacific/Guadalcanal" | "Srednekolymsk" | "Asia/Srednekolymsk" | "Auckland" | "Pacific/Auckland" | "Fiji" | "Pacific/Fiji" | "Kamchatka" | "Asia/Kamchatka" | "Marshall Is." | "Pacific/Majuro" | "Wellington" | "Chatham Is." | "Pacific/Chatham" | "Nuku'alofa" | "Pacific/Tongatapu" | "Samoa" | "Pacific/Apia" | "Tokelau Is." | "Pacific/Fakaofo" | "America/Adak" | "America/Atka" | "US/Aleutian" | "America/Vancouver" | "Canada/Pacific" | "America/Miquelon" | "Australia/Eucla" | "Australia/LHI" | "Australia/Lord_Howe" | "Chile/EasterIsland" | "Pacific/Easter" | "Pacific/Gambier" | "Pacific/Pitcairn" | "Pacific/Marquesas" | "Pacific/Kiritimati" | "Pacific/Norfolk" | null;
                     /** @description If time restrictions are set, alerts will follow this path when they arrive within the specified time ranges and meet the rules. */
                     time_restrictions?: {
                         /** @enum {string} */
@@ -10998,6 +12769,8 @@ export interface components {
             repeat_count: number | null;
             /** @description Initial delay for escalation path in minutes. Maximum 1 week (10080). */
             initial_delay?: number;
+            /** @description Re-trigger acknowledged alerts on this path after N minutes; null inherits the urgency/workspace default, negative = never. */
+            retrigger_timeout_minutes?: number | null;
             /** @description Date of creation */
             created_at?: string;
             /** @description Date of last update */
@@ -11031,7 +12804,7 @@ export interface components {
                  * @description How JSON path value should be matched
                  * @enum {string}
                  */
-                operator: "is" | "is_not" | "contains" | "does_not_contain" | "is_one_of" | "is_not_one_of" | "is_set" | "is_not_set";
+                operator: "is" | "is_not" | "contains" | "does_not_contain" | "contains_key" | "does_not_contain_key" | "starts_with" | "does_not_start_with" | "matches" | "does_not_match" | "is_one_of" | "is_not_one_of" | "is_set" | "is_not_set";
                 /** @description Value with which JSON path value should be matched */
                 value?: string | null;
                 /** @description Values to match against (for is_one_of / is_not_one_of operators) */
@@ -11071,7 +12844,7 @@ export interface components {
                  * @description Time zone for the deferral window
                  * @enum {string}
                  */
-                time_zone: "International Date Line West" | "Etc/GMT+12" | "American Samoa" | "Pacific/Pago_Pago" | "Midway Island" | "Pacific/Midway" | "Hawaii" | "Pacific/Honolulu" | "Alaska" | "America/Juneau" | "Pacific Time (US & Canada)" | "America/Los_Angeles" | "Tijuana" | "America/Tijuana" | "Arizona" | "America/Phoenix" | "Mazatlan" | "America/Mazatlan" | "Mountain Time (US & Canada)" | "America/Denver" | "Central America" | "America/Guatemala" | "Central Time (US & Canada)" | "America/Chicago" | "Chihuahua" | "America/Chihuahua" | "Guadalajara" | "America/Mexico_City" | "Mexico City" | "America/Mexico_City" | "Monterrey" | "America/Monterrey" | "Saskatchewan" | "America/Regina" | "Bogota" | "America/Bogota" | "Eastern Time (US & Canada)" | "America/New_York" | "Indiana (East)" | "America/Indiana/Indianapolis" | "Lima" | "America/Lima" | "Quito" | "America/Lima" | "Atlantic Time (Canada)" | "America/Halifax" | "Caracas" | "America/Caracas" | "Georgetown" | "America/Guyana" | "La Paz" | "America/La_Paz" | "Puerto Rico" | "America/Puerto_Rico" | "Santiago" | "America/Santiago" | "Newfoundland" | "America/St_Johns" | "Asuncion" | "America/Asuncion" | "Brasilia" | "America/Sao_Paulo" | "Buenos Aires" | "America/Argentina/Buenos_Aires" | "Montevideo" | "America/Montevideo" | "Greenland" | "America/Nuuk" | "Mid-Atlantic" | "Atlantic/South_Georgia" | "Azores" | "Atlantic/Azores" | "Cape Verde Is." | "Atlantic/Cape_Verde" | "Edinburgh" | "Europe/London" | "Lisbon" | "Europe/Lisbon" | "London" | "Europe/London" | "Monrovia" | "Africa/Monrovia" | "UTC" | "Etc/UTC" | "Amsterdam" | "Europe/Amsterdam" | "Belgrade" | "Europe/Belgrade" | "Berlin" | "Europe/Berlin" | "Bern" | "Europe/Zurich" | "Bratislava" | "Europe/Bratislava" | "Brussels" | "Europe/Brussels" | "Budapest" | "Europe/Budapest" | "Casablanca" | "Africa/Casablanca" | "Copenhagen" | "Europe/Copenhagen" | "Dublin" | "Europe/Dublin" | "Ljubljana" | "Europe/Ljubljana" | "Madrid" | "Europe/Madrid" | "Paris" | "Europe/Paris" | "Prague" | "Europe/Prague" | "Rome" | "Europe/Rome" | "Sarajevo" | "Europe/Sarajevo" | "Skopje" | "Europe/Skopje" | "Stockholm" | "Europe/Stockholm" | "Vienna" | "Europe/Vienna" | "Warsaw" | "Europe/Warsaw" | "West Central Africa" | "Africa/Algiers" | "Zagreb" | "Europe/Zagreb" | "Zurich" | "Europe/Zurich" | "Athens" | "Europe/Athens" | "Bucharest" | "Europe/Bucharest" | "Cairo" | "Africa/Cairo" | "Harare" | "Africa/Harare" | "Helsinki" | "Europe/Helsinki" | "Jerusalem" | "Asia/Jerusalem" | "Kaliningrad" | "Europe/Kaliningrad" | "Kyiv" | "Europe/Kiev" | "Pretoria" | "Africa/Johannesburg" | "Riga" | "Europe/Riga" | "Sofia" | "Europe/Sofia" | "Tallinn" | "Europe/Tallinn" | "Vilnius" | "Europe/Vilnius" | "Baghdad" | "Asia/Baghdad" | "Istanbul" | "Europe/Istanbul" | "Kuwait" | "Asia/Kuwait" | "Minsk" | "Europe/Minsk" | "Moscow" | "Europe/Moscow" | "Nairobi" | "Africa/Nairobi" | "Riyadh" | "Asia/Riyadh" | "St. Petersburg" | "Europe/Moscow" | "Volgograd" | "Europe/Volgograd" | "Tehran" | "Asia/Tehran" | "Abu Dhabi" | "Asia/Muscat" | "Baku" | "Asia/Baku" | "Muscat" | "Asia/Muscat" | "Samara" | "Europe/Samara" | "Tbilisi" | "Asia/Tbilisi" | "Yerevan" | "Asia/Yerevan" | "Kabul" | "Asia/Kabul" | "Almaty" | "Asia/Almaty" | "Astana" | "Asia/Almaty" | "Ekaterinburg" | "Asia/Yekaterinburg" | "Islamabad" | "Asia/Karachi" | "Karachi" | "Asia/Karachi" | "Tashkent" | "Asia/Tashkent" | "Chennai" | "Asia/Kolkata" | "Kolkata" | "Asia/Kolkata" | "Mumbai" | "Asia/Kolkata" | "New Delhi" | "Asia/Kolkata" | "Sri Jayawardenepura" | "Asia/Colombo" | "Kathmandu" | "Asia/Kathmandu" | "Dhaka" | "Asia/Dhaka" | "Urumqi" | "Asia/Urumqi" | "Rangoon" | "Asia/Rangoon" | "Bangkok" | "Asia/Bangkok" | "Hanoi" | "Asia/Bangkok" | "Jakarta" | "Asia/Jakarta" | "Krasnoyarsk" | "Asia/Krasnoyarsk" | "Novosibirsk" | "Asia/Novosibirsk" | "Beijing" | "Asia/Shanghai" | "Chongqing" | "Asia/Chongqing" | "Hong Kong" | "Asia/Hong_Kong" | "Irkutsk" | "Asia/Irkutsk" | "Kuala Lumpur" | "Asia/Kuala_Lumpur" | "Perth" | "Australia/Perth" | "Singapore" | "Asia/Singapore" | "Taipei" | "Asia/Taipei" | "Ulaanbaatar" | "Asia/Ulaanbaatar" | "Osaka" | "Asia/Tokyo" | "Sapporo" | "Asia/Tokyo" | "Seoul" | "Asia/Seoul" | "Tokyo" | "Asia/Tokyo" | "Yakutsk" | "Asia/Yakutsk" | "Adelaide" | "Australia/Adelaide" | "Darwin" | "Australia/Darwin" | "Brisbane" | "Australia/Brisbane" | "Canberra" | "Australia/Canberra" | "Guam" | "Pacific/Guam" | "Hobart" | "Australia/Hobart" | "Melbourne" | "Australia/Melbourne" | "Port Moresby" | "Pacific/Port_Moresby" | "Sydney" | "Australia/Sydney" | "Vladivostok" | "Asia/Vladivostok" | "Magadan" | "Asia/Magadan" | "New Caledonia" | "Pacific/Noumea" | "Solomon Is." | "Pacific/Guadalcanal" | "Srednekolymsk" | "Asia/Srednekolymsk" | "Auckland" | "Pacific/Auckland" | "Fiji" | "Pacific/Fiji" | "Kamchatka" | "Asia/Kamchatka" | "Marshall Is." | "Pacific/Majuro" | "Wellington" | "Pacific/Auckland" | "Chatham Is." | "Pacific/Chatham" | "Nuku'alofa" | "Pacific/Tongatapu" | "Samoa" | "Pacific/Apia" | "Tokelau Is." | "Pacific/Fakaofo";
+                time_zone: "International Date Line West" | "Etc/GMT+12" | "American Samoa" | "Pacific/Pago_Pago" | "Midway Island" | "Pacific/Midway" | "Hawaii" | "Pacific/Honolulu" | "Alaska" | "America/Juneau" | "Pacific Time (US & Canada)" | "America/Los_Angeles" | "Tijuana" | "America/Tijuana" | "Arizona" | "America/Phoenix" | "Mazatlan" | "America/Mazatlan" | "Mountain Time (US & Canada)" | "America/Denver" | "Central America" | "America/Guatemala" | "Central Time (US & Canada)" | "America/Chicago" | "Chihuahua" | "America/Chihuahua" | "Guadalajara" | "America/Mexico_City" | "Mexico City" | "Monterrey" | "America/Monterrey" | "Saskatchewan" | "America/Regina" | "Bogota" | "America/Bogota" | "Eastern Time (US & Canada)" | "America/New_York" | "Indiana (East)" | "America/Indiana/Indianapolis" | "Lima" | "America/Lima" | "Quito" | "Atlantic Time (Canada)" | "America/Halifax" | "Caracas" | "America/Caracas" | "Georgetown" | "America/Guyana" | "La Paz" | "America/La_Paz" | "Puerto Rico" | "America/Puerto_Rico" | "Santiago" | "America/Santiago" | "Newfoundland" | "America/St_Johns" | "Asuncion" | "America/Asuncion" | "Brasilia" | "America/Sao_Paulo" | "Buenos Aires" | "America/Argentina/Buenos_Aires" | "Montevideo" | "America/Montevideo" | "Greenland" | "America/Nuuk" | "Mid-Atlantic" | "Atlantic/South_Georgia" | "Azores" | "Atlantic/Azores" | "Cape Verde Is." | "Atlantic/Cape_Verde" | "Edinburgh" | "Europe/London" | "Lisbon" | "Europe/Lisbon" | "London" | "Monrovia" | "Africa/Monrovia" | "UTC" | "Etc/UTC" | "Amsterdam" | "Europe/Amsterdam" | "Belgrade" | "Europe/Belgrade" | "Berlin" | "Europe/Berlin" | "Bern" | "Europe/Zurich" | "Bratislava" | "Europe/Bratislava" | "Brussels" | "Europe/Brussels" | "Budapest" | "Europe/Budapest" | "Casablanca" | "Africa/Casablanca" | "Copenhagen" | "Europe/Copenhagen" | "Dublin" | "Europe/Dublin" | "Ljubljana" | "Europe/Ljubljana" | "Madrid" | "Europe/Madrid" | "Paris" | "Europe/Paris" | "Prague" | "Europe/Prague" | "Rome" | "Europe/Rome" | "Sarajevo" | "Europe/Sarajevo" | "Skopje" | "Europe/Skopje" | "Stockholm" | "Europe/Stockholm" | "Vienna" | "Europe/Vienna" | "Warsaw" | "Europe/Warsaw" | "West Central Africa" | "Africa/Algiers" | "Zagreb" | "Europe/Zagreb" | "Zurich" | "Athens" | "Europe/Athens" | "Bucharest" | "Europe/Bucharest" | "Cairo" | "Africa/Cairo" | "Harare" | "Africa/Harare" | "Helsinki" | "Europe/Helsinki" | "Jerusalem" | "Asia/Jerusalem" | "Kaliningrad" | "Europe/Kaliningrad" | "Pretoria" | "Africa/Johannesburg" | "Riga" | "Europe/Riga" | "Sofia" | "Europe/Sofia" | "Tallinn" | "Europe/Tallinn" | "Vilnius" | "Europe/Vilnius" | "Baghdad" | "Asia/Baghdad" | "Istanbul" | "Europe/Istanbul" | "Kuwait" | "Asia/Kuwait" | "Minsk" | "Europe/Minsk" | "Moscow" | "Europe/Moscow" | "Nairobi" | "Africa/Nairobi" | "Riyadh" | "Asia/Riyadh" | "St. Petersburg" | "Volgograd" | "Europe/Volgograd" | "Tehran" | "Asia/Tehran" | "Abu Dhabi" | "Asia/Muscat" | "Baku" | "Asia/Baku" | "Muscat" | "Samara" | "Europe/Samara" | "Tbilisi" | "Asia/Tbilisi" | "Yerevan" | "Asia/Yerevan" | "Kabul" | "Asia/Kabul" | "Almaty" | "Asia/Almaty" | "Astana" | "Ekaterinburg" | "Asia/Yekaterinburg" | "Islamabad" | "Asia/Karachi" | "Karachi" | "Tashkent" | "Asia/Tashkent" | "Chennai" | "Asia/Kolkata" | "Kolkata" | "Mumbai" | "New Delhi" | "Sri Jayawardenepura" | "Asia/Colombo" | "Kathmandu" | "Asia/Kathmandu" | "Dhaka" | "Asia/Dhaka" | "Urumqi" | "Asia/Urumqi" | "Bangkok" | "Asia/Bangkok" | "Hanoi" | "Jakarta" | "Asia/Jakarta" | "Krasnoyarsk" | "Asia/Krasnoyarsk" | "Novosibirsk" | "Asia/Novosibirsk" | "Beijing" | "Asia/Shanghai" | "Chongqing" | "Asia/Chongqing" | "Hong Kong" | "Asia/Hong_Kong" | "Irkutsk" | "Asia/Irkutsk" | "Kuala Lumpur" | "Asia/Kuala_Lumpur" | "Perth" | "Australia/Perth" | "Singapore" | "Asia/Singapore" | "Taipei" | "Asia/Taipei" | "Ulaanbaatar" | "Asia/Ulaanbaatar" | "Osaka" | "Asia/Tokyo" | "Sapporo" | "Seoul" | "Asia/Seoul" | "Tokyo" | "Yakutsk" | "Asia/Yakutsk" | "Adelaide" | "Australia/Adelaide" | "Darwin" | "Australia/Darwin" | "Brisbane" | "Australia/Brisbane" | "Canberra" | "Australia/Canberra" | "Guam" | "Pacific/Guam" | "Hobart" | "Australia/Hobart" | "Melbourne" | "Australia/Melbourne" | "Port Moresby" | "Pacific/Port_Moresby" | "Sydney" | "Australia/Sydney" | "Vladivostok" | "Asia/Vladivostok" | "Magadan" | "Asia/Magadan" | "New Caledonia" | "Pacific/Noumea" | "Solomon Is." | "Pacific/Guadalcanal" | "Srednekolymsk" | "Asia/Srednekolymsk" | "Auckland" | "Pacific/Auckland" | "Fiji" | "Pacific/Fiji" | "Kamchatka" | "Asia/Kamchatka" | "Marshall Is." | "Pacific/Majuro" | "Wellington" | "Chatham Is." | "Pacific/Chatham" | "Nuku'alofa" | "Pacific/Tongatapu" | "Samoa" | "Pacific/Apia" | "Tokelau Is." | "Pacific/Fakaofo" | "America/Adak" | "America/Atka" | "US/Aleutian" | "America/Vancouver" | "Canada/Pacific" | "America/Miquelon" | "Australia/Eucla" | "Australia/LHI" | "Australia/Lord_Howe" | "Chile/EasterIsland" | "Pacific/Easter" | "Pacific/Gambier" | "Pacific/Pitcairn" | "Pacific/Marquesas" | "Pacific/Kiritimati" | "Pacific/Norfolk";
                 /** @description Time windows during which alerts are deferred */
                 time_blocks: {
                     /** @default false */
@@ -11096,12 +12869,36 @@ export interface components {
                     all_day: boolean;
                     position?: number | null;
                 }[];
+            } | {
+                /**
+                 * @description The type of the escalation path rule
+                 * @enum {string}
+                 */
+                rule_type: "source";
+                /**
+                 * @description How the alert source should be matched
+                 * @enum {string}
+                 */
+                operator: "is" | "is_not" | "is_one_of" | "is_not_one_of";
+                /** @description Alert source values to match against (e.g., manual, datadog) */
+                values: string[];
+            } | {
+                /**
+                 * @description The type of the escalation path rule
+                 * @enum {string}
+                 */
+                rule_type: "related_incidents";
+                /**
+                 * @description Whether the alert must (or must not) have related incidents
+                 * @enum {string}
+                 */
+                operator: "is_set" | "is_not_set";
             }) | null)[];
             /**
              * @description Time zone used for time restrictions.
              * @enum {string|null}
              */
-            time_restriction_time_zone?: "International Date Line West" | "Etc/GMT+12" | "American Samoa" | "Pacific/Pago_Pago" | "Midway Island" | "Pacific/Midway" | "Hawaii" | "Pacific/Honolulu" | "Alaska" | "America/Juneau" | "Pacific Time (US & Canada)" | "America/Los_Angeles" | "Tijuana" | "America/Tijuana" | "Arizona" | "America/Phoenix" | "Mazatlan" | "America/Mazatlan" | "Mountain Time (US & Canada)" | "America/Denver" | "Central America" | "America/Guatemala" | "Central Time (US & Canada)" | "America/Chicago" | "Chihuahua" | "America/Chihuahua" | "Guadalajara" | "America/Mexico_City" | "Mexico City" | "America/Mexico_City" | "Monterrey" | "America/Monterrey" | "Saskatchewan" | "America/Regina" | "Bogota" | "America/Bogota" | "Eastern Time (US & Canada)" | "America/New_York" | "Indiana (East)" | "America/Indiana/Indianapolis" | "Lima" | "America/Lima" | "Quito" | "America/Lima" | "Atlantic Time (Canada)" | "America/Halifax" | "Caracas" | "America/Caracas" | "Georgetown" | "America/Guyana" | "La Paz" | "America/La_Paz" | "Puerto Rico" | "America/Puerto_Rico" | "Santiago" | "America/Santiago" | "Newfoundland" | "America/St_Johns" | "Asuncion" | "America/Asuncion" | "Brasilia" | "America/Sao_Paulo" | "Buenos Aires" | "America/Argentina/Buenos_Aires" | "Montevideo" | "America/Montevideo" | "Greenland" | "America/Nuuk" | "Mid-Atlantic" | "Atlantic/South_Georgia" | "Azores" | "Atlantic/Azores" | "Cape Verde Is." | "Atlantic/Cape_Verde" | "Edinburgh" | "Europe/London" | "Lisbon" | "Europe/Lisbon" | "London" | "Europe/London" | "Monrovia" | "Africa/Monrovia" | "UTC" | "Etc/UTC" | "Amsterdam" | "Europe/Amsterdam" | "Belgrade" | "Europe/Belgrade" | "Berlin" | "Europe/Berlin" | "Bern" | "Europe/Zurich" | "Bratislava" | "Europe/Bratislava" | "Brussels" | "Europe/Brussels" | "Budapest" | "Europe/Budapest" | "Casablanca" | "Africa/Casablanca" | "Copenhagen" | "Europe/Copenhagen" | "Dublin" | "Europe/Dublin" | "Ljubljana" | "Europe/Ljubljana" | "Madrid" | "Europe/Madrid" | "Paris" | "Europe/Paris" | "Prague" | "Europe/Prague" | "Rome" | "Europe/Rome" | "Sarajevo" | "Europe/Sarajevo" | "Skopje" | "Europe/Skopje" | "Stockholm" | "Europe/Stockholm" | "Vienna" | "Europe/Vienna" | "Warsaw" | "Europe/Warsaw" | "West Central Africa" | "Africa/Algiers" | "Zagreb" | "Europe/Zagreb" | "Zurich" | "Europe/Zurich" | "Athens" | "Europe/Athens" | "Bucharest" | "Europe/Bucharest" | "Cairo" | "Africa/Cairo" | "Harare" | "Africa/Harare" | "Helsinki" | "Europe/Helsinki" | "Jerusalem" | "Asia/Jerusalem" | "Kaliningrad" | "Europe/Kaliningrad" | "Kyiv" | "Europe/Kiev" | "Pretoria" | "Africa/Johannesburg" | "Riga" | "Europe/Riga" | "Sofia" | "Europe/Sofia" | "Tallinn" | "Europe/Tallinn" | "Vilnius" | "Europe/Vilnius" | "Baghdad" | "Asia/Baghdad" | "Istanbul" | "Europe/Istanbul" | "Kuwait" | "Asia/Kuwait" | "Minsk" | "Europe/Minsk" | "Moscow" | "Europe/Moscow" | "Nairobi" | "Africa/Nairobi" | "Riyadh" | "Asia/Riyadh" | "St. Petersburg" | "Europe/Moscow" | "Volgograd" | "Europe/Volgograd" | "Tehran" | "Asia/Tehran" | "Abu Dhabi" | "Asia/Muscat" | "Baku" | "Asia/Baku" | "Muscat" | "Asia/Muscat" | "Samara" | "Europe/Samara" | "Tbilisi" | "Asia/Tbilisi" | "Yerevan" | "Asia/Yerevan" | "Kabul" | "Asia/Kabul" | "Almaty" | "Asia/Almaty" | "Astana" | "Asia/Almaty" | "Ekaterinburg" | "Asia/Yekaterinburg" | "Islamabad" | "Asia/Karachi" | "Karachi" | "Asia/Karachi" | "Tashkent" | "Asia/Tashkent" | "Chennai" | "Asia/Kolkata" | "Kolkata" | "Asia/Kolkata" | "Mumbai" | "Asia/Kolkata" | "New Delhi" | "Asia/Kolkata" | "Sri Jayawardenepura" | "Asia/Colombo" | "Kathmandu" | "Asia/Kathmandu" | "Dhaka" | "Asia/Dhaka" | "Urumqi" | "Asia/Urumqi" | "Rangoon" | "Asia/Rangoon" | "Bangkok" | "Asia/Bangkok" | "Hanoi" | "Asia/Bangkok" | "Jakarta" | "Asia/Jakarta" | "Krasnoyarsk" | "Asia/Krasnoyarsk" | "Novosibirsk" | "Asia/Novosibirsk" | "Beijing" | "Asia/Shanghai" | "Chongqing" | "Asia/Chongqing" | "Hong Kong" | "Asia/Hong_Kong" | "Irkutsk" | "Asia/Irkutsk" | "Kuala Lumpur" | "Asia/Kuala_Lumpur" | "Perth" | "Australia/Perth" | "Singapore" | "Asia/Singapore" | "Taipei" | "Asia/Taipei" | "Ulaanbaatar" | "Asia/Ulaanbaatar" | "Osaka" | "Asia/Tokyo" | "Sapporo" | "Asia/Tokyo" | "Seoul" | "Asia/Seoul" | "Tokyo" | "Asia/Tokyo" | "Yakutsk" | "Asia/Yakutsk" | "Adelaide" | "Australia/Adelaide" | "Darwin" | "Australia/Darwin" | "Brisbane" | "Australia/Brisbane" | "Canberra" | "Australia/Canberra" | "Guam" | "Pacific/Guam" | "Hobart" | "Australia/Hobart" | "Melbourne" | "Australia/Melbourne" | "Port Moresby" | "Pacific/Port_Moresby" | "Sydney" | "Australia/Sydney" | "Vladivostok" | "Asia/Vladivostok" | "Magadan" | "Asia/Magadan" | "New Caledonia" | "Pacific/Noumea" | "Solomon Is." | "Pacific/Guadalcanal" | "Srednekolymsk" | "Asia/Srednekolymsk" | "Auckland" | "Pacific/Auckland" | "Fiji" | "Pacific/Fiji" | "Kamchatka" | "Asia/Kamchatka" | "Marshall Is." | "Pacific/Majuro" | "Wellington" | "Pacific/Auckland" | "Chatham Is." | "Pacific/Chatham" | "Nuku'alofa" | "Pacific/Tongatapu" | "Samoa" | "Pacific/Apia" | "Tokelau Is." | "Pacific/Fakaofo" | null;
+            time_restriction_time_zone?: "International Date Line West" | "Etc/GMT+12" | "American Samoa" | "Pacific/Pago_Pago" | "Midway Island" | "Pacific/Midway" | "Hawaii" | "Pacific/Honolulu" | "Alaska" | "America/Juneau" | "Pacific Time (US & Canada)" | "America/Los_Angeles" | "Tijuana" | "America/Tijuana" | "Arizona" | "America/Phoenix" | "Mazatlan" | "America/Mazatlan" | "Mountain Time (US & Canada)" | "America/Denver" | "Central America" | "America/Guatemala" | "Central Time (US & Canada)" | "America/Chicago" | "Chihuahua" | "America/Chihuahua" | "Guadalajara" | "America/Mexico_City" | "Mexico City" | "Monterrey" | "America/Monterrey" | "Saskatchewan" | "America/Regina" | "Bogota" | "America/Bogota" | "Eastern Time (US & Canada)" | "America/New_York" | "Indiana (East)" | "America/Indiana/Indianapolis" | "Lima" | "America/Lima" | "Quito" | "Atlantic Time (Canada)" | "America/Halifax" | "Caracas" | "America/Caracas" | "Georgetown" | "America/Guyana" | "La Paz" | "America/La_Paz" | "Puerto Rico" | "America/Puerto_Rico" | "Santiago" | "America/Santiago" | "Newfoundland" | "America/St_Johns" | "Asuncion" | "America/Asuncion" | "Brasilia" | "America/Sao_Paulo" | "Buenos Aires" | "America/Argentina/Buenos_Aires" | "Montevideo" | "America/Montevideo" | "Greenland" | "America/Nuuk" | "Mid-Atlantic" | "Atlantic/South_Georgia" | "Azores" | "Atlantic/Azores" | "Cape Verde Is." | "Atlantic/Cape_Verde" | "Edinburgh" | "Europe/London" | "Lisbon" | "Europe/Lisbon" | "London" | "Monrovia" | "Africa/Monrovia" | "UTC" | "Etc/UTC" | "Amsterdam" | "Europe/Amsterdam" | "Belgrade" | "Europe/Belgrade" | "Berlin" | "Europe/Berlin" | "Bern" | "Europe/Zurich" | "Bratislava" | "Europe/Bratislava" | "Brussels" | "Europe/Brussels" | "Budapest" | "Europe/Budapest" | "Casablanca" | "Africa/Casablanca" | "Copenhagen" | "Europe/Copenhagen" | "Dublin" | "Europe/Dublin" | "Ljubljana" | "Europe/Ljubljana" | "Madrid" | "Europe/Madrid" | "Paris" | "Europe/Paris" | "Prague" | "Europe/Prague" | "Rome" | "Europe/Rome" | "Sarajevo" | "Europe/Sarajevo" | "Skopje" | "Europe/Skopje" | "Stockholm" | "Europe/Stockholm" | "Vienna" | "Europe/Vienna" | "Warsaw" | "Europe/Warsaw" | "West Central Africa" | "Africa/Algiers" | "Zagreb" | "Europe/Zagreb" | "Zurich" | "Athens" | "Europe/Athens" | "Bucharest" | "Europe/Bucharest" | "Cairo" | "Africa/Cairo" | "Harare" | "Africa/Harare" | "Helsinki" | "Europe/Helsinki" | "Jerusalem" | "Asia/Jerusalem" | "Kaliningrad" | "Europe/Kaliningrad" | "Pretoria" | "Africa/Johannesburg" | "Riga" | "Europe/Riga" | "Sofia" | "Europe/Sofia" | "Tallinn" | "Europe/Tallinn" | "Vilnius" | "Europe/Vilnius" | "Baghdad" | "Asia/Baghdad" | "Istanbul" | "Europe/Istanbul" | "Kuwait" | "Asia/Kuwait" | "Minsk" | "Europe/Minsk" | "Moscow" | "Europe/Moscow" | "Nairobi" | "Africa/Nairobi" | "Riyadh" | "Asia/Riyadh" | "St. Petersburg" | "Volgograd" | "Europe/Volgograd" | "Tehran" | "Asia/Tehran" | "Abu Dhabi" | "Asia/Muscat" | "Baku" | "Asia/Baku" | "Muscat" | "Samara" | "Europe/Samara" | "Tbilisi" | "Asia/Tbilisi" | "Yerevan" | "Asia/Yerevan" | "Kabul" | "Asia/Kabul" | "Almaty" | "Asia/Almaty" | "Astana" | "Ekaterinburg" | "Asia/Yekaterinburg" | "Islamabad" | "Asia/Karachi" | "Karachi" | "Tashkent" | "Asia/Tashkent" | "Chennai" | "Asia/Kolkata" | "Kolkata" | "Mumbai" | "New Delhi" | "Sri Jayawardenepura" | "Asia/Colombo" | "Kathmandu" | "Asia/Kathmandu" | "Dhaka" | "Asia/Dhaka" | "Urumqi" | "Asia/Urumqi" | "Bangkok" | "Asia/Bangkok" | "Hanoi" | "Jakarta" | "Asia/Jakarta" | "Krasnoyarsk" | "Asia/Krasnoyarsk" | "Novosibirsk" | "Asia/Novosibirsk" | "Beijing" | "Asia/Shanghai" | "Chongqing" | "Asia/Chongqing" | "Hong Kong" | "Asia/Hong_Kong" | "Irkutsk" | "Asia/Irkutsk" | "Kuala Lumpur" | "Asia/Kuala_Lumpur" | "Perth" | "Australia/Perth" | "Singapore" | "Asia/Singapore" | "Taipei" | "Asia/Taipei" | "Ulaanbaatar" | "Asia/Ulaanbaatar" | "Osaka" | "Asia/Tokyo" | "Sapporo" | "Seoul" | "Asia/Seoul" | "Tokyo" | "Yakutsk" | "Asia/Yakutsk" | "Adelaide" | "Australia/Adelaide" | "Darwin" | "Australia/Darwin" | "Brisbane" | "Australia/Brisbane" | "Canberra" | "Australia/Canberra" | "Guam" | "Pacific/Guam" | "Hobart" | "Australia/Hobart" | "Melbourne" | "Australia/Melbourne" | "Port Moresby" | "Pacific/Port_Moresby" | "Sydney" | "Australia/Sydney" | "Vladivostok" | "Asia/Vladivostok" | "Magadan" | "Asia/Magadan" | "New Caledonia" | "Pacific/Noumea" | "Solomon Is." | "Pacific/Guadalcanal" | "Srednekolymsk" | "Asia/Srednekolymsk" | "Auckland" | "Pacific/Auckland" | "Fiji" | "Pacific/Fiji" | "Kamchatka" | "Asia/Kamchatka" | "Marshall Is." | "Pacific/Majuro" | "Wellington" | "Chatham Is." | "Pacific/Chatham" | "Nuku'alofa" | "Pacific/Tongatapu" | "Samoa" | "Pacific/Apia" | "Tokelau Is." | "Pacific/Fakaofo" | "America/Adak" | "America/Atka" | "US/Aleutian" | "America/Vancouver" | "Canada/Pacific" | "America/Miquelon" | "Australia/Eucla" | "Australia/LHI" | "Australia/Lord_Howe" | "Chile/EasterIsland" | "Pacific/Easter" | "Pacific/Gambier" | "Pacific/Pitcairn" | "Pacific/Marquesas" | "Pacific/Kiritimati" | "Pacific/Norfolk" | null;
             /** @description If time restrictions are set, alerts will follow this path when they arrive within the specified time ranges and meet the rules. */
             time_restrictions?: {
                 /** @enum {string} */
@@ -11122,6 +12919,7 @@ export interface components {
                 type?: "escalation_paths";
                 attributes: components["schemas"]["escalation_policy_path"];
             };
+            included?: components["schemas"]["jsonapi_included_resource"][];
         };
         escalation_policy_path_list: {
             data: {
@@ -11131,6 +12929,7 @@ export interface components {
             }[];
             links: components["schemas"]["links"];
             meta: components["schemas"]["meta"];
+            included?: components["schemas"]["jsonapi_included_resource"][];
         };
         new_escalation_policy_level: {
             data: {
@@ -11151,17 +12950,31 @@ export interface components {
                      * @enum {string|null}
                      */
                     paging_strategy_configuration_schedule_strategy: "on_call_only" | "everyone" | null;
+                    /** @description Number of times to rotate through the roster (cycle-based round robin). */
+                    paging_strategy_configuration_repeats?: number | null;
+                    /**
+                     * @description Controls how repeats are interpreted: 'users' pages exactly N users, 'all' pages everyone once.
+                     * @enum {string|null}
+                     */
+                    paging_strategy_configuration_repeats_mode?: "users" | "all" | null;
+                    /**
+                     * @description Scope of rotation ordering: active rotation members only, or entire schedule.
+                     * @enum {string|null}
+                     */
+                    paging_strategy_configuration_rotation_scope?: "active_rotation" | "entire_schedule" | null;
+                    /** @description Number of users to page at a time (cycle-based round robin). */
+                    paging_strategy_configuration_page_users_count?: number | null;
                     /** @description The ID of the dynamic escalation policy path the level will belong to. If nothing is specified it will add the level to your default path. */
                     escalation_policy_path_id?: string | null;
                     /** @description Escalation level's notification targets */
                     notification_target_params: ({
-                        /** @description The ID of notification target. If Slack channel, then id of the slack channel (eg. C06Q2JK7RQW) */
+                        /** @description The ID of notification target. If Slack channel, then id of the slack channel (eg. C06Q2JK7RQW). If Microsoft Teams channel, then the Rootly channel UUID. */
                         id: string;
                         /**
                          * @description The type of the notification target
                          * @enum {string}
                          */
-                        type: "team" | "user" | "schedule" | "slack_channel" | "service";
+                        type: "team" | "user" | "schedule" | "slack_channel" | "microsoft_teams_channel" | "service";
                         /**
                          * @description For targets with type=team, controls whether to notify admins, all team members, or escalate to team EP.
                          * @enum {string|null}
@@ -11192,6 +13005,20 @@ export interface components {
                      * @enum {string|null}
                      */
                     paging_strategy_configuration_schedule_strategy: "on_call_only" | "everyone" | null;
+                    /** @description Number of times to rotate through the roster (cycle-based round robin). */
+                    paging_strategy_configuration_repeats?: number | null;
+                    /**
+                     * @description Controls how repeats are interpreted: 'users' pages exactly N users, 'all' pages everyone once.
+                     * @enum {string|null}
+                     */
+                    paging_strategy_configuration_repeats_mode?: "users" | "all" | null;
+                    /**
+                     * @description Scope of rotation ordering: active rotation members only, or entire schedule.
+                     * @enum {string|null}
+                     */
+                    paging_strategy_configuration_rotation_scope?: "active_rotation" | "entire_schedule" | null;
+                    /** @description Number of users to page at a time (cycle-based round robin). */
+                    paging_strategy_configuration_page_users_count?: number | null;
                     /** @description Escalation level's notification targets */
                     notification_target_params?: ({
                         /** @description The ID of notification target */
@@ -11200,7 +13027,7 @@ export interface components {
                          * @description The type of the notification target
                          * @enum {string}
                          */
-                        type: "team" | "user" | "schedule" | "slack_channel" | "service";
+                        type: "team" | "user" | "schedule" | "slack_channel" | "microsoft_teams_channel" | "service";
                         /**
                          * @description For targets with type=team, controls whether to notify admins, all team members, or escalate to team EP.
                          * @enum {string|null}
@@ -11225,6 +13052,20 @@ export interface components {
              * @enum {string|null}
              */
             paging_strategy_configuration_schedule_strategy: "on_call_only" | "everyone" | null;
+            /** @description Number of times to rotate through the roster (cycle-based round robin). */
+            paging_strategy_configuration_repeats?: number | null;
+            /**
+             * @description Controls how repeats are interpreted: 'users' pages exactly N users, 'all' pages everyone once.
+             * @enum {string|null}
+             */
+            paging_strategy_configuration_repeats_mode?: "users" | "all" | null;
+            /**
+             * @description Scope of rotation ordering: active rotation members only, or entire schedule.
+             * @enum {string|null}
+             */
+            paging_strategy_configuration_rotation_scope?: "active_rotation" | "entire_schedule" | null;
+            /** @description Number of users to page at a time (cycle-based round robin). */
+            paging_strategy_configuration_page_users_count?: number | null;
             /** @description Delay before notifying targets in the next Escalation Level. */
             delay: number;
             /** @description Position of the escalation policy level */
@@ -11241,7 +13082,7 @@ export interface components {
                  * @description The type of the notification target
                  * @enum {string}
                  */
-                type: "team" | "user" | "schedule" | "slack_channel" | "service";
+                type: "team" | "user" | "schedule" | "slack_channel" | "microsoft_teams_channel" | "service";
                 /**
                  * @description For targets with type=team, controls whether to notify admins, all team members, or escalate to team EP.
                  * @enum {string|null}
@@ -11257,6 +13098,7 @@ export interface components {
                 type?: "escalation_levels";
                 attributes: components["schemas"]["escalation_policy_level"];
             };
+            included?: components["schemas"]["jsonapi_included_resource"][];
         };
         escalation_policy_level_list: {
             data: {
@@ -11266,6 +13108,7 @@ export interface components {
             }[];
             links: components["schemas"]["links"];
             meta: components["schemas"]["meta"];
+            included?: components["schemas"]["jsonapi_included_resource"][];
         };
         new_form_field_option: {
             data: {
@@ -11324,6 +13167,7 @@ export interface components {
                 type: "form_field_options";
                 attributes: components["schemas"]["form_field_option"];
             };
+            included?: components["schemas"]["jsonapi_included_resource"][];
         };
         form_field_option_list: {
             data: {
@@ -11335,6 +13179,7 @@ export interface components {
             }[];
             links: components["schemas"]["links"];
             meta: components["schemas"]["meta"];
+            included?: components["schemas"]["jsonapi_included_resource"][];
         };
         new_form_field_placement_condition: {
             data: {
@@ -11412,6 +13257,7 @@ export interface components {
                 type: "form_field_placement_conditions";
                 attributes: components["schemas"]["form_field_placement_condition"];
             };
+            included?: components["schemas"]["jsonapi_included_resource"][];
         };
         form_field_placement_condition_list: {
             data: {
@@ -11423,13 +13269,14 @@ export interface components {
             }[];
             links: components["schemas"]["links"];
             meta: components["schemas"]["meta"];
+            included?: components["schemas"]["jsonapi_included_resource"][];
         };
         new_form_field_placement: {
             data: {
                 /** @enum {string} */
                 type: "form_field_placements";
                 attributes: {
-                    /** @description The form set this field is placed in. */
+                    /** @description The form set this field is placed in. The form set must have the same `resource_type` as the form field, otherwise the request is rejected with 422. */
                     form_set_id: string;
                     /** @description The form this field is placed on. */
                     form: string;
@@ -11457,7 +13304,7 @@ export interface components {
                 /** @enum {string} */
                 type: "form_field_placements";
                 attributes: {
-                    /** @description The form set this field is placed in. */
+                    /** @description The form set this field is placed in. The form set must have the same `resource_type` as the form field, otherwise the request is rejected with 422. */
                     form_set_id?: string;
                     /** @description The form this field is placed on. */
                     form?: string;
@@ -11483,7 +13330,7 @@ export interface components {
         form_field_placement: {
             /** @description The form field that is placed. */
             form_field_id: string;
-            /** @description The form set this field is placed in. */
+            /** @description The form set this field is placed in. The form set must have the same `resource_type` as the form field, otherwise the request is rejected with 422. */
             form_set_id: string;
             /** @description The form this field is placed on. */
             form: string;
@@ -11512,6 +13359,7 @@ export interface components {
                 type: "form_field_placements";
                 attributes: components["schemas"]["form_field_placement"];
             };
+            included?: components["schemas"]["jsonapi_included_resource"][];
         };
         form_field_placement_list: {
             data: {
@@ -11523,6 +13371,7 @@ export interface components {
             }[];
             links: components["schemas"]["links"];
             meta: components["schemas"]["meta"];
+            included?: components["schemas"]["jsonapi_included_resource"][];
         };
         new_form_field_position: {
             data: {
@@ -11535,7 +13384,7 @@ export interface components {
                      * @description The form for the position
                      * @enum {string}
                      */
-                    form: "web_new_incident_form" | "web_update_incident_form" | "web_incident_post_mortem_form" | "web_incident_mitigation_form" | "web_incident_resolution_form" | "web_incident_cancellation_form" | "web_scheduled_incident_form" | "web_update_scheduled_incident_form" | "incident_post_mortem" | "slack_new_incident_form" | "slack_update_incident_form" | "slack_update_incident_status_form" | "slack_incident_mitigation_form" | "slack_incident_resolution_form" | "slack_incident_cancellation_form" | "slack_scheduled_incident_form" | "slack_update_scheduled_incident_form";
+                    form: "web_new_incident_form" | "web_update_incident_form" | "web_incident_post_mortem_form" | "web_incident_mitigation_form" | "web_incident_resolution_form" | "web_incident_cancellation_form" | "web_scheduled_incident_form" | "web_update_scheduled_incident_form" | "incident_post_mortem" | "slack_new_incident_form" | "slack_update_incident_form" | "slack_update_incident_status_form" | "slack_incident_mitigation_form" | "slack_incident_resolution_form" | "slack_incident_cancellation_form" | "slack_scheduled_incident_form" | "slack_update_scheduled_incident_form" | "web_action_item_form" | "slack_action_item_form" | "web_task_form" | "slack_task_form";
                     /** @description The position of the form_field_position */
                     position: number;
                 };
@@ -11552,7 +13401,7 @@ export interface components {
                      * @description The form for the position
                      * @enum {string}
                      */
-                    form?: "web_new_incident_form" | "web_update_incident_form" | "web_incident_post_mortem_form" | "web_incident_mitigation_form" | "web_incident_resolution_form" | "web_incident_cancellation_form" | "web_scheduled_incident_form" | "web_update_scheduled_incident_form" | "incident_post_mortem" | "slack_new_incident_form" | "slack_update_incident_form" | "slack_update_incident_status_form" | "slack_incident_mitigation_form" | "slack_incident_resolution_form" | "slack_incident_cancellation_form" | "slack_scheduled_incident_form" | "slack_update_scheduled_incident_form";
+                    form?: "web_new_incident_form" | "web_update_incident_form" | "web_incident_post_mortem_form" | "web_incident_mitigation_form" | "web_incident_resolution_form" | "web_incident_cancellation_form" | "web_scheduled_incident_form" | "web_update_scheduled_incident_form" | "incident_post_mortem" | "slack_new_incident_form" | "slack_update_incident_form" | "slack_update_incident_status_form" | "slack_incident_mitigation_form" | "slack_incident_resolution_form" | "slack_incident_cancellation_form" | "slack_scheduled_incident_form" | "slack_update_scheduled_incident_form" | "web_action_item_form" | "slack_action_item_form" | "web_task_form" | "slack_task_form";
                     /** @description The position of the form_field_position */
                     position?: number;
                 };
@@ -11565,7 +13414,7 @@ export interface components {
              * @description The form for the position
              * @enum {string}
              */
-            form: "web_new_incident_form" | "web_update_incident_form" | "web_incident_post_mortem_form" | "web_incident_mitigation_form" | "web_incident_resolution_form" | "web_incident_cancellation_form" | "web_scheduled_incident_form" | "web_update_scheduled_incident_form" | "incident_post_mortem" | "slack_new_incident_form" | "slack_update_incident_form" | "slack_update_incident_status_form" | "slack_incident_mitigation_form" | "slack_incident_resolution_form" | "slack_incident_cancellation_form" | "slack_scheduled_incident_form" | "slack_update_scheduled_incident_form";
+            form: "web_new_incident_form" | "web_update_incident_form" | "web_incident_post_mortem_form" | "web_incident_mitigation_form" | "web_incident_resolution_form" | "web_incident_cancellation_form" | "web_scheduled_incident_form" | "web_update_scheduled_incident_form" | "incident_post_mortem" | "slack_new_incident_form" | "slack_update_incident_form" | "slack_update_incident_status_form" | "slack_incident_mitigation_form" | "slack_incident_resolution_form" | "slack_incident_cancellation_form" | "slack_scheduled_incident_form" | "slack_update_scheduled_incident_form" | "web_action_item_form" | "slack_action_item_form" | "web_task_form" | "slack_task_form";
             /** @description The position of the form_field_position */
             position: number;
         };
@@ -11577,6 +13426,7 @@ export interface components {
                 type: "form_field_positions";
                 attributes: components["schemas"]["form_field_position"];
             };
+            included?: components["schemas"]["jsonapi_included_resource"][];
         };
         form_field_position_list: {
             data: {
@@ -11588,6 +13438,7 @@ export interface components {
             }[];
             links: components["schemas"]["links"];
             meta: components["schemas"]["meta"];
+            included?: components["schemas"]["jsonapi_included_resource"][];
         };
         new_form_field: {
             data: {
@@ -11595,10 +13446,15 @@ export interface components {
                 type: "form_fields";
                 attributes: {
                     /**
+                     * @deprecated
+                     * @description Deprecated. `slug` is derived from `name`; any submitted value is ignored. This property will be removed from the request schema in a future version.
+                     */
+                    slug?: string | null;
+                    /**
                      * @description The kind of the form field
                      * @enum {string}
                      */
-                    kind: "custom" | "title" | "summary" | "mitigation_message" | "resolution_message" | "severity" | "environments" | "types" | "services" | "causes" | "functionalities" | "teams" | "visibility" | "mark_as_test" | "mark_as_backfilled" | "labels" | "notify_emails" | "trigger_manual_workflows" | "show_ongoing_incidents" | "attach_alerts" | "mark_as_in_triage" | "in_triage_at" | "started_at" | "detected_at" | "acknowledged_at" | "mitigated_at" | "resolved_at" | "closed_at" | "custom_sub_status" | "manual_starting_datetime_field";
+                    kind: "custom" | "title" | "summary" | "mitigation_message" | "resolution_message" | "severity" | "environments" | "types" | "services" | "causes" | "functionalities" | "teams" | "status" | "visibility" | "mark_as_test" | "mark_as_backfilled" | "labels" | "notify_emails" | "trigger_manual_workflows" | "show_ongoing_incidents" | "attach_alerts" | "mark_as_in_triage" | "in_triage_at" | "started_at" | "detected_at" | "acknowledged_at" | "mitigated_at" | "resolved_at" | "closed_at" | "custom_sub_status" | "manual_starting_datetime_field";
                     /**
                      * @description The input kind of the form field
                      * @enum {string}
@@ -11633,10 +13489,15 @@ export interface components {
                 type: "form_fields";
                 attributes: {
                     /**
+                     * @deprecated
+                     * @description Deprecated. `slug` is derived from `name`; any submitted value is ignored. This property will be removed from the request schema in a future version.
+                     */
+                    slug?: string | null;
+                    /**
                      * @description The kind of the form field
                      * @enum {string}
                      */
-                    kind?: "custom" | "title" | "summary" | "mitigation_message" | "resolution_message" | "severity" | "environments" | "types" | "services" | "causes" | "functionalities" | "teams" | "visibility" | "mark_as_test" | "mark_as_backfilled" | "labels" | "notify_emails" | "trigger_manual_workflows" | "show_ongoing_incidents" | "attach_alerts" | "mark_as_in_triage" | "in_triage_at" | "started_at" | "detected_at" | "acknowledged_at" | "mitigated_at" | "resolved_at" | "closed_at" | "custom_sub_status" | "manual_starting_datetime_field";
+                    kind?: "custom" | "title" | "summary" | "mitigation_message" | "resolution_message" | "severity" | "environments" | "types" | "services" | "causes" | "functionalities" | "teams" | "status" | "visibility" | "mark_as_test" | "mark_as_backfilled" | "labels" | "notify_emails" | "trigger_manual_workflows" | "show_ongoing_incidents" | "attach_alerts" | "mark_as_in_triage" | "in_triage_at" | "started_at" | "detected_at" | "acknowledged_at" | "mitigated_at" | "resolved_at" | "closed_at" | "custom_sub_status" | "manual_starting_datetime_field";
                     /**
                      * @description The input kind of the form field
                      * @enum {string}
@@ -11670,7 +13531,7 @@ export interface components {
              * @description The kind of the form field
              * @enum {string}
              */
-            kind: "custom" | "title" | "summary" | "mitigation_message" | "resolution_message" | "severity" | "environments" | "types" | "services" | "causes" | "functionalities" | "teams" | "visibility" | "mark_as_test" | "mark_as_backfilled" | "labels" | "notify_emails" | "trigger_manual_workflows" | "show_ongoing_incidents" | "attach_alerts" | "mark_as_in_triage" | "in_triage_at" | "started_at" | "detected_at" | "acknowledged_at" | "mitigated_at" | "resolved_at" | "closed_at" | "custom_sub_status" | "manual_starting_datetime_field";
+            kind: "custom" | "title" | "summary" | "mitigation_message" | "resolution_message" | "severity" | "environments" | "types" | "services" | "causes" | "functionalities" | "teams" | "status" | "visibility" | "mark_as_test" | "mark_as_backfilled" | "labels" | "notify_emails" | "trigger_manual_workflows" | "show_ongoing_incidents" | "attach_alerts" | "mark_as_in_triage" | "in_triage_at" | "started_at" | "detected_at" | "acknowledged_at" | "mitigated_at" | "resolved_at" | "closed_at" | "custom_sub_status" | "manual_starting_datetime_field";
             /**
              * @description The input kind of the form field
              * @enum {string}
@@ -11686,7 +13547,12 @@ export interface components {
             /** @description The name of the form field */
             name: string;
             /** @description The slug of the form field */
-            slug?: string;
+            readonly slug?: string;
+            /**
+             * @description The resource type this field belongs to
+             * @enum {string}
+             */
+            resource_type?: "incident" | "problem";
             /** @description The description of the form field */
             description?: string | null;
             shown: string[];
@@ -11711,6 +13577,7 @@ export interface components {
                 type: "form_fields";
                 attributes: components["schemas"]["form_field"];
             };
+            included?: components["schemas"]["jsonapi_included_resource"][];
         };
         form_field_list: {
             data: {
@@ -11722,6 +13589,7 @@ export interface components {
             }[];
             links: components["schemas"]["links"];
             meta: components["schemas"]["meta"];
+            included?: components["schemas"]["jsonapi_included_resource"][];
         };
         new_form_set_condition: {
             data: {
@@ -11778,6 +13646,7 @@ export interface components {
                 type: "form_set_conditions";
                 attributes: components["schemas"]["form_set_condition"];
             };
+            included?: components["schemas"]["jsonapi_included_resource"][];
         };
         form_set_condition_list: {
             data: {
@@ -11789,15 +13658,21 @@ export interface components {
             }[];
             links: components["schemas"]["links"];
             meta: components["schemas"]["meta"];
+            included?: components["schemas"]["jsonapi_included_resource"][];
         };
         new_form_set: {
             data: {
                 /** @enum {string} */
                 type: "form_sets";
                 attributes: {
+                    /**
+                     * @deprecated
+                     * @description Deprecated. `slug` is derived from `name`; any submitted value is ignored. This property will be removed from the request schema in a future version.
+                     */
+                    slug?: string | null;
                     /** @description The name of the form set */
                     name: string;
-                    /** @description The forms included in the form set. Add custom forms using the custom form's `slug` field. Or choose a built-in form: `web_new_incident_form`, `web_update_incident_form`, `web_incident_post_mortem_form`, `web_incident_mitigation_form`, `web_incident_resolution_form`, `web_incident_cancellation_form`, `web_scheduled_incident_form`, `web_update_scheduled_incident_form`, `slack_new_incident_form`, `slack_update_incident_form`, `slack_update_incident_status_form`, `slack_incident_mitigation_form`, `slack_incident_resolution_form`, `slack_incident_cancellation_form`, `slack_scheduled_incident_form`, `slack_update_scheduled_incident_form` */
+                    /** @description The forms included in the form set. Add custom forms using the custom form's `slug` field. Or choose a built-in form: `web_new_incident_form`, `web_update_incident_form`, `web_incident_post_mortem_form`, `web_incident_mitigation_form`, `web_incident_resolution_form`, `web_incident_cancellation_form`, `web_scheduled_incident_form`, `web_update_scheduled_incident_form`, `slack_new_incident_form`, `slack_update_incident_form`, `slack_update_incident_status_form`, `slack_incident_mitigation_form`, `slack_incident_resolution_form`, `slack_incident_cancellation_form`, `slack_scheduled_incident_form`, `slack_update_scheduled_incident_form`, `google_chat_new_incident_form`, `google_chat_update_incident_form`, `microsoft_teams_new_incident_form` */
                     forms: string[];
                 };
             };
@@ -11807,9 +13682,14 @@ export interface components {
                 /** @enum {string} */
                 type: "form_sets";
                 attributes: {
+                    /**
+                     * @deprecated
+                     * @description Deprecated. `slug` is derived from `name`; any submitted value is ignored. This property will be removed from the request schema in a future version.
+                     */
+                    slug?: string | null;
                     /** @description The name of the form set */
                     name?: string;
-                    /** @description The forms included in the form set. Add custom forms using the custom form's `slug` field. Or choose a built-in form: `web_new_incident_form`, `web_update_incident_form`, `web_incident_post_mortem_form`, `web_incident_mitigation_form`, `web_incident_resolution_form`, `web_incident_cancellation_form`, `web_scheduled_incident_form`, `web_update_scheduled_incident_form`, `slack_new_incident_form`, `slack_update_incident_form`, `slack_update_incident_status_form`, `slack_incident_mitigation_form`, `slack_incident_resolution_form`, `slack_incident_cancellation_form`, `slack_scheduled_incident_form`, `slack_update_scheduled_incident_form` */
+                    /** @description The forms included in the form set. Add custom forms using the custom form's `slug` field. Or choose a built-in form: `web_new_incident_form`, `web_update_incident_form`, `web_incident_post_mortem_form`, `web_incident_mitigation_form`, `web_incident_resolution_form`, `web_incident_cancellation_form`, `web_scheduled_incident_form`, `web_update_scheduled_incident_form`, `slack_new_incident_form`, `slack_update_incident_form`, `slack_update_incident_status_form`, `slack_incident_mitigation_form`, `slack_incident_resolution_form`, `slack_incident_cancellation_form`, `slack_scheduled_incident_form`, `slack_update_scheduled_incident_form`, `google_chat_new_incident_form`, `google_chat_update_incident_form`, `microsoft_teams_new_incident_form` */
                     forms?: string[];
                 };
             };
@@ -11818,10 +13698,10 @@ export interface components {
             /** @description The name of the form set */
             name: string;
             /** @description The slug of the form set */
-            slug?: string;
+            readonly slug?: string;
             /** @description Whether the form set is default */
             is_default: boolean;
-            /** @description The forms included in the form set. Add custom forms using the custom form's `slug` field. Or choose a built-in form: `web_new_incident_form`, `web_update_incident_form`, `web_incident_post_mortem_form`, `web_incident_mitigation_form`, `web_incident_resolution_form`, `web_incident_cancellation_form`, `web_scheduled_incident_form`, `web_update_scheduled_incident_form`, `slack_new_incident_form`, `slack_update_incident_form`, `slack_update_incident_status_form`, `slack_incident_mitigation_form`, `slack_incident_resolution_form`, `slack_incident_cancellation_form`, `slack_scheduled_incident_form`, `slack_update_scheduled_incident_form` */
+            /** @description The forms included in the form set. Add custom forms using the custom form's `slug` field. Or choose a built-in form: `web_new_incident_form`, `web_update_incident_form`, `web_incident_post_mortem_form`, `web_incident_mitigation_form`, `web_incident_resolution_form`, `web_incident_cancellation_form`, `web_scheduled_incident_form`, `web_update_scheduled_incident_form`, `slack_new_incident_form`, `slack_update_incident_form`, `slack_update_incident_status_form`, `slack_incident_mitigation_form`, `slack_incident_resolution_form`, `slack_incident_cancellation_form`, `slack_scheduled_incident_form`, `slack_update_scheduled_incident_form`, `google_chat_new_incident_form`, `google_chat_update_incident_form`, `microsoft_teams_new_incident_form` */
             forms: string[];
             /** @description Date of creation */
             created_at: string;
@@ -11836,6 +13716,7 @@ export interface components {
                 type: "form_sets";
                 attributes: components["schemas"]["form_set"];
             };
+            included?: components["schemas"]["jsonapi_included_resource"][];
         };
         form_set_list: {
             data: {
@@ -11847,17 +13728,23 @@ export interface components {
             }[];
             links: components["schemas"]["links"];
             meta: components["schemas"]["meta"];
+            included?: components["schemas"]["jsonapi_included_resource"][];
         };
         new_functionality: {
             data: {
                 /** @enum {string} */
                 type: "functionalities";
                 attributes: {
+                    /**
+                     * @deprecated
+                     * @description Deprecated. `slug` is derived from `name`; any submitted value is ignored. This property will be removed from the request schema in a future version.
+                     */
+                    slug?: string | null;
                     /** @description The name of the functionality */
                     name: string;
                     /** @description The description of the functionality */
                     description?: string | null;
-                    /** @description The public description of the functionality */
+                    /** @description The status page description of the functionality */
                     public_description?: string | null;
                     /** @description Emails to attach to the functionality */
                     notify_emails?: string[] | null;
@@ -11926,11 +13813,16 @@ export interface components {
                 /** @enum {string} */
                 type: "functionalities";
                 attributes: {
+                    /**
+                     * @deprecated
+                     * @description Deprecated. `slug` is derived from `name`; any submitted value is ignored. This property will be removed from the request schema in a future version.
+                     */
+                    slug?: string | null;
                     /** @description The name of the functionality */
                     name?: string;
                     /** @description The description of the functionality */
                     description?: string | null;
-                    /** @description The public description of the functionality */
+                    /** @description The status page description of the functionality */
                     public_description?: string | null;
                     /** @description Emails to attach to the functionality */
                     notify_emails?: string[] | null;
@@ -11990,10 +13882,15 @@ export interface components {
             /** @description The name of the functionality */
             name: string;
             /** @description The slug of the functionality */
-            slug?: string;
+            readonly slug?: string;
+            /**
+             * @description How this functionality is managed (provenance): web, api, terraform, etc. Read-only.
+             * @enum {string}
+             */
+            managed_by?: "web" | "admin_web" | "api" | "terraform" | "pulumi" | "backstage" | "catalog_sync";
             /** @description The description of the functionality */
             description?: string | null;
-            /** @description The public description of the functionality */
+            /** @description The status page description of the functionality */
             public_description?: string | null;
             /** @description Emails attached to the functionality */
             notify_emails?: string[] | null;
@@ -12051,8 +13948,6 @@ export interface components {
             /** @description Date of last update */
             updated_at: string;
         };
-        incidents_chart_response: Record<string, never>;
-        uptime_chart_response: Record<string, never>;
         functionality_response: {
             data: {
                 /** @description Unique ID of the functionality */
@@ -12061,6 +13956,7 @@ export interface components {
                 type: "functionalities";
                 attributes: components["schemas"]["functionality"];
             };
+            included?: components["schemas"]["jsonapi_included_resource"][];
         };
         functionality_list: {
             data: {
@@ -12072,6 +13968,78 @@ export interface components {
             }[];
             links: components["schemas"]["links"];
             meta: components["schemas"]["meta"];
+            included?: components["schemas"]["jsonapi_included_resource"][];
+        };
+        bulk_upsert_functionalities: {
+            /** @description Functionalities to upsert, matched by external_id. Max 100 per request; external_ids unique within a batch. Only attributes present are written (managed-fields semantics). */
+            entities: {
+                /** @description External identifier used as the upsert key. Unique per team. */
+                external_id: string;
+                /** @description Required for new records. Optional for updates. */
+                name?: string;
+                description?: string | null;
+                public_description?: string | null;
+                color?: string | null;
+                position?: number | null;
+                show_uptime?: boolean | null;
+                show_uptime_last_days?: number | null;
+                notify_emails?: string[] | null;
+                pagerduty_id?: string | null;
+                opsgenie_id?: string | null;
+                opsgenie_team_id?: string | null;
+                backstage_id?: string | null;
+                cortex_id?: string | null;
+                opslevel_id?: string | null;
+                service_now_ci_sys_id?: string | null;
+                /** @description Catalog property values (merge semantics: only mentioned fields written). */
+                fields?: {
+                    /** @description UUID, slug, or external_id of the catalog field (required if catalog_property_id is absent) */
+                    catalog_field_id?: string;
+                    /** @description Alias for catalog_field_id (required if catalog_field_id is absent) */
+                    catalog_property_id?: string;
+                    /** @description The value for this field */
+                    value: string;
+                }[];
+            }[];
+        };
+        bulk_upsert_functionalities_response: {
+            data?: {
+                id?: string;
+                /** @enum {string} */
+                type?: "functionalities";
+                attributes?: components["schemas"]["functionality"];
+            }[];
+        };
+        bulk_upsert_functionalities_error: {
+            errors: {
+                /** @description Position of the failed record in the batch */
+                index: number;
+                external_id: string;
+                errors: string[];
+            }[];
+        };
+        /** @description Two mutually exclusive modes. Pass exactly one of: external_ids (delete specific records) or managed_by (prune all managed records not in keep set). */
+        bulk_destroy_functionalities: {
+            /** @description Array of external_ids to delete. Max 100 per request. */
+            external_ids: string[];
+        } | {
+            /**
+             * @description Delete all records with this managed_by value (web/admin_web not allowed).
+             * @enum {string}
+             */
+            managed_by: "api" | "terraform" | "pulumi" | "backstage" | "catalog_sync";
+            /** @description Records with these external_ids are preserved. */
+            keep_external_ids?: string[];
+        };
+        bulk_destroy_functionalities_response: {
+            data?: {
+                /** @description External IDs that were successfully deleted */
+                deleted_external_ids?: string[];
+                /** @description External IDs whose deletion the record itself blocked (e.g. minimum-one guard, restrict associations). Records the caller is not authorized to destroy are NOT listed here. */
+                failed_external_ids?: string[];
+                /** @description External IDs that were not found or not accessible to the caller (external_ids mode only) */
+                not_found_external_ids?: string[];
+            };
         };
         add_action_item_task_params: {
             /** @enum {string} */
@@ -12181,7 +14149,12 @@ export interface components {
             link?: string | null;
             /** @description The bookmark emoji */
             emoji?: string;
-        } | unknown | unknown;
+        } | {
+            title: string;
+            link: string;
+        } | {
+            playbook_id: string;
+        };
         add_team_task_params: {
             /** @enum {string} */
             task_type?: "add_team";
@@ -12256,7 +14229,32 @@ export interface components {
                 id?: string;
                 name?: string;
             };
-        };
+        } & ({
+            escalation_policy_target: {
+                id?: string;
+                name?: string;
+            };
+        } | {
+            service_target: {
+                id?: string;
+                name?: string;
+            };
+        } | {
+            user_target: {
+                id?: string;
+                name?: string;
+            };
+        } | {
+            group_target: {
+                id?: string;
+                name?: string;
+            };
+        } | {
+            schedule_target: {
+                id?: string;
+                name?: string;
+            };
+        });
         auto_assign_role_pagerduty_task_params: {
             /** @enum {string} */
             task_type?: "auto_assign_role_pagerduty";
@@ -12274,7 +14272,17 @@ export interface components {
                 id?: string;
                 name?: string;
             };
-        } | unknown | unknown;
+        } | {
+            schedule: {
+                id?: string;
+                name?: string;
+            };
+        } | {
+            escalation_policy: {
+                id?: string;
+                name?: string;
+            };
+        };
         update_pagerduty_incident_task_params: {
             /** @enum {string} */
             task_type?: "update_pagerduty_incident";
@@ -12472,6 +14480,14 @@ export interface components {
             post_mortem_template_id?: string;
             /** @default true */
             mark_post_mortem_as_published: boolean;
+            /** @default true */
+            include_overview: boolean;
+            /** @default true */
+            include_timeline: boolean;
+            /** @default true */
+            include_follow_ups: boolean;
+            /** @default false */
+            create_as_live_doc: boolean;
         };
         create_datadog_notebook_task_params: {
             /** @enum {string} */
@@ -12563,6 +14579,8 @@ export interface components {
             };
             /** @description The parent issue number for sub-issue linking */
             parent_issue_number?: string | null;
+            /** @description Custom field mappings. Can contain liquid markup and need to be valid JSON */
+            custom_fields_mapping?: string | null;
         };
         create_gitlab_issue_task_params: {
             /** @enum {string} */
@@ -12571,7 +14589,7 @@ export interface components {
              * @description The issue type
              * @enum {string}
              */
-            issue_type?: "issue" | "incident" | "test_case" | "task";
+            issue_type: "issue" | "incident" | "test_case" | "task";
             /** @description The issue title */
             title: string;
             /** @description The issue description */
@@ -12676,6 +14694,12 @@ export interface components {
             post_mortem_template_id?: string;
             /** @description The Google Doc file ID to use as a template. */
             template_id?: string;
+            /** @default true */
+            include_overview: boolean;
+            /** @default true */
+            include_timeline: boolean;
+            /** @default true */
+            include_follow_ups: boolean;
         };
         update_coda_page_task_params: {
             /** @enum {string} */
@@ -12784,6 +14808,12 @@ export interface components {
             template_id?: string;
             /** @description Page permissions JSON */
             permissions?: string;
+            /** @default true */
+            include_overview: boolean;
+            /** @default true */
+            include_timeline: boolean;
+            /** @default true */
+            include_follow_ups: boolean;
         };
         create_google_docs_permissions_task_params: {
             /** @enum {string} */
@@ -12950,6 +14980,18 @@ export interface components {
             custom_fields_mapping?: string | null;
             /** @description Update payload. Can contain liquid markup and need to be valid JSON */
             update_payload?: string | null;
+            /**
+             * @description Number of times to retry on rate-limit (HTTP 429) responses (0-4). 0 disables retry.
+             * @default 0
+             * @example 3
+             */
+            retry_count: number;
+            /**
+             * @description Seconds to wait before each retry (1-15). Retry-After header is honored when present and <= 90s, taking the larger of retry_wait_time and the header value.
+             * @default 1
+             * @example 2
+             */
+            retry_wait_time: number;
         };
         create_jira_subtask_task_params: {
             /** @enum {string} */
@@ -12994,6 +15036,39 @@ export interface components {
             custom_fields_mapping?: string | null;
             /** @description Update payload. Can contain liquid markup and need to be valid JSON */
             update_payload?: string | null;
+            /**
+             * @description Number of times to retry on rate-limit (HTTP 429) responses (0-4). 0 disables retry.
+             * @default 0
+             * @example 3
+             */
+            retry_count: number;
+            /**
+             * @description Seconds to wait before each retry (1-15). Retry-After header is honored when present and <= 90s, taking the larger of retry_wait_time and the header value.
+             * @default 1
+             * @example 2
+             */
+            retry_wait_time: number;
+        };
+        attach_retrospective_pdf_to_jira_issue_task_params: {
+            /** @enum {string} */
+            task_type?: "attach_retrospective_pdf_to_jira_issue";
+            /** @description Specify integration id if you have more than one Jira instance */
+            integration?: {
+                id?: string;
+                name?: string;
+            };
+            /** @description The issue id */
+            issue_id: string;
+            /** @description The attachment filename */
+            filename?: string;
+        };
+        attach_retrospective_pdf_to_freshservice_ticket_task_params: {
+            /** @enum {string} */
+            task_type?: "attach_retrospective_pdf_to_freshservice_ticket";
+            /** @description The Freshservice ticket id */
+            ticket_id: string;
+            /** @description The attachment filename */
+            filename?: string;
         };
         create_linear_issue_task_params: {
             /** @enum {string} */
@@ -13028,6 +15103,8 @@ export interface components {
             };
             /** @description The assigned user's email */
             assign_user_email?: string;
+            /** @description Custom field mappings. Can contain liquid markup and need to be valid JSON */
+            custom_fields_mapping?: string | null;
         };
         create_linear_subtask_issue_task_params: {
             /** @enum {string} */
@@ -13054,6 +15131,8 @@ export interface components {
             }[];
             /** @description The assigned user's email */
             assign_user_email?: string;
+            /** @description Custom field mappings. Can contain liquid markup and need to be valid JSON */
+            custom_fields_mapping?: string | null;
         };
         create_linear_issue_comment_task_params: {
             /** @enum {string} */
@@ -13086,7 +15165,7 @@ export interface components {
         create_microsoft_teams_channel_task_params: {
             /** @enum {string} */
             task_type?: "create_microsoft_teams_channel";
-            team?: {
+            team: {
                 id?: string;
                 name?: string;
             };
@@ -13134,7 +15213,12 @@ export interface components {
             title?: string | null;
             /** @description The tab link. Required if not a playbook tab */
             link?: string | null;
-        } | unknown | unknown;
+        } | {
+            title: string;
+            link: string;
+        } | {
+            playbook_id: string;
+        };
         add_microsoft_teams_chat_tab_task_params: {
             /** @enum {string} */
             task_type?: "add_microsoft_teams_chat_tab";
@@ -13146,6 +15230,81 @@ export interface components {
             title: string;
             /** @description The tab link */
             link: string;
+        };
+        create_google_chat_space_task_params: {
+            /** @enum {string} */
+            task_type?: "create_google_chat_space";
+            title: string;
+            description?: string;
+            /** @description Target audience resource name (e.g. audiences/default). Leave blank for private space. */
+            audience?: string;
+        };
+        send_google_chat_message_task_params: {
+            /** @enum {string} */
+            task_type?: "send_google_chat_message";
+            spaces: {
+                id?: string;
+                name?: string;
+            }[];
+            text: string;
+            /** @description Thread key to reply within a thread. Messages with the same thread key are grouped together */
+            thread_key?: string | null;
+        };
+        send_google_chat_attachments_task_params: {
+            /** @enum {string} */
+            task_type?: "send_google_chat_attachments";
+            spaces: {
+                id?: string;
+                name?: string;
+            }[];
+            attachments: string;
+        };
+        invite_to_google_chat_space_task_params: {
+            /** @enum {string} */
+            task_type?: "invite_to_google_chat_space";
+            space: {
+                id?: string;
+                name?: string;
+            };
+            /** @description Comma separated list of emails to invite */
+            emails: string;
+        };
+        archive_google_chat_spaces_task_params: {
+            /** @enum {string} */
+            task_type?: "archive_google_chat_spaces";
+            spaces: {
+                id?: string;
+                name?: string;
+            }[];
+        };
+        rename_google_chat_space_task_params: {
+            /** @enum {string} */
+            task_type?: "rename_google_chat_space";
+            space: {
+                id?: string;
+                name?: string;
+            };
+            title: string;
+        };
+        update_google_chat_space_description_task_params: {
+            /** @enum {string} */
+            task_type?: "update_google_chat_space_description";
+            space: {
+                id?: string;
+                name?: string;
+            };
+            /** @description The space description. Supports liquid markup */
+            description: string;
+        };
+        change_google_chat_space_privacy_task_params: {
+            /** @enum {string} */
+            task_type?: "change_google_chat_space_privacy";
+            space: {
+                id?: string;
+                name?: string;
+            };
+            /** @description Target audience resource name (e.g. audiences/default). Leave blank to make private. */
+            audience?: string | null;
         };
         archive_microsoft_teams_channels_task_params: {
             /** @enum {string} */
@@ -13214,7 +15373,12 @@ export interface components {
             }[];
             /** @description The message text */
             text: string;
-        } | unknown;
+        } | {
+            channels: {
+                id?: string;
+                name?: string;
+            }[];
+        };
         send_microsoft_teams_chat_message_task_params: {
             /** @enum {string} */
             task_type?: "send_microsoft_teams_chat_message";
@@ -13228,9 +15392,18 @@ export interface components {
         send_microsoft_teams_blocks_task_params: {
             /** @enum {string} */
             task_type?: "send_microsoft_teams_blocks";
+            channels?: {
+                id?: string;
+                name?: string;
+            }[];
             /** @description Support liquid markup. Needs to be a valid JSON string after liquid is parsed */
             attachments: string;
-        } | unknown;
+        } | {
+            channels: {
+                id?: string;
+                name?: string;
+            }[];
+        };
         update_notion_page_task_params: {
             /** @enum {string} */
             task_type?: "update_notion_page";
@@ -13280,6 +15453,12 @@ export interface components {
                 id?: string;
                 name?: string;
             };
+            /** @default true */
+            include_overview: boolean;
+            /** @default true */
+            include_timeline: boolean;
+            /** @default true */
+            include_follow_ups: boolean;
         };
         update_sharepoint_page_task_params: {
             /** @enum {string} */
@@ -13380,7 +15559,17 @@ export interface components {
                 id?: string;
                 name?: string;
             };
-        } | unknown | unknown;
+        } | {
+            project: {
+                id?: string;
+                name?: string;
+            };
+        } | {
+            workflow_state: {
+                id?: string;
+                name?: string;
+            };
+        };
         create_shortcut_task_task_params: {
             /** @enum {string} */
             task_type?: "create_shortcut_task";
@@ -13486,6 +15675,10 @@ export interface components {
             title: string;
             /** @description The task description */
             description?: string;
+            list: {
+                id?: string;
+                name?: string;
+            };
             /** @description The task tags */
             tags?: string;
             /** @description The priority id and display name */
@@ -13519,7 +15712,8 @@ export interface components {
             title: string;
             /** @description The task description */
             description?: string;
-            labels?: string[];
+            /** @description The task labels */
+            labels?: string;
             /** @description The priority id and display name */
             priority?: {
                 id?: string;
@@ -13552,6 +15746,8 @@ export interface components {
              * @enum {string|null}
              */
             recording_mode?: "speaker_view" | "gallery_view" | "gallery_view_v2" | "audio_only" | null;
+            /** @description Allow the Rootly bot to start recording without waiting for host approval */
+            enable_zoom_bot_auto_join?: boolean;
             post_to_incident_timeline?: boolean;
             post_to_slack_channels?: {
                 id?: string;
@@ -13576,7 +15772,11 @@ export interface components {
                 id?: string;
                 name?: string;
             }[];
-        } | unknown | unknown;
+        } | {
+            service_ids: string[];
+        } | {
+            github_repository_names: string[];
+        };
         get_gitlab_commits_task_params: {
             /** @enum {string} */
             task_type?: "get_gitlab_commits";
@@ -13595,7 +15795,11 @@ export interface components {
                 id?: string;
                 name?: string;
             }[];
-        } | unknown | unknown;
+        } | {
+            service_ids: string[];
+        } | {
+            gitlab_repository_names: string[];
+        };
         get_pulses_task_params: {
             /** @enum {string} */
             task_type?: "get_pulses";
@@ -13679,6 +15883,18 @@ export interface components {
                 id?: string;
                 name?: string;
             }[];
+            /**
+             * @description Number of times to retry on HTTP 429 responses (0-4). 0 disables retry.
+             * @default 0
+             * @example 3
+             */
+            retry_count: number;
+            /**
+             * @description Seconds to wait before each retry (1-15). Retry-After header is honored when present and <= 90s, taking the larger of retry_wait_time and the header value.
+             * @default 1
+             * @example 2
+             */
+            retry_wait_time: number;
         };
         invite_to_slack_channel_opsgenie_task_params: {
             /** @enum {string} */
@@ -13720,6 +15936,38 @@ export interface components {
                 name?: string;
             };
         };
+        invite_to_microsoft_teams_channel_rootly_task_params: {
+            /** @enum {string} */
+            task_type?: "invite_to_microsoft_teams_channel_rootly";
+            team: {
+                id?: string;
+                name?: string;
+            };
+            channel: {
+                id?: string;
+                name?: string;
+            };
+            escalation_policy_target?: {
+                id?: string;
+                name?: string;
+            };
+            service_target?: {
+                id?: string;
+                name?: string;
+            };
+            user_target?: {
+                id?: string;
+                name?: string;
+            };
+            group_target?: {
+                id?: string;
+                name?: string;
+            };
+            schedule_target?: {
+                id?: string;
+                name?: string;
+            };
+        };
         invite_to_slack_channel_pagerduty_task_params: {
             /** @enum {string} */
             task_type?: "invite_to_slack_channel_pagerduty";
@@ -13739,7 +15987,17 @@ export interface components {
                 id?: string;
                 name?: string;
             };
-        } | unknown | unknown;
+        } | {
+            escalation_policy: {
+                id?: string;
+                name?: string;
+            };
+        } | {
+            schedule: {
+                id?: string;
+                name?: string;
+            };
+        };
         invite_to_slack_channel_task_params: {
             /** @enum {string} */
             task_type?: "invite_to_slack_channel";
@@ -13757,7 +16015,19 @@ export interface components {
             }[];
             /** @description Comma separated list of emails to invite to the channel */
             slack_emails?: string;
-        } | unknown | unknown | unknown;
+        } | {
+            slack_users: {
+                id?: string;
+                name?: string;
+            }[];
+        } | {
+            slack_user_groups: {
+                id?: string;
+                name?: string;
+            }[];
+        } | {
+            slack_emails: string;
+        };
         invite_to_slack_channel_victor_ops_task_params: {
             /** @enum {string} */
             task_type?: "invite_to_slack_channel_victor_ops";
@@ -13851,7 +16121,7 @@ export interface components {
              * @default P3
              * @enum {string}
              */
-            priority: "P3" | "P1" | "P2" | "P3" | "P4" | "P5" | "auto";
+            priority: "P3" | "P1" | "P2" | "P4" | "P5" | "auto";
             /** @description Details payload. Can contain liquid markup and need to be valid JSON */
             details?: string | null;
         };
@@ -13876,7 +16146,7 @@ export interface components {
              * @default P3
              * @enum {string}
              */
-            priority: "P3" | "P1" | "P2" | "P3" | "P4" | "P5" | "auto";
+            priority: "P3" | "P1" | "P2" | "P4" | "P5" | "auto";
         };
         update_opsgenie_alert_task_params: {
             /** @description Opsgenie Alert ID */
@@ -13938,6 +16208,11 @@ export interface components {
             /** @description Alert description */
             description?: string;
             escalation_note?: string;
+            /**
+             * @description When true, always create a new alert instead of re-paging the alert that triggered the workflow
+             * @default false
+             */
+            create_new_alert: boolean;
         };
         page_pagerduty_on_call_responders_task_params: {
             /** @enum {string} */
@@ -13983,7 +16258,17 @@ export interface components {
             }[];
             /** @description Alert title. */
             title?: string | null;
-        } | unknown | unknown;
+        } | {
+            users: {
+                id?: string;
+                name?: string;
+            }[];
+        } | {
+            escalation_policies: {
+                id?: string;
+                name?: string;
+            }[];
+        };
         update_victor_ops_incident_task_params: {
             /** @enum {string} */
             task_type?: "update_victor_ops_incident";
@@ -14030,6 +16315,8 @@ export interface components {
                 name?: string;
             };
             status_page_id: string;
+            /** @description Publishes the update to every listed status page (requires the status-page-v3-limited-bulk-publish feature). When set, it takes precedence over status_page_id and the first entry becomes status_page_id. */
+            status_page_ids?: string[];
             /** @description Additional API Payload you can pass to statuspage.io for example. Can contain liquid markup and need to be valid JSON */
             integration_payload?: string | null;
         };
@@ -14058,8 +16345,8 @@ export interface components {
         };
         change_slack_channel_privacy_task_params: {
             /** @enum {string} */
-            task_type?: "rename_slack_channel";
-            channel?: {
+            task_type?: "change_slack_channel_privacy";
+            channel: {
                 id?: string;
                 name?: string;
             };
@@ -14166,7 +16453,22 @@ export interface components {
             text: string;
             /** @description When set to true, if the parent for this threaded message cannot be found the message will be skipped. */
             send_only_as_threaded_message?: boolean;
-        } | unknown | unknown | unknown;
+        } | {
+            channels: {
+                id?: string;
+                name?: string;
+            }[];
+        } | {
+            slack_users: {
+                id?: string;
+                name?: string;
+            }[];
+        } | {
+            slack_user_groups: {
+                id?: string;
+                name?: string;
+            }[];
+        };
         send_sms_task_params: {
             /** @enum {string} */
             task_type?: "send_sms";
@@ -14319,6 +16621,8 @@ export interface components {
                 id?: string;
                 name?: string;
             };
+            /** @description Custom field mappings. Can contain liquid markup and need to be valid JSON */
+            custom_fields_mapping?: string | null;
         };
         update_gitlab_issue_task_params: {
             /** @enum {string} */
@@ -14423,6 +16727,18 @@ export interface components {
             custom_fields_mapping?: string | null;
             /** @description Update payload. Can contain liquid markup and need to be valid JSON */
             update_payload?: string | null;
+            /**
+             * @description Number of times to retry on rate-limit (HTTP 429) responses (0-4). 0 disables retry.
+             * @default 0
+             * @example 3
+             */
+            retry_count: number;
+            /**
+             * @description Seconds to wait before each retry (1-15). Retry-After header is honored when present and <= 90s, taking the larger of retry_wait_time and the header value.
+             * @default 1
+             * @example 2
+             */
+            retry_wait_time: number;
         };
         update_linear_issue_task_params: {
             /** @enum {string} */
@@ -14454,6 +16770,8 @@ export interface components {
             };
             /** @description The assigned user's email */
             assign_user_email?: string;
+            /** @description Custom field mappings. Can contain liquid markup and need to be valid JSON */
+            custom_fields_mapping?: string | null;
         };
         update_service_now_incident_task_params: {
             /** @enum {string} */
@@ -14650,9 +16968,9 @@ export interface components {
              * @default incident
              * @enum {string}
              */
-            kind: "incident" | "post_mortem" | "action_item" | "pulse" | "alert";
+            kind: "incident" | "action_item" | "post_mortem" | "pulse" | "alert";
             /**
-             * @description ["(incident) kind can only match [:id, :slug, :sequential_id, :pagerduty_incident_id, :opsgenie_incident_id, :victor_ops_incident_id, :jira_issue_id, :asana_task_id, :shortcut_task_id, :linear_issue_id, :zendesk_ticket_id, :motion_task_id, :trello_card_id, :airtable_record_id, :shortcut_story_id, :github_issue_id, :freshservice_ticket_id, :freshservice_task_id, :clickup_task_id]", "(post_mortem) kind can only match [:id]", "(action_item) kind can only match [:id, :jira_issue_id, :asana_task_id, :shortcut_task_id, :linear_issue_id, :zendesk_ticket_id, :motion_task_id, :trello_card_id, :airtable_record_id, :shortcut_story_id, :github_issue_id, :freshservice_ticket_id, :freshservice_task_id, :clickup_task_id]", "(pulse) kind can only match [:id]", "(alert) kind can only match [:id]"]
+             * @description ["(incident) kind can only match [:id, :slug, :sequential_id, :pagerduty_incident_id, :opsgenie_incident_id, :victor_ops_incident_id, :jira_issue_id, :asana_task_id, :shortcut_task_id, :linear_issue_id, :zendesk_ticket_id, :motion_task_id, :trello_card_id, :airtable_record_id, :shortcut_story_id, :github_issue_id, :freshservice_ticket_id, :freshservice_task_id, :clickup_task_id]", "(action_item) kind can only match [:id, :jira_issue_id, :asana_task_id, :shortcut_task_id, :linear_issue_id, :zendesk_ticket_id, :motion_task_id, :trello_card_id, :airtable_record_id, :shortcut_story_id, :github_issue_id, :freshservice_ticket_id, :freshservice_task_id, :clickup_task_id]", "(post_mortem) kind can only match [:id]", "(pulse) kind can only match [:id]", "(alert) kind can only match [:id]"]
              * @default id
              * @enum {string}
              */
@@ -14700,7 +17018,22 @@ export interface components {
             };
             /** @description When set to true, if the parent for this threaded message cannot be found the message will be skipped. */
             send_only_as_threaded_message?: boolean;
-        } | unknown | unknown | unknown;
+        } | {
+            channels: {
+                id?: string;
+                name?: string;
+            }[];
+        } | {
+            slack_users: {
+                id?: string;
+                name?: string;
+            }[];
+        } | {
+            slack_user_groups: {
+                id?: string;
+                name?: string;
+            }[];
+        };
         create_openai_chat_completion_task_params: {
             /** @enum {string} */
             task_type?: "openai_chat_completion";
@@ -14788,6 +17121,8 @@ export interface components {
             system_prompt?: string;
             /** @description The prompt to send to Anthropic */
             prompt: string;
+            /** @description Maximum number of tokens to generate. Defaults to 4000 when omitted */
+            max_tokens?: number;
         };
         new_workflow_task: {
             data: {
@@ -14805,7 +17140,7 @@ export interface components {
                      * @default true
                      */
                     enabled: boolean;
-                    task_params: components["schemas"]["add_action_item_task_params"] | components["schemas"]["update_action_item_task_params"] | components["schemas"]["add_role_task_params"] | components["schemas"]["add_slack_bookmark_task_params"] | components["schemas"]["add_team_task_params"] | components["schemas"]["add_to_timeline_task_params"] | components["schemas"]["archive_slack_channels_task_params"] | components["schemas"]["attach_datadog_dashboards_task_params"] | components["schemas"]["auto_assign_role_opsgenie_task_params"] | components["schemas"]["auto_assign_role_rootly_task_params"] | components["schemas"]["auto_assign_role_pagerduty_task_params"] | components["schemas"]["update_pagerduty_incident_task_params"] | components["schemas"]["create_pagerduty_status_update_task_params"] | components["schemas"]["create_pagertree_alert_task_params"] | components["schemas"]["update_pagertree_alert_task_params"] | components["schemas"]["auto_assign_role_victor_ops_task_params"] | components["schemas"]["call_people_task_params"] | components["schemas"]["create_airtable_table_record_task_params"] | components["schemas"]["create_asana_subtask_task_params"] | components["schemas"]["create_asana_task_task_params"] | components["schemas"]["create_confluence_page_task_params"] | components["schemas"]["create_datadog_notebook_task_params"] | components["schemas"]["create_coda_page_task_params"] | components["schemas"]["create_dropbox_paper_page_task_params"] | components["schemas"]["create_github_issue_task_params"] | components["schemas"]["create_gitlab_issue_task_params"] | components["schemas"]["create_outlook_event_task_params"] | components["schemas"]["create_google_calendar_event_task_params"] | components["schemas"]["update_google_docs_page_task_params"] | components["schemas"]["update_coda_page_task_params"] | components["schemas"]["update_google_calendar_event_task_params"] | components["schemas"]["create_sharepoint_page_task_params"] | components["schemas"]["create_google_docs_page_task_params"] | components["schemas"]["create_google_docs_permissions_task_params"] | components["schemas"]["remove_google_docs_permissions_task_params"] | components["schemas"]["create_quip_page_task_params"] | components["schemas"]["create_google_meeting_task_params"] | components["schemas"]["create_go_to_meeting_task_params"] | components["schemas"]["create_incident_task_params"] | components["schemas"]["create_sub_incident_task_params"] | components["schemas"]["create_incident_postmortem_task_params"] | components["schemas"]["create_jira_issue_task_params"] | components["schemas"]["create_jira_subtask_task_params"] | components["schemas"]["create_linear_issue_task_params"] | components["schemas"]["create_linear_subtask_issue_task_params"] | components["schemas"]["create_linear_issue_comment_task_params"] | components["schemas"]["create_microsoft_teams_meeting_task_params"] | components["schemas"]["create_microsoft_teams_channel_task_params"] | components["schemas"]["create_microsoft_teams_chat_task_params"] | components["schemas"]["add_microsoft_teams_tab_task_params"] | components["schemas"]["add_microsoft_teams_chat_tab_task_params"] | components["schemas"]["archive_microsoft_teams_channels_task_params"] | components["schemas"]["rename_microsoft_teams_channel_task_params"] | components["schemas"]["invite_to_microsoft_teams_channel_task_params"] | components["schemas"]["create_notion_page_task_params"] | components["schemas"]["send_microsoft_teams_message_task_params"] | components["schemas"]["send_microsoft_teams_chat_message_task_params"] | components["schemas"]["send_microsoft_teams_blocks_task_params"] | components["schemas"]["update_notion_page_task_params"] | components["schemas"]["update_quip_page_task_params"] | components["schemas"]["update_confluence_page_task_params"] | components["schemas"]["update_sharepoint_page_task_params"] | components["schemas"]["update_dropbox_paper_page_task_params"] | components["schemas"]["update_datadog_notebook_task_params"] | components["schemas"]["create_service_now_incident_task_params"] | components["schemas"]["create_shortcut_story_task_params"] | components["schemas"]["create_shortcut_task_task_params"] | components["schemas"]["create_trello_card_task_params"] | components["schemas"]["create_webex_meeting_task_params"] | components["schemas"]["create_zendesk_ticket_task_params"] | components["schemas"]["create_zendesk_jira_link_task_params"] | components["schemas"]["create_clickup_task_task_params"] | components["schemas"]["create_motion_task_task_params"] | components["schemas"]["create_zoom_meeting_task_params"] | components["schemas"]["get_github_commits_task_params"] | components["schemas"]["get_gitlab_commits_task_params"] | components["schemas"]["get_pulses_task_params"] | components["schemas"]["get_alerts_task_params"] | components["schemas"]["http_client_task_params"] | components["schemas"]["invite_to_slack_channel_opsgenie_task_params"] | components["schemas"]["invite_to_slack_channel_rootly_task_params"] | components["schemas"]["invite_to_slack_channel_pagerduty_task_params"] | components["schemas"]["invite_to_slack_channel_task_params"] | components["schemas"]["invite_to_slack_channel_victor_ops_task_params"] | components["schemas"]["page_opsgenie_on_call_responders_task_params"] | components["schemas"]["create_opsgenie_alert_task_params"] | components["schemas"]["create_jsmops_alert_task_params"] | components["schemas"]["page_jsmops_on_call_responders_task_params"] | components["schemas"]["update_opsgenie_alert_task_params"] | components["schemas"]["update_opsgenie_incident_task_params"] | components["schemas"]["page_rootly_on_call_responders_task_params"] | components["schemas"]["page_pagerduty_on_call_responders_task_params"] | components["schemas"]["page_victor_ops_on_call_responders_task_params"] | components["schemas"]["update_victor_ops_incident_task_params"] | components["schemas"]["print_task_params"] | components["schemas"]["publish_incident_task_params"] | components["schemas"]["redis_client_task_params"] | components["schemas"]["rename_slack_channel_task_params"] | components["schemas"]["change_slack_channel_privacy_task_params"] | components["schemas"]["run_command_heroku_task_params"] | components["schemas"]["send_email_task_params"] | components["schemas"]["send_dashboard_report_task_params"] | components["schemas"]["create_slack_channel_task_params"] | components["schemas"]["send_slack_message_task_params"] | components["schemas"]["send_sms_task_params"] | components["schemas"]["send_whatsapp_message_task_params"] | components["schemas"]["snapshot_datadog_graph_task_params"] | components["schemas"]["snapshot_grafana_dashboard_task_params"] | components["schemas"]["snapshot_looker_look_task_params"] | components["schemas"]["snapshot_new_relic_graph_task_params"] | components["schemas"]["tweet_twitter_message_task_params"] | components["schemas"]["update_airtable_table_record_task_params"] | components["schemas"]["update_asana_task_task_params"] | components["schemas"]["update_github_issue_task_params"] | components["schemas"]["update_gitlab_issue_task_params"] | components["schemas"]["update_incident_task_params"] | components["schemas"]["update_incident_postmortem_task_params"] | components["schemas"]["update_jira_issue_task_params"] | components["schemas"]["update_linear_issue_task_params"] | components["schemas"]["update_service_now_incident_task_params"] | components["schemas"]["update_shortcut_story_task_params"] | components["schemas"]["update_shortcut_task_task_params"] | components["schemas"]["update_slack_channel_topic_task_params"] | components["schemas"]["update_status_task_params"] | components["schemas"]["update_incident_status_timestamp_task_params"] | components["schemas"]["update_trello_card_task_params"] | components["schemas"]["update_clickup_task_task_params"] | components["schemas"]["update_motion_task_task_params"] | components["schemas"]["update_zendesk_ticket_task_params"] | components["schemas"]["update_attached_alerts_task_params"] | components["schemas"]["trigger_workflow_task_params"] | components["schemas"]["send_slack_blocks_task_params"] | components["schemas"]["create_openai_chat_completion_task_params"] | components["schemas"]["create_watsonx_chat_completion_task_params"] | components["schemas"]["create_google_gemini_chat_completion_task_params"] | components["schemas"]["create_mistral_chat_completion_task_params"] | components["schemas"]["create_anthropic_chat_completion_task_params"];
+                    task_params: components["schemas"]["add_action_item_task_params"] | components["schemas"]["update_action_item_task_params"] | components["schemas"]["add_role_task_params"] | components["schemas"]["add_slack_bookmark_task_params"] | components["schemas"]["add_team_task_params"] | components["schemas"]["add_to_timeline_task_params"] | components["schemas"]["archive_slack_channels_task_params"] | components["schemas"]["attach_datadog_dashboards_task_params"] | components["schemas"]["auto_assign_role_opsgenie_task_params"] | components["schemas"]["auto_assign_role_rootly_task_params"] | components["schemas"]["auto_assign_role_pagerduty_task_params"] | components["schemas"]["update_pagerduty_incident_task_params"] | components["schemas"]["create_pagerduty_status_update_task_params"] | components["schemas"]["create_pagertree_alert_task_params"] | components["schemas"]["update_pagertree_alert_task_params"] | components["schemas"]["auto_assign_role_victor_ops_task_params"] | components["schemas"]["call_people_task_params"] | components["schemas"]["create_airtable_table_record_task_params"] | components["schemas"]["create_asana_subtask_task_params"] | components["schemas"]["create_asana_task_task_params"] | components["schemas"]["create_confluence_page_task_params"] | components["schemas"]["create_datadog_notebook_task_params"] | components["schemas"]["create_coda_page_task_params"] | components["schemas"]["create_dropbox_paper_page_task_params"] | components["schemas"]["create_github_issue_task_params"] | components["schemas"]["create_gitlab_issue_task_params"] | components["schemas"]["create_outlook_event_task_params"] | components["schemas"]["create_google_calendar_event_task_params"] | components["schemas"]["update_google_docs_page_task_params"] | components["schemas"]["update_coda_page_task_params"] | components["schemas"]["update_google_calendar_event_task_params"] | components["schemas"]["create_sharepoint_page_task_params"] | components["schemas"]["create_google_docs_page_task_params"] | components["schemas"]["create_google_docs_permissions_task_params"] | components["schemas"]["remove_google_docs_permissions_task_params"] | components["schemas"]["create_quip_page_task_params"] | components["schemas"]["create_google_meeting_task_params"] | components["schemas"]["create_go_to_meeting_task_params"] | components["schemas"]["create_incident_task_params"] | components["schemas"]["create_sub_incident_task_params"] | components["schemas"]["create_incident_postmortem_task_params"] | components["schemas"]["create_jira_issue_task_params"] | components["schemas"]["create_jira_subtask_task_params"] | components["schemas"]["attach_retrospective_pdf_to_jira_issue_task_params"] | components["schemas"]["attach_retrospective_pdf_to_freshservice_ticket_task_params"] | components["schemas"]["create_linear_issue_task_params"] | components["schemas"]["create_linear_subtask_issue_task_params"] | components["schemas"]["create_linear_issue_comment_task_params"] | components["schemas"]["create_microsoft_teams_meeting_task_params"] | components["schemas"]["create_microsoft_teams_channel_task_params"] | components["schemas"]["create_microsoft_teams_chat_task_params"] | components["schemas"]["add_microsoft_teams_tab_task_params"] | components["schemas"]["add_microsoft_teams_chat_tab_task_params"] | components["schemas"]["create_google_chat_space_task_params"] | components["schemas"]["send_google_chat_message_task_params"] | components["schemas"]["send_google_chat_attachments_task_params"] | components["schemas"]["invite_to_google_chat_space_task_params"] | components["schemas"]["archive_google_chat_spaces_task_params"] | components["schemas"]["rename_google_chat_space_task_params"] | components["schemas"]["update_google_chat_space_description_task_params"] | components["schemas"]["change_google_chat_space_privacy_task_params"] | components["schemas"]["archive_microsoft_teams_channels_task_params"] | components["schemas"]["rename_microsoft_teams_channel_task_params"] | components["schemas"]["invite_to_microsoft_teams_channel_task_params"] | components["schemas"]["create_notion_page_task_params"] | components["schemas"]["send_microsoft_teams_message_task_params"] | components["schemas"]["send_microsoft_teams_chat_message_task_params"] | components["schemas"]["send_microsoft_teams_blocks_task_params"] | components["schemas"]["update_notion_page_task_params"] | components["schemas"]["update_quip_page_task_params"] | components["schemas"]["update_confluence_page_task_params"] | components["schemas"]["update_sharepoint_page_task_params"] | components["schemas"]["update_dropbox_paper_page_task_params"] | components["schemas"]["update_datadog_notebook_task_params"] | components["schemas"]["create_service_now_incident_task_params"] | components["schemas"]["create_shortcut_story_task_params"] | components["schemas"]["create_shortcut_task_task_params"] | components["schemas"]["create_trello_card_task_params"] | components["schemas"]["create_webex_meeting_task_params"] | components["schemas"]["create_zendesk_ticket_task_params"] | components["schemas"]["create_zendesk_jira_link_task_params"] | components["schemas"]["create_clickup_task_task_params"] | components["schemas"]["create_motion_task_task_params"] | components["schemas"]["create_zoom_meeting_task_params"] | components["schemas"]["get_github_commits_task_params"] | components["schemas"]["get_gitlab_commits_task_params"] | components["schemas"]["get_pulses_task_params"] | components["schemas"]["get_alerts_task_params"] | components["schemas"]["http_client_task_params"] | components["schemas"]["invite_to_slack_channel_opsgenie_task_params"] | components["schemas"]["invite_to_slack_channel_rootly_task_params"] | components["schemas"]["invite_to_microsoft_teams_channel_rootly_task_params"] | components["schemas"]["invite_to_slack_channel_pagerduty_task_params"] | components["schemas"]["invite_to_slack_channel_task_params"] | components["schemas"]["invite_to_slack_channel_victor_ops_task_params"] | components["schemas"]["page_opsgenie_on_call_responders_task_params"] | components["schemas"]["create_opsgenie_alert_task_params"] | components["schemas"]["create_jsmops_alert_task_params"] | components["schemas"]["page_jsmops_on_call_responders_task_params"] | components["schemas"]["update_opsgenie_alert_task_params"] | components["schemas"]["update_opsgenie_incident_task_params"] | components["schemas"]["page_rootly_on_call_responders_task_params"] | components["schemas"]["page_pagerduty_on_call_responders_task_params"] | components["schemas"]["page_victor_ops_on_call_responders_task_params"] | components["schemas"]["update_victor_ops_incident_task_params"] | components["schemas"]["print_task_params"] | components["schemas"]["publish_incident_task_params"] | components["schemas"]["redis_client_task_params"] | components["schemas"]["rename_slack_channel_task_params"] | components["schemas"]["change_slack_channel_privacy_task_params"] | components["schemas"]["run_command_heroku_task_params"] | components["schemas"]["send_email_task_params"] | components["schemas"]["send_dashboard_report_task_params"] | components["schemas"]["create_slack_channel_task_params"] | components["schemas"]["send_slack_message_task_params"] | components["schemas"]["send_sms_task_params"] | components["schemas"]["send_whatsapp_message_task_params"] | components["schemas"]["snapshot_datadog_graph_task_params"] | components["schemas"]["snapshot_grafana_dashboard_task_params"] | components["schemas"]["snapshot_looker_look_task_params"] | components["schemas"]["snapshot_new_relic_graph_task_params"] | components["schemas"]["tweet_twitter_message_task_params"] | components["schemas"]["update_airtable_table_record_task_params"] | components["schemas"]["update_asana_task_task_params"] | components["schemas"]["update_github_issue_task_params"] | components["schemas"]["update_gitlab_issue_task_params"] | components["schemas"]["update_incident_task_params"] | components["schemas"]["update_incident_postmortem_task_params"] | components["schemas"]["update_jira_issue_task_params"] | components["schemas"]["update_linear_issue_task_params"] | components["schemas"]["update_service_now_incident_task_params"] | components["schemas"]["update_shortcut_story_task_params"] | components["schemas"]["update_shortcut_task_task_params"] | components["schemas"]["update_slack_channel_topic_task_params"] | components["schemas"]["update_status_task_params"] | components["schemas"]["update_incident_status_timestamp_task_params"] | components["schemas"]["update_trello_card_task_params"] | components["schemas"]["update_clickup_task_task_params"] | components["schemas"]["update_motion_task_task_params"] | components["schemas"]["update_zendesk_ticket_task_params"] | components["schemas"]["update_attached_alerts_task_params"] | components["schemas"]["trigger_workflow_task_params"] | components["schemas"]["send_slack_blocks_task_params"] | components["schemas"]["create_openai_chat_completion_task_params"] | components["schemas"]["create_watsonx_chat_completion_task_params"] | components["schemas"]["create_google_gemini_chat_completion_task_params"] | components["schemas"]["create_mistral_chat_completion_task_params"] | components["schemas"]["create_anthropic_chat_completion_task_params"];
                 };
             };
         };
@@ -14825,14 +17160,14 @@ export interface components {
                      * @default true
                      */
                     enabled: boolean;
-                    task_params?: components["schemas"]["add_action_item_task_params"] | components["schemas"]["update_action_item_task_params"] | components["schemas"]["add_role_task_params"] | components["schemas"]["add_slack_bookmark_task_params"] | components["schemas"]["add_team_task_params"] | components["schemas"]["add_to_timeline_task_params"] | components["schemas"]["archive_slack_channels_task_params"] | components["schemas"]["attach_datadog_dashboards_task_params"] | components["schemas"]["auto_assign_role_opsgenie_task_params"] | components["schemas"]["auto_assign_role_rootly_task_params"] | components["schemas"]["auto_assign_role_pagerduty_task_params"] | components["schemas"]["update_pagerduty_incident_task_params"] | components["schemas"]["create_pagerduty_status_update_task_params"] | components["schemas"]["create_pagertree_alert_task_params"] | components["schemas"]["update_pagertree_alert_task_params"] | components["schemas"]["auto_assign_role_victor_ops_task_params"] | components["schemas"]["call_people_task_params"] | components["schemas"]["create_airtable_table_record_task_params"] | components["schemas"]["create_asana_subtask_task_params"] | components["schemas"]["create_asana_task_task_params"] | components["schemas"]["create_confluence_page_task_params"] | components["schemas"]["create_datadog_notebook_task_params"] | components["schemas"]["create_coda_page_task_params"] | components["schemas"]["create_dropbox_paper_page_task_params"] | components["schemas"]["create_github_issue_task_params"] | components["schemas"]["create_gitlab_issue_task_params"] | components["schemas"]["create_outlook_event_task_params"] | components["schemas"]["create_google_calendar_event_task_params"] | components["schemas"]["update_google_docs_page_task_params"] | components["schemas"]["update_coda_page_task_params"] | components["schemas"]["update_google_calendar_event_task_params"] | components["schemas"]["create_sharepoint_page_task_params"] | components["schemas"]["create_google_docs_page_task_params"] | components["schemas"]["create_google_docs_permissions_task_params"] | components["schemas"]["remove_google_docs_permissions_task_params"] | components["schemas"]["create_quip_page_task_params"] | components["schemas"]["create_google_meeting_task_params"] | components["schemas"]["create_go_to_meeting_task_params"] | components["schemas"]["create_incident_task_params"] | components["schemas"]["create_sub_incident_task_params"] | components["schemas"]["create_incident_postmortem_task_params"] | components["schemas"]["create_jira_issue_task_params"] | components["schemas"]["create_jira_subtask_task_params"] | components["schemas"]["create_linear_issue_task_params"] | components["schemas"]["create_linear_subtask_issue_task_params"] | components["schemas"]["create_linear_issue_comment_task_params"] | components["schemas"]["create_microsoft_teams_meeting_task_params"] | components["schemas"]["create_microsoft_teams_channel_task_params"] | components["schemas"]["create_microsoft_teams_chat_task_params"] | components["schemas"]["add_microsoft_teams_tab_task_params"] | components["schemas"]["add_microsoft_teams_chat_tab_task_params"] | components["schemas"]["archive_microsoft_teams_channels_task_params"] | components["schemas"]["rename_microsoft_teams_channel_task_params"] | components["schemas"]["invite_to_microsoft_teams_channel_task_params"] | components["schemas"]["create_notion_page_task_params"] | components["schemas"]["send_microsoft_teams_message_task_params"] | components["schemas"]["send_microsoft_teams_chat_message_task_params"] | components["schemas"]["send_microsoft_teams_blocks_task_params"] | components["schemas"]["update_notion_page_task_params"] | components["schemas"]["update_quip_page_task_params"] | components["schemas"]["update_confluence_page_task_params"] | components["schemas"]["update_sharepoint_page_task_params"] | components["schemas"]["update_dropbox_paper_page_task_params"] | components["schemas"]["update_datadog_notebook_task_params"] | components["schemas"]["create_service_now_incident_task_params"] | components["schemas"]["create_shortcut_story_task_params"] | components["schemas"]["create_shortcut_task_task_params"] | components["schemas"]["create_trello_card_task_params"] | components["schemas"]["create_webex_meeting_task_params"] | components["schemas"]["create_zendesk_ticket_task_params"] | components["schemas"]["create_zendesk_jira_link_task_params"] | components["schemas"]["create_clickup_task_task_params"] | components["schemas"]["create_motion_task_task_params"] | components["schemas"]["create_zoom_meeting_task_params"] | components["schemas"]["get_github_commits_task_params"] | components["schemas"]["get_gitlab_commits_task_params"] | components["schemas"]["get_pulses_task_params"] | components["schemas"]["get_alerts_task_params"] | components["schemas"]["http_client_task_params"] | components["schemas"]["invite_to_slack_channel_opsgenie_task_params"] | components["schemas"]["invite_to_slack_channel_rootly_task_params"] | components["schemas"]["invite_to_slack_channel_pagerduty_task_params"] | components["schemas"]["invite_to_slack_channel_task_params"] | components["schemas"]["invite_to_slack_channel_victor_ops_task_params"] | components["schemas"]["page_opsgenie_on_call_responders_task_params"] | components["schemas"]["create_opsgenie_alert_task_params"] | components["schemas"]["create_jsmops_alert_task_params"] | components["schemas"]["page_jsmops_on_call_responders_task_params"] | components["schemas"]["update_opsgenie_alert_task_params"] | components["schemas"]["update_opsgenie_incident_task_params"] | components["schemas"]["page_rootly_on_call_responders_task_params"] | components["schemas"]["page_pagerduty_on_call_responders_task_params"] | components["schemas"]["page_victor_ops_on_call_responders_task_params"] | components["schemas"]["update_victor_ops_incident_task_params"] | components["schemas"]["print_task_params"] | components["schemas"]["publish_incident_task_params"] | components["schemas"]["redis_client_task_params"] | components["schemas"]["rename_slack_channel_task_params"] | components["schemas"]["change_slack_channel_privacy_task_params"] | components["schemas"]["run_command_heroku_task_params"] | components["schemas"]["send_email_task_params"] | components["schemas"]["send_dashboard_report_task_params"] | components["schemas"]["create_slack_channel_task_params"] | components["schemas"]["send_slack_message_task_params"] | components["schemas"]["send_sms_task_params"] | components["schemas"]["send_whatsapp_message_task_params"] | components["schemas"]["snapshot_datadog_graph_task_params"] | components["schemas"]["snapshot_grafana_dashboard_task_params"] | components["schemas"]["snapshot_looker_look_task_params"] | components["schemas"]["snapshot_new_relic_graph_task_params"] | components["schemas"]["tweet_twitter_message_task_params"] | components["schemas"]["update_airtable_table_record_task_params"] | components["schemas"]["update_asana_task_task_params"] | components["schemas"]["update_github_issue_task_params"] | components["schemas"]["update_gitlab_issue_task_params"] | components["schemas"]["update_incident_task_params"] | components["schemas"]["update_incident_postmortem_task_params"] | components["schemas"]["update_jira_issue_task_params"] | components["schemas"]["update_linear_issue_task_params"] | components["schemas"]["update_service_now_incident_task_params"] | components["schemas"]["update_shortcut_story_task_params"] | components["schemas"]["update_shortcut_task_task_params"] | components["schemas"]["update_slack_channel_topic_task_params"] | components["schemas"]["update_status_task_params"] | components["schemas"]["update_incident_status_timestamp_task_params"] | components["schemas"]["update_trello_card_task_params"] | components["schemas"]["update_clickup_task_task_params"] | components["schemas"]["update_motion_task_task_params"] | components["schemas"]["update_zendesk_ticket_task_params"] | components["schemas"]["update_attached_alerts_task_params"] | components["schemas"]["trigger_workflow_task_params"] | components["schemas"]["send_slack_blocks_task_params"] | components["schemas"]["create_openai_chat_completion_task_params"] | components["schemas"]["create_watsonx_chat_completion_task_params"] | components["schemas"]["create_google_gemini_chat_completion_task_params"] | components["schemas"]["create_mistral_chat_completion_task_params"] | components["schemas"]["create_anthropic_chat_completion_task_params"];
+                    task_params?: components["schemas"]["add_action_item_task_params"] | components["schemas"]["update_action_item_task_params"] | components["schemas"]["add_role_task_params"] | components["schemas"]["add_slack_bookmark_task_params"] | components["schemas"]["add_team_task_params"] | components["schemas"]["add_to_timeline_task_params"] | components["schemas"]["archive_slack_channels_task_params"] | components["schemas"]["attach_datadog_dashboards_task_params"] | components["schemas"]["auto_assign_role_opsgenie_task_params"] | components["schemas"]["auto_assign_role_rootly_task_params"] | components["schemas"]["auto_assign_role_pagerduty_task_params"] | components["schemas"]["update_pagerduty_incident_task_params"] | components["schemas"]["create_pagerduty_status_update_task_params"] | components["schemas"]["create_pagertree_alert_task_params"] | components["schemas"]["update_pagertree_alert_task_params"] | components["schemas"]["auto_assign_role_victor_ops_task_params"] | components["schemas"]["call_people_task_params"] | components["schemas"]["create_airtable_table_record_task_params"] | components["schemas"]["create_asana_subtask_task_params"] | components["schemas"]["create_asana_task_task_params"] | components["schemas"]["create_confluence_page_task_params"] | components["schemas"]["create_datadog_notebook_task_params"] | components["schemas"]["create_coda_page_task_params"] | components["schemas"]["create_dropbox_paper_page_task_params"] | components["schemas"]["create_github_issue_task_params"] | components["schemas"]["create_gitlab_issue_task_params"] | components["schemas"]["create_outlook_event_task_params"] | components["schemas"]["create_google_calendar_event_task_params"] | components["schemas"]["update_google_docs_page_task_params"] | components["schemas"]["update_coda_page_task_params"] | components["schemas"]["update_google_calendar_event_task_params"] | components["schemas"]["create_sharepoint_page_task_params"] | components["schemas"]["create_google_docs_page_task_params"] | components["schemas"]["create_google_docs_permissions_task_params"] | components["schemas"]["remove_google_docs_permissions_task_params"] | components["schemas"]["create_quip_page_task_params"] | components["schemas"]["create_google_meeting_task_params"] | components["schemas"]["create_go_to_meeting_task_params"] | components["schemas"]["create_incident_task_params"] | components["schemas"]["create_sub_incident_task_params"] | components["schemas"]["create_incident_postmortem_task_params"] | components["schemas"]["create_jira_issue_task_params"] | components["schemas"]["create_jira_subtask_task_params"] | components["schemas"]["attach_retrospective_pdf_to_jira_issue_task_params"] | components["schemas"]["attach_retrospective_pdf_to_freshservice_ticket_task_params"] | components["schemas"]["create_linear_issue_task_params"] | components["schemas"]["create_linear_subtask_issue_task_params"] | components["schemas"]["create_linear_issue_comment_task_params"] | components["schemas"]["create_microsoft_teams_meeting_task_params"] | components["schemas"]["create_microsoft_teams_channel_task_params"] | components["schemas"]["create_microsoft_teams_chat_task_params"] | components["schemas"]["add_microsoft_teams_tab_task_params"] | components["schemas"]["add_microsoft_teams_chat_tab_task_params"] | components["schemas"]["create_google_chat_space_task_params"] | components["schemas"]["send_google_chat_message_task_params"] | components["schemas"]["send_google_chat_attachments_task_params"] | components["schemas"]["invite_to_google_chat_space_task_params"] | components["schemas"]["archive_google_chat_spaces_task_params"] | components["schemas"]["rename_google_chat_space_task_params"] | components["schemas"]["update_google_chat_space_description_task_params"] | components["schemas"]["change_google_chat_space_privacy_task_params"] | components["schemas"]["archive_microsoft_teams_channels_task_params"] | components["schemas"]["rename_microsoft_teams_channel_task_params"] | components["schemas"]["invite_to_microsoft_teams_channel_task_params"] | components["schemas"]["create_notion_page_task_params"] | components["schemas"]["send_microsoft_teams_message_task_params"] | components["schemas"]["send_microsoft_teams_chat_message_task_params"] | components["schemas"]["send_microsoft_teams_blocks_task_params"] | components["schemas"]["update_notion_page_task_params"] | components["schemas"]["update_quip_page_task_params"] | components["schemas"]["update_confluence_page_task_params"] | components["schemas"]["update_sharepoint_page_task_params"] | components["schemas"]["update_dropbox_paper_page_task_params"] | components["schemas"]["update_datadog_notebook_task_params"] | components["schemas"]["create_service_now_incident_task_params"] | components["schemas"]["create_shortcut_story_task_params"] | components["schemas"]["create_shortcut_task_task_params"] | components["schemas"]["create_trello_card_task_params"] | components["schemas"]["create_webex_meeting_task_params"] | components["schemas"]["create_zendesk_ticket_task_params"] | components["schemas"]["create_zendesk_jira_link_task_params"] | components["schemas"]["create_clickup_task_task_params"] | components["schemas"]["create_motion_task_task_params"] | components["schemas"]["create_zoom_meeting_task_params"] | components["schemas"]["get_github_commits_task_params"] | components["schemas"]["get_gitlab_commits_task_params"] | components["schemas"]["get_pulses_task_params"] | components["schemas"]["get_alerts_task_params"] | components["schemas"]["http_client_task_params"] | components["schemas"]["invite_to_slack_channel_opsgenie_task_params"] | components["schemas"]["invite_to_slack_channel_rootly_task_params"] | components["schemas"]["invite_to_microsoft_teams_channel_rootly_task_params"] | components["schemas"]["invite_to_slack_channel_pagerduty_task_params"] | components["schemas"]["invite_to_slack_channel_task_params"] | components["schemas"]["invite_to_slack_channel_victor_ops_task_params"] | components["schemas"]["page_opsgenie_on_call_responders_task_params"] | components["schemas"]["create_opsgenie_alert_task_params"] | components["schemas"]["create_jsmops_alert_task_params"] | components["schemas"]["page_jsmops_on_call_responders_task_params"] | components["schemas"]["update_opsgenie_alert_task_params"] | components["schemas"]["update_opsgenie_incident_task_params"] | components["schemas"]["page_rootly_on_call_responders_task_params"] | components["schemas"]["page_pagerduty_on_call_responders_task_params"] | components["schemas"]["page_victor_ops_on_call_responders_task_params"] | components["schemas"]["update_victor_ops_incident_task_params"] | components["schemas"]["print_task_params"] | components["schemas"]["publish_incident_task_params"] | components["schemas"]["redis_client_task_params"] | components["schemas"]["rename_slack_channel_task_params"] | components["schemas"]["change_slack_channel_privacy_task_params"] | components["schemas"]["run_command_heroku_task_params"] | components["schemas"]["send_email_task_params"] | components["schemas"]["send_dashboard_report_task_params"] | components["schemas"]["create_slack_channel_task_params"] | components["schemas"]["send_slack_message_task_params"] | components["schemas"]["send_sms_task_params"] | components["schemas"]["send_whatsapp_message_task_params"] | components["schemas"]["snapshot_datadog_graph_task_params"] | components["schemas"]["snapshot_grafana_dashboard_task_params"] | components["schemas"]["snapshot_looker_look_task_params"] | components["schemas"]["snapshot_new_relic_graph_task_params"] | components["schemas"]["tweet_twitter_message_task_params"] | components["schemas"]["update_airtable_table_record_task_params"] | components["schemas"]["update_asana_task_task_params"] | components["schemas"]["update_github_issue_task_params"] | components["schemas"]["update_gitlab_issue_task_params"] | components["schemas"]["update_incident_task_params"] | components["schemas"]["update_incident_postmortem_task_params"] | components["schemas"]["update_jira_issue_task_params"] | components["schemas"]["update_linear_issue_task_params"] | components["schemas"]["update_service_now_incident_task_params"] | components["schemas"]["update_shortcut_story_task_params"] | components["schemas"]["update_shortcut_task_task_params"] | components["schemas"]["update_slack_channel_topic_task_params"] | components["schemas"]["update_status_task_params"] | components["schemas"]["update_incident_status_timestamp_task_params"] | components["schemas"]["update_trello_card_task_params"] | components["schemas"]["update_clickup_task_task_params"] | components["schemas"]["update_motion_task_task_params"] | components["schemas"]["update_zendesk_ticket_task_params"] | components["schemas"]["update_attached_alerts_task_params"] | components["schemas"]["trigger_workflow_task_params"] | components["schemas"]["send_slack_blocks_task_params"] | components["schemas"]["create_openai_chat_completion_task_params"] | components["schemas"]["create_watsonx_chat_completion_task_params"] | components["schemas"]["create_google_gemini_chat_completion_task_params"] | components["schemas"]["create_mistral_chat_completion_task_params"] | components["schemas"]["create_anthropic_chat_completion_task_params"];
                 };
             };
         };
         workflow_task: {
             /** @description The ID of the parent workflow */
             workflow_id: string;
-            task_params: components["schemas"]["add_action_item_task_params"] | components["schemas"]["update_action_item_task_params"] | components["schemas"]["add_role_task_params"] | components["schemas"]["add_slack_bookmark_task_params"] | components["schemas"]["add_team_task_params"] | components["schemas"]["add_to_timeline_task_params"] | components["schemas"]["archive_slack_channels_task_params"] | components["schemas"]["attach_datadog_dashboards_task_params"] | components["schemas"]["auto_assign_role_opsgenie_task_params"] | components["schemas"]["auto_assign_role_rootly_task_params"] | components["schemas"]["auto_assign_role_pagerduty_task_params"] | components["schemas"]["update_pagerduty_incident_task_params"] | components["schemas"]["create_pagerduty_status_update_task_params"] | components["schemas"]["create_pagertree_alert_task_params"] | components["schemas"]["update_pagertree_alert_task_params"] | components["schemas"]["auto_assign_role_victor_ops_task_params"] | components["schemas"]["call_people_task_params"] | components["schemas"]["create_airtable_table_record_task_params"] | components["schemas"]["create_asana_subtask_task_params"] | components["schemas"]["create_asana_task_task_params"] | components["schemas"]["create_confluence_page_task_params"] | components["schemas"]["create_datadog_notebook_task_params"] | components["schemas"]["create_coda_page_task_params"] | components["schemas"]["create_dropbox_paper_page_task_params"] | components["schemas"]["create_github_issue_task_params"] | components["schemas"]["create_gitlab_issue_task_params"] | components["schemas"]["create_outlook_event_task_params"] | components["schemas"]["create_google_calendar_event_task_params"] | components["schemas"]["update_google_docs_page_task_params"] | components["schemas"]["update_coda_page_task_params"] | components["schemas"]["update_google_calendar_event_task_params"] | components["schemas"]["create_sharepoint_page_task_params"] | components["schemas"]["create_google_docs_page_task_params"] | components["schemas"]["create_google_docs_permissions_task_params"] | components["schemas"]["remove_google_docs_permissions_task_params"] | components["schemas"]["create_quip_page_task_params"] | components["schemas"]["create_google_meeting_task_params"] | components["schemas"]["create_go_to_meeting_task_params"] | components["schemas"]["create_incident_task_params"] | components["schemas"]["create_sub_incident_task_params"] | components["schemas"]["create_incident_postmortem_task_params"] | components["schemas"]["create_jira_issue_task_params"] | components["schemas"]["create_jira_subtask_task_params"] | components["schemas"]["create_linear_issue_task_params"] | components["schemas"]["create_linear_subtask_issue_task_params"] | components["schemas"]["create_linear_issue_comment_task_params"] | components["schemas"]["create_microsoft_teams_meeting_task_params"] | components["schemas"]["create_microsoft_teams_channel_task_params"] | components["schemas"]["create_microsoft_teams_chat_task_params"] | components["schemas"]["add_microsoft_teams_tab_task_params"] | components["schemas"]["add_microsoft_teams_chat_tab_task_params"] | components["schemas"]["archive_microsoft_teams_channels_task_params"] | components["schemas"]["rename_microsoft_teams_channel_task_params"] | components["schemas"]["invite_to_microsoft_teams_channel_task_params"] | components["schemas"]["create_notion_page_task_params"] | components["schemas"]["send_microsoft_teams_message_task_params"] | components["schemas"]["send_microsoft_teams_chat_message_task_params"] | components["schemas"]["send_microsoft_teams_blocks_task_params"] | components["schemas"]["update_notion_page_task_params"] | components["schemas"]["update_quip_page_task_params"] | components["schemas"]["update_confluence_page_task_params"] | components["schemas"]["update_sharepoint_page_task_params"] | components["schemas"]["update_dropbox_paper_page_task_params"] | components["schemas"]["update_datadog_notebook_task_params"] | components["schemas"]["create_service_now_incident_task_params"] | components["schemas"]["create_shortcut_story_task_params"] | components["schemas"]["create_shortcut_task_task_params"] | components["schemas"]["create_trello_card_task_params"] | components["schemas"]["create_webex_meeting_task_params"] | components["schemas"]["create_zendesk_ticket_task_params"] | components["schemas"]["create_zendesk_jira_link_task_params"] | components["schemas"]["create_clickup_task_task_params"] | components["schemas"]["create_motion_task_task_params"] | components["schemas"]["create_zoom_meeting_task_params"] | components["schemas"]["get_github_commits_task_params"] | components["schemas"]["get_gitlab_commits_task_params"] | components["schemas"]["get_pulses_task_params"] | components["schemas"]["get_alerts_task_params"] | components["schemas"]["http_client_task_params"] | components["schemas"]["invite_to_slack_channel_opsgenie_task_params"] | components["schemas"]["invite_to_slack_channel_rootly_task_params"] | components["schemas"]["invite_to_slack_channel_pagerduty_task_params"] | components["schemas"]["invite_to_slack_channel_task_params"] | components["schemas"]["invite_to_slack_channel_victor_ops_task_params"] | components["schemas"]["page_opsgenie_on_call_responders_task_params"] | components["schemas"]["create_opsgenie_alert_task_params"] | components["schemas"]["create_jsmops_alert_task_params"] | components["schemas"]["page_jsmops_on_call_responders_task_params"] | components["schemas"]["update_opsgenie_alert_task_params"] | components["schemas"]["update_opsgenie_incident_task_params"] | components["schemas"]["page_rootly_on_call_responders_task_params"] | components["schemas"]["page_pagerduty_on_call_responders_task_params"] | components["schemas"]["page_victor_ops_on_call_responders_task_params"] | components["schemas"]["update_victor_ops_incident_task_params"] | components["schemas"]["print_task_params"] | components["schemas"]["publish_incident_task_params"] | components["schemas"]["redis_client_task_params"] | components["schemas"]["rename_slack_channel_task_params"] | components["schemas"]["change_slack_channel_privacy_task_params"] | components["schemas"]["run_command_heroku_task_params"] | components["schemas"]["send_email_task_params"] | components["schemas"]["send_dashboard_report_task_params"] | components["schemas"]["create_slack_channel_task_params"] | components["schemas"]["send_slack_message_task_params"] | components["schemas"]["send_sms_task_params"] | components["schemas"]["send_whatsapp_message_task_params"] | components["schemas"]["snapshot_datadog_graph_task_params"] | components["schemas"]["snapshot_grafana_dashboard_task_params"] | components["schemas"]["snapshot_looker_look_task_params"] | components["schemas"]["snapshot_new_relic_graph_task_params"] | components["schemas"]["tweet_twitter_message_task_params"] | components["schemas"]["update_airtable_table_record_task_params"] | components["schemas"]["update_asana_task_task_params"] | components["schemas"]["update_github_issue_task_params"] | components["schemas"]["update_gitlab_issue_task_params"] | components["schemas"]["update_incident_task_params"] | components["schemas"]["update_incident_postmortem_task_params"] | components["schemas"]["update_jira_issue_task_params"] | components["schemas"]["update_linear_issue_task_params"] | components["schemas"]["update_service_now_incident_task_params"] | components["schemas"]["update_shortcut_story_task_params"] | components["schemas"]["update_shortcut_task_task_params"] | components["schemas"]["update_slack_channel_topic_task_params"] | components["schemas"]["update_status_task_params"] | components["schemas"]["update_incident_status_timestamp_task_params"] | components["schemas"]["update_trello_card_task_params"] | components["schemas"]["update_clickup_task_task_params"] | components["schemas"]["update_motion_task_task_params"] | components["schemas"]["update_zendesk_ticket_task_params"] | components["schemas"]["update_attached_alerts_task_params"] | components["schemas"]["trigger_workflow_task_params"] | components["schemas"]["send_slack_blocks_task_params"] | components["schemas"]["create_openai_chat_completion_task_params"] | components["schemas"]["create_watsonx_chat_completion_task_params"] | components["schemas"]["create_google_gemini_chat_completion_task_params"] | components["schemas"]["create_mistral_chat_completion_task_params"] | components["schemas"]["create_anthropic_chat_completion_task_params"];
+            task_params: components["schemas"]["add_action_item_task_params"] | components["schemas"]["update_action_item_task_params"] | components["schemas"]["add_role_task_params"] | components["schemas"]["add_slack_bookmark_task_params"] | components["schemas"]["add_team_task_params"] | components["schemas"]["add_to_timeline_task_params"] | components["schemas"]["archive_slack_channels_task_params"] | components["schemas"]["attach_datadog_dashboards_task_params"] | components["schemas"]["auto_assign_role_opsgenie_task_params"] | components["schemas"]["auto_assign_role_rootly_task_params"] | components["schemas"]["auto_assign_role_pagerduty_task_params"] | components["schemas"]["update_pagerduty_incident_task_params"] | components["schemas"]["create_pagerduty_status_update_task_params"] | components["schemas"]["create_pagertree_alert_task_params"] | components["schemas"]["update_pagertree_alert_task_params"] | components["schemas"]["auto_assign_role_victor_ops_task_params"] | components["schemas"]["call_people_task_params"] | components["schemas"]["create_airtable_table_record_task_params"] | components["schemas"]["create_asana_subtask_task_params"] | components["schemas"]["create_asana_task_task_params"] | components["schemas"]["create_confluence_page_task_params"] | components["schemas"]["create_datadog_notebook_task_params"] | components["schemas"]["create_coda_page_task_params"] | components["schemas"]["create_dropbox_paper_page_task_params"] | components["schemas"]["create_github_issue_task_params"] | components["schemas"]["create_gitlab_issue_task_params"] | components["schemas"]["create_outlook_event_task_params"] | components["schemas"]["create_google_calendar_event_task_params"] | components["schemas"]["update_google_docs_page_task_params"] | components["schemas"]["update_coda_page_task_params"] | components["schemas"]["update_google_calendar_event_task_params"] | components["schemas"]["create_sharepoint_page_task_params"] | components["schemas"]["create_google_docs_page_task_params"] | components["schemas"]["create_google_docs_permissions_task_params"] | components["schemas"]["remove_google_docs_permissions_task_params"] | components["schemas"]["create_quip_page_task_params"] | components["schemas"]["create_google_meeting_task_params"] | components["schemas"]["create_go_to_meeting_task_params"] | components["schemas"]["create_incident_task_params"] | components["schemas"]["create_sub_incident_task_params"] | components["schemas"]["create_incident_postmortem_task_params"] | components["schemas"]["create_jira_issue_task_params"] | components["schemas"]["create_jira_subtask_task_params"] | components["schemas"]["attach_retrospective_pdf_to_jira_issue_task_params"] | components["schemas"]["attach_retrospective_pdf_to_freshservice_ticket_task_params"] | components["schemas"]["create_linear_issue_task_params"] | components["schemas"]["create_linear_subtask_issue_task_params"] | components["schemas"]["create_linear_issue_comment_task_params"] | components["schemas"]["create_microsoft_teams_meeting_task_params"] | components["schemas"]["create_microsoft_teams_channel_task_params"] | components["schemas"]["create_microsoft_teams_chat_task_params"] | components["schemas"]["add_microsoft_teams_tab_task_params"] | components["schemas"]["add_microsoft_teams_chat_tab_task_params"] | components["schemas"]["create_google_chat_space_task_params"] | components["schemas"]["send_google_chat_message_task_params"] | components["schemas"]["send_google_chat_attachments_task_params"] | components["schemas"]["invite_to_google_chat_space_task_params"] | components["schemas"]["archive_google_chat_spaces_task_params"] | components["schemas"]["rename_google_chat_space_task_params"] | components["schemas"]["update_google_chat_space_description_task_params"] | components["schemas"]["change_google_chat_space_privacy_task_params"] | components["schemas"]["archive_microsoft_teams_channels_task_params"] | components["schemas"]["rename_microsoft_teams_channel_task_params"] | components["schemas"]["invite_to_microsoft_teams_channel_task_params"] | components["schemas"]["create_notion_page_task_params"] | components["schemas"]["send_microsoft_teams_message_task_params"] | components["schemas"]["send_microsoft_teams_chat_message_task_params"] | components["schemas"]["send_microsoft_teams_blocks_task_params"] | components["schemas"]["update_notion_page_task_params"] | components["schemas"]["update_quip_page_task_params"] | components["schemas"]["update_confluence_page_task_params"] | components["schemas"]["update_sharepoint_page_task_params"] | components["schemas"]["update_dropbox_paper_page_task_params"] | components["schemas"]["update_datadog_notebook_task_params"] | components["schemas"]["create_service_now_incident_task_params"] | components["schemas"]["create_shortcut_story_task_params"] | components["schemas"]["create_shortcut_task_task_params"] | components["schemas"]["create_trello_card_task_params"] | components["schemas"]["create_webex_meeting_task_params"] | components["schemas"]["create_zendesk_ticket_task_params"] | components["schemas"]["create_zendesk_jira_link_task_params"] | components["schemas"]["create_clickup_task_task_params"] | components["schemas"]["create_motion_task_task_params"] | components["schemas"]["create_zoom_meeting_task_params"] | components["schemas"]["get_github_commits_task_params"] | components["schemas"]["get_gitlab_commits_task_params"] | components["schemas"]["get_pulses_task_params"] | components["schemas"]["get_alerts_task_params"] | components["schemas"]["http_client_task_params"] | components["schemas"]["invite_to_slack_channel_opsgenie_task_params"] | components["schemas"]["invite_to_slack_channel_rootly_task_params"] | components["schemas"]["invite_to_microsoft_teams_channel_rootly_task_params"] | components["schemas"]["invite_to_slack_channel_pagerduty_task_params"] | components["schemas"]["invite_to_slack_channel_task_params"] | components["schemas"]["invite_to_slack_channel_victor_ops_task_params"] | components["schemas"]["page_opsgenie_on_call_responders_task_params"] | components["schemas"]["create_opsgenie_alert_task_params"] | components["schemas"]["create_jsmops_alert_task_params"] | components["schemas"]["page_jsmops_on_call_responders_task_params"] | components["schemas"]["update_opsgenie_alert_task_params"] | components["schemas"]["update_opsgenie_incident_task_params"] | components["schemas"]["page_rootly_on_call_responders_task_params"] | components["schemas"]["page_pagerduty_on_call_responders_task_params"] | components["schemas"]["page_victor_ops_on_call_responders_task_params"] | components["schemas"]["update_victor_ops_incident_task_params"] | components["schemas"]["print_task_params"] | components["schemas"]["publish_incident_task_params"] | components["schemas"]["redis_client_task_params"] | components["schemas"]["rename_slack_channel_task_params"] | components["schemas"]["change_slack_channel_privacy_task_params"] | components["schemas"]["run_command_heroku_task_params"] | components["schemas"]["send_email_task_params"] | components["schemas"]["send_dashboard_report_task_params"] | components["schemas"]["create_slack_channel_task_params"] | components["schemas"]["send_slack_message_task_params"] | components["schemas"]["send_sms_task_params"] | components["schemas"]["send_whatsapp_message_task_params"] | components["schemas"]["snapshot_datadog_graph_task_params"] | components["schemas"]["snapshot_grafana_dashboard_task_params"] | components["schemas"]["snapshot_looker_look_task_params"] | components["schemas"]["snapshot_new_relic_graph_task_params"] | components["schemas"]["tweet_twitter_message_task_params"] | components["schemas"]["update_airtable_table_record_task_params"] | components["schemas"]["update_asana_task_task_params"] | components["schemas"]["update_github_issue_task_params"] | components["schemas"]["update_gitlab_issue_task_params"] | components["schemas"]["update_incident_task_params"] | components["schemas"]["update_incident_postmortem_task_params"] | components["schemas"]["update_jira_issue_task_params"] | components["schemas"]["update_linear_issue_task_params"] | components["schemas"]["update_service_now_incident_task_params"] | components["schemas"]["update_shortcut_story_task_params"] | components["schemas"]["update_shortcut_task_task_params"] | components["schemas"]["update_slack_channel_topic_task_params"] | components["schemas"]["update_status_task_params"] | components["schemas"]["update_incident_status_timestamp_task_params"] | components["schemas"]["update_trello_card_task_params"] | components["schemas"]["update_clickup_task_task_params"] | components["schemas"]["update_motion_task_task_params"] | components["schemas"]["update_zendesk_ticket_task_params"] | components["schemas"]["update_attached_alerts_task_params"] | components["schemas"]["trigger_workflow_task_params"] | components["schemas"]["send_slack_blocks_task_params"] | components["schemas"]["create_openai_chat_completion_task_params"] | components["schemas"]["create_watsonx_chat_completion_task_params"] | components["schemas"]["create_google_gemini_chat_completion_task_params"] | components["schemas"]["create_mistral_chat_completion_task_params"] | components["schemas"]["create_anthropic_chat_completion_task_params"];
             /** @description Name of the workflow task */
             name?: string;
             /** @description The position of the workflow task */
@@ -14857,6 +17192,7 @@ export interface components {
                 type: "workflow_tasks";
                 attributes: components["schemas"]["workflow_task"];
             };
+            included?: components["schemas"]["jsonapi_included_resource"][];
         };
         workflow_task_list: {
             data: {
@@ -14868,6 +17204,101 @@ export interface components {
             }[];
             links: components["schemas"]["links"];
             meta: components["schemas"]["meta"];
+            included?: components["schemas"]["jsonapi_included_resource"][];
+        };
+        new_workflow_action_item_form_field_condition: {
+            data: {
+                /** @enum {string} */
+                type: "workflow_action_item_form_field_conditions";
+                attributes: {
+                    /** @description The custom field for this condition */
+                    form_field_id: string;
+                    /**
+                     * @description The trigger condition
+                     * @default ANY
+                     * @enum {string}
+                     */
+                    action_item_condition: "IS" | "IS NOT" | "ANY" | "CONTAINS" | "CONTAINS_ALL" | "CONTAINS_NONE" | "NONE" | "SET" | "UNSET";
+                    values?: string[];
+                    selected_catalog_entity_ids?: string[];
+                    selected_functionality_ids?: string[];
+                    selected_group_ids?: string[];
+                    selected_option_ids?: string[];
+                    selected_service_ids?: string[];
+                    selected_user_ids?: number[];
+                    selected_cause_ids?: string[];
+                    selected_environment_ids?: string[];
+                    selected_incident_type_ids?: string[];
+                };
+            };
+        };
+        update_workflow_action_item_form_field_condition: {
+            data: {
+                /** @enum {string} */
+                type: "workflow_action_item_form_field_conditions";
+                attributes: {
+                    /**
+                     * @description The trigger condition
+                     * @default ANY
+                     * @enum {string}
+                     */
+                    action_item_condition: "IS" | "IS NOT" | "ANY" | "CONTAINS" | "CONTAINS_ALL" | "CONTAINS_NONE" | "NONE" | "SET" | "UNSET";
+                    values?: string[];
+                    selected_catalog_entity_ids?: string[];
+                    selected_functionality_ids?: string[];
+                    selected_group_ids?: string[];
+                    selected_option_ids?: string[];
+                    selected_service_ids?: string[];
+                    selected_user_ids?: number[];
+                    selected_cause_ids?: string[];
+                    selected_environment_ids?: string[];
+                    selected_incident_type_ids?: string[];
+                };
+            };
+        };
+        workflow_action_item_form_field_condition: {
+            /** @description The workflow for this condition */
+            workflow_id: string;
+            /** @description The custom field for this condition */
+            form_field_id: string;
+            /**
+             * @description The trigger condition
+             * @default ANY
+             * @enum {string}
+             */
+            action_item_condition: "IS" | "IS NOT" | "ANY" | "CONTAINS" | "CONTAINS_ALL" | "CONTAINS_NONE" | "NONE" | "SET" | "UNSET";
+            values?: string[];
+            selected_catalog_entity_ids: string[];
+            selected_functionality_ids?: string[];
+            selected_group_ids?: string[];
+            selected_option_ids: string[];
+            selected_service_ids?: string[];
+            selected_user_ids: number[];
+            selected_cause_ids?: string[];
+            selected_environment_ids?: string[];
+            selected_incident_type_ids?: string[];
+        };
+        workflow_action_item_form_field_condition_response: {
+            data: {
+                /** @description Unique ID of the workflow_action_item_form_field_condition */
+                id: string;
+                /** @enum {string} */
+                type: "workflow_action_item_form_field_conditions";
+                attributes: components["schemas"]["workflow_action_item_form_field_condition"];
+            };
+            included?: components["schemas"]["jsonapi_included_resource"][];
+        };
+        workflow_action_item_form_field_condition_list: {
+            data: {
+                /** @description Unique ID of the workflow_action_item_form_field_condition */
+                id: string;
+                /** @enum {string} */
+                type: "workflow_action_item_form_field_conditions";
+                attributes: components["schemas"]["workflow_action_item_form_field_condition"];
+            }[];
+            links: components["schemas"]["links"];
+            meta: components["schemas"]["meta"];
+            included?: components["schemas"]["jsonapi_included_resource"][];
         };
         new_workflow_custom_field_selection: {
             data: {
@@ -14927,6 +17358,7 @@ export interface components {
                 type: "workflow_custom_field_selections";
                 attributes: components["schemas"]["workflow_custom_field_selection"];
             };
+            included?: components["schemas"]["jsonapi_included_resource"][];
         };
         workflow_custom_field_selection_list: {
             data: {
@@ -14938,6 +17370,7 @@ export interface components {
             }[];
             links: components["schemas"]["links"];
             meta: components["schemas"]["meta"];
+            included?: components["schemas"]["jsonapi_included_resource"][];
         };
         new_workflow_form_field_condition: {
             data: {
@@ -15021,6 +17454,7 @@ export interface components {
                 type: "workflow_form_field_conditions";
                 attributes: components["schemas"]["workflow_form_field_condition"];
             };
+            included?: components["schemas"]["jsonapi_included_resource"][];
         };
         workflow_form_field_condition_list: {
             data: {
@@ -15032,12 +17466,18 @@ export interface components {
             }[];
             links: components["schemas"]["links"];
             meta: components["schemas"]["meta"];
+            included?: components["schemas"]["jsonapi_included_resource"][];
         };
         new_workflow_group: {
             data: {
                 /** @enum {string} */
                 type: "workflow_groups";
                 attributes: {
+                    /**
+                     * @deprecated
+                     * @description Deprecated. `slug` is derived from `name` and `kind`; any submitted value is ignored. This property will be removed from the request schema in a future version.
+                     */
+                    slug?: string | null;
                     /**
                      * @description The kind of the workflow group
                      * @enum {string|null}
@@ -15061,6 +17501,11 @@ export interface components {
                 /** @enum {string} */
                 type: "workflow_groups";
                 attributes: {
+                    /**
+                     * @deprecated
+                     * @description Deprecated. `slug` is derived from `name` and `kind`; any submitted value is ignored. This property will be removed from the request schema in a future version.
+                     */
+                    slug?: string | null;
                     /**
                      * @description The kind of the workflow group
                      * @enum {string|null}
@@ -15088,7 +17533,7 @@ export interface components {
             /** @description The name of the workflow group. */
             name: string;
             /** @description The slug of the workflow group. */
-            slug?: string;
+            readonly slug?: string;
             /** @description A description of the workflow group. */
             description?: string | null;
             /** @description An emoji icon displayed next to the workflow group. */
@@ -15106,6 +17551,7 @@ export interface components {
                 type: "workflow_groups";
                 attributes: components["schemas"]["workflow_group"];
             };
+            included?: components["schemas"]["jsonapi_included_resource"][];
         };
         workflow_group_list: {
             data: {
@@ -15117,6 +17563,7 @@ export interface components {
             }[];
             links: components["schemas"]["links"];
             meta: components["schemas"]["meta"];
+            included?: components["schemas"]["jsonapi_included_resource"][];
         };
         new_workflow_run: {
             data: {
@@ -15242,6 +17689,7 @@ export interface components {
                 type: "workflow_runs";
                 attributes: components["schemas"]["workflow_run"];
             };
+            included?: components["schemas"]["jsonapi_included_resource"][];
         };
         workflow_runs_list: {
             data: {
@@ -15253,12 +17701,18 @@ export interface components {
             }[];
             links: components["schemas"]["links"];
             meta: components["schemas"]["meta"];
+            included?: components["schemas"]["jsonapi_included_resource"][];
         };
         new_workflow: {
             data: {
                 /** @enum {string} */
                 type: "workflows";
                 attributes: {
+                    /**
+                     * @deprecated
+                     * @description Deprecated. `slug` is derived from `name`; any submitted value is ignored. This property will be removed from the request schema in a future version.
+                     */
+                    slug?: string | null;
                     /** @description The title of the workflow */
                     name: string;
                     /** @description The description of the workflow */
@@ -15378,6 +17832,14 @@ export interface components {
              */
             incident_condition_cause: "IS" | "IS NOT" | "ANY" | "CONTAINS" | "CONTAINS_ALL" | "CONTAINS_NONE" | "NONE" | "SET" | "UNSET";
             /**
+             * @default ANY
+             * @enum {string}
+             */
+            incident_condition_label: "IS" | "IS NOT" | "ANY" | "CONTAINS" | "CONTAINS_ALL" | "CONTAINS_NONE" | "NONE" | "SET" | "UNSET";
+            /** @default false */
+            incident_condition_label_use_regexp: boolean;
+            incident_labels?: string[];
+            /**
              * @description [DEPRECATED] Use incident_condition_cause instead
              * @default ANY
              * @enum {string}
@@ -15472,6 +17934,14 @@ export interface components {
              * @enum {string}
              */
             incident_condition_cause: "IS" | "IS NOT" | "ANY" | "CONTAINS" | "CONTAINS_ALL" | "CONTAINS_NONE" | "NONE" | "SET" | "UNSET";
+            /**
+             * @default ANY
+             * @enum {string}
+             */
+            incident_condition_label: "IS" | "IS NOT" | "ANY" | "CONTAINS" | "CONTAINS_ALL" | "CONTAINS_NONE" | "NONE" | "SET" | "UNSET";
+            /** @default false */
+            incident_condition_label_use_regexp: boolean;
+            incident_labels?: string[];
             /**
              * @description [DEPRECATED] Use incident_condition_cause instead
              * @default ANY
@@ -15570,6 +18040,14 @@ export interface components {
              * @enum {string}
              */
             incident_condition_group: "IS" | "IS NOT" | "ANY" | "CONTAINS" | "CONTAINS_ALL" | "CONTAINS_NONE" | "NONE" | "SET" | "UNSET";
+            /**
+             * @default ANY
+             * @enum {string}
+             */
+            incident_condition_label: "IS" | "IS NOT" | "ANY" | "CONTAINS" | "CONTAINS_ALL" | "CONTAINS_NONE" | "NONE" | "SET" | "UNSET";
+            /** @default false */
+            incident_condition_label_use_regexp: boolean;
+            incident_labels?: string[];
             /** @enum {string|null} */
             incident_condition_summary?: "SET" | "UNSET" | null;
             /** @enum {string|null} */
@@ -15715,9 +18193,16 @@ export interface components {
         };
         update_workflow: {
             data: {
+                /** @description Accepted for JSON:API client compatibility, but ignored. The workflow to update is identified by the id in the path. */
+                id?: string;
                 /** @enum {string} */
                 type: "workflows";
                 attributes: {
+                    /**
+                     * @deprecated
+                     * @description Deprecated. `slug` is derived from `name`; any submitted value is ignored. This property will be removed from the request schema in a future version.
+                     */
+                    slug?: string | null;
                     /** @description The title of the workflow */
                     name?: string;
                     /** @description The description of the workflow */
@@ -15760,7 +18245,7 @@ export interface components {
             /** @description The title of the workflow */
             name: string;
             /** @description The slug of the workflow */
-            slug?: string;
+            readonly slug?: string;
             /** @description The description of the workflow */
             description?: string | null;
             /** @description Workflow command */
@@ -15808,6 +18293,7 @@ export interface components {
                 type: "workflows";
                 attributes: components["schemas"]["workflow"];
             };
+            included?: components["schemas"]["jsonapi_included_resource"][];
         };
         workflow_list: {
             data: {
@@ -15819,6 +18305,7 @@ export interface components {
             }[];
             links: components["schemas"]["links"];
             meta: components["schemas"]["meta"];
+            included?: components["schemas"]["jsonapi_included_resource"][];
         };
         new_live_call_router: {
             data: {
@@ -15838,7 +18325,7 @@ export interface components {
                      * @description The country code of the live_call_router
                      * @enum {string}
                      */
-                    country_code: "AU" | "CA" | "DE" | "NL" | "NZ" | "SE" | "GB" | "US";
+                    country_code: "AU" | "CA" | "DE" | "NL" | "NZ" | "SE" | "CH" | "GB" | "US";
                     /**
                      * @description The phone type of the live_call_router
                      * @enum {string}
@@ -15850,6 +18337,8 @@ export interface components {
                     voicemail_greeting: string;
                     /** @description The caller greeting message of the live_call_router */
                     caller_greeting?: string;
+                    /** @description The message played to the caller when a responder doesn't answer and the call moves on to the next person in the escalation. Leave blank to use the default message. */
+                    unavailable_responder_message?: string | null;
                     /**
                      * @description The waiting music URL of the live_call_router
                      * @enum {string}
@@ -15863,6 +18352,12 @@ export interface components {
                     escalation_level_delay_in_seconds?: number;
                     /** @description This overrides the delay (seconds) in escalation levels */
                     should_auto_resolve_alert_on_call_end?: boolean;
+                    /** @description Whether responders are also notified via SMS when this router pages them */
+                    notify_via_sms?: boolean;
+                    /** @description Whether responders are also notified via push notification when this router pages them */
+                    notify_via_push_notification?: boolean;
+                    /** @description Optional message included in the SMS/push notification. Supports variables such as {{ alert.url }}, {{ alert.data.* }}, and {{ alert.alert_urgency.name }}. */
+                    informational_notification_message?: string | null;
                     /** @description This is used in escalation paths to determine who to page */
                     alert_urgency_id?: string;
                     /** @description Whether the live call router is configured as a phone tree, requiring callers to press a key before being connected */
@@ -15911,7 +18406,7 @@ export interface components {
                      * @description The country code of the live_call_router
                      * @enum {string}
                      */
-                    country_code?: "AU" | "CA" | "DE" | "NL" | "NZ" | "SE" | "GB" | "US";
+                    country_code?: "AU" | "CA" | "DE" | "NL" | "NZ" | "SE" | "CH" | "GB" | "US";
                     /**
                      * @description The phone type of the live_call_router
                      * @enum {string}
@@ -15921,6 +18416,8 @@ export interface components {
                     voicemail_greeting?: string;
                     /** @description The caller greeting message of the live_call_router */
                     caller_greeting?: string;
+                    /** @description The message played to the caller when a responder doesn't answer and the call moves on to the next person in the escalation. Leave blank to use the default message. */
+                    unavailable_responder_message?: string | null;
                     /**
                      * @description The waiting music URL of the live_call_router
                      * @enum {string}
@@ -15934,6 +18431,12 @@ export interface components {
                     escalation_level_delay_in_seconds?: number;
                     /** @description This overrides the delay (seconds) in escalation levels */
                     should_auto_resolve_alert_on_call_end?: boolean;
+                    /** @description Whether responders are also notified via SMS when this router pages them */
+                    notify_via_sms?: boolean;
+                    /** @description Whether responders are also notified via push notification when this router pages them */
+                    notify_via_push_notification?: boolean;
+                    /** @description Optional message included in the SMS/push notification. Supports variables such as {{ alert.url }}, {{ alert.data.* }}, and {{ alert.alert_urgency.name }}. */
+                    informational_notification_message?: string | null;
                     /** @description This is used in escalation paths to determine who to page */
                     alert_urgency_id?: string;
                     /** @description Whether the live call router is configured as a phone tree, requiring callers to press a key before being connected */
@@ -15978,7 +18481,7 @@ export interface components {
              * @description The country code of the live_call_router
              * @enum {string}
              */
-            country_code?: "AU" | "CA" | "DE" | "NL" | "NZ" | "SE" | "GB" | "US";
+            country_code?: "AU" | "CA" | "DE" | "NL" | "NZ" | "SE" | "CH" | "GB" | "US";
             /**
              * @description The phone type of the live_call_router
              * @enum {string}
@@ -15990,6 +18493,8 @@ export interface components {
             voicemail_greeting?: string;
             /** @description The caller greeting message of the live_call_router */
             caller_greeting?: string;
+            /** @description The message played to the caller when a responder doesn't answer and the call moves on to the next person in the escalation. Leave blank to use the default message. */
+            unavailable_responder_message?: string | null;
             /**
              * @description The waiting music URL of the live_call_router
              * @enum {string}
@@ -16003,6 +18508,12 @@ export interface components {
             escalation_level_delay_in_seconds?: number;
             /** @description This overrides the delay (seconds) in escalation levels */
             should_auto_resolve_alert_on_call_end?: boolean;
+            /** @description Whether responders are also notified via SMS when this router pages them */
+            notify_via_sms?: boolean;
+            /** @description Whether responders are also notified via push notification when this router pages them */
+            notify_via_push_notification?: boolean;
+            /** @description Optional message included in the SMS/push notification. Supports variables such as {{ alert.url }}, {{ alert.data.* }}, and {{ alert.alert_urgency.name }}. */
+            informational_notification_message?: string | null;
             /** @description This is used in escalation paths to determine who to page */
             alert_urgency_id?: string;
             /** @description The audio instructions callers will hear when they call this number, prompting them to select from available options to route their call */
@@ -16041,6 +18552,7 @@ export interface components {
                 type: "live_call_routers";
                 attributes: components["schemas"]["live_call_router"];
             };
+            included?: components["schemas"]["jsonapi_included_resource"][];
         };
         live_call_router_list: {
             data: {
@@ -16052,6 +18564,7 @@ export interface components {
             }[];
             links: components["schemas"]["links"];
             meta: components["schemas"]["meta"];
+            included?: components["schemas"]["jsonapi_included_resource"][];
         };
         new_heartbeat: {
             data: {
@@ -16077,6 +18590,8 @@ export interface components {
                      * @enum {string}
                      */
                     notification_target_type: "User" | "Group" | "Service" | "EscalationPolicy" | "Functionality";
+                    /** @description List of team IDs that own this heartbeat */
+                    owner_group_ids?: string[];
                     /** @description Whether to trigger alerts when heartbeat is expired. */
                     enabled?: boolean;
                 };
@@ -16106,6 +18621,8 @@ export interface components {
                      * @enum {string}
                      */
                     notification_target_type?: "User" | "Group" | "Service" | "EscalationPolicy" | "Functionality";
+                    /** @description List of team IDs that own this heartbeat */
+                    owner_group_ids?: string[];
                     /** @description Whether to trigger alerts when heartbeat is expired. */
                     enabled?: boolean;
                 };
@@ -16131,6 +18648,8 @@ export interface components {
              * @enum {string}
              */
             notification_target_type: "User" | "Group" | "Service" | "EscalationPolicy" | "Functionality";
+            /** @description List of team IDs that own this heartbeat */
+            owner_group_ids?: string[];
             /** @description Whether to trigger alerts when heartbeat is expired. */
             enabled: boolean;
             /** @enum {string} */
@@ -16141,9 +18660,9 @@ export interface components {
             secret?: string | null;
             /** @description Email address to receive heartbeat pings. */
             email_address: string;
-            /** @description When the heartbeat was last pinged. */
+            /** @description Last persisted heartbeat ping timestamp. Accepted pings may be coalesced for up to 30 seconds. */
             last_pinged_at?: string | null;
-            /** @description When heartbeat expires */
+            /** @description Persisted expiry deadline, including up to 30 seconds of coalescing grace. */
             expires_at?: string | null;
             /** @description Date of creation */
             created_at: string;
@@ -16158,6 +18677,7 @@ export interface components {
                 type: "heartbeats";
                 attributes: components["schemas"]["heartbeat"];
             };
+            included?: components["schemas"]["jsonapi_included_resource"][];
         };
         heartbeat_list: {
             data: {
@@ -16169,6 +18689,7 @@ export interface components {
             }[];
             links: components["schemas"]["links"];
             meta: components["schemas"]["meta"];
+            included?: components["schemas"]["jsonapi_included_resource"][];
         };
         new_incident_action_item: {
             data: {
@@ -16206,6 +18727,35 @@ export interface components {
                     jira_issue_key?: string | null;
                     /** @description The Jira issue URL. */
                     jira_issue_url?: string | null;
+                    /** @description Custom field values to set on the action item. Ignored unless custom fields for action items are enabled for the organization. */
+                    form_field_selections?: {
+                        /** @description ID of an existing selection. Required when updating or removing a field's existing value. */
+                        id?: string;
+                        /** @description ID of the custom field */
+                        form_field_id: string;
+                        /** @description Value for text, textarea, rich text, date, datetime, number, checkbox, or tag fields */
+                        value?: (string | null) | string[];
+                        /** @description IDs of the selected custom field options */
+                        selected_option_ids?: string[];
+                        /** @description IDs of the selected users */
+                        selected_user_ids?: number[];
+                        /** @description IDs of the selected teams */
+                        selected_group_ids?: string[];
+                        /** @description IDs of the selected services */
+                        selected_service_ids?: string[];
+                        /** @description IDs of the selected functionalities */
+                        selected_functionality_ids?: string[];
+                        /** @description IDs of the selected catalog entities */
+                        selected_catalog_entity_ids?: string[];
+                        /** @description IDs of the selected environments */
+                        selected_environment_ids?: string[];
+                        /** @description IDs of the selected causes */
+                        selected_cause_ids?: string[];
+                        /** @description IDs of the selected incident types */
+                        selected_incident_type_ids?: string[];
+                        /** @description Set to true to remove the field's value from the action item */
+                        _destroy?: boolean | null;
+                    }[] | null;
                 };
             };
         };
@@ -16245,6 +18795,35 @@ export interface components {
                     jira_issue_key?: string | null;
                     /** @description The Jira issue URL. */
                     jira_issue_url?: string | null;
+                    /** @description Custom field values to set on the action item. Ignored unless custom fields for action items are enabled for the organization. */
+                    form_field_selections?: {
+                        /** @description ID of an existing selection. Required when updating or removing a field's existing value. */
+                        id?: string;
+                        /** @description ID of the custom field */
+                        form_field_id: string;
+                        /** @description Value for text, textarea, rich text, date, datetime, number, checkbox, or tag fields */
+                        value?: (string | null) | string[];
+                        /** @description IDs of the selected custom field options */
+                        selected_option_ids?: string[];
+                        /** @description IDs of the selected users */
+                        selected_user_ids?: number[];
+                        /** @description IDs of the selected teams */
+                        selected_group_ids?: string[];
+                        /** @description IDs of the selected services */
+                        selected_service_ids?: string[];
+                        /** @description IDs of the selected functionalities */
+                        selected_functionality_ids?: string[];
+                        /** @description IDs of the selected catalog entities */
+                        selected_catalog_entity_ids?: string[];
+                        /** @description IDs of the selected environments */
+                        selected_environment_ids?: string[];
+                        /** @description IDs of the selected causes */
+                        selected_cause_ids?: string[];
+                        /** @description IDs of the selected incident types */
+                        selected_incident_type_ids?: string[];
+                        /** @description Set to true to remove the field's value from the action item */
+                        _destroy?: boolean | null;
+                    }[] | null;
                 };
             };
         };
@@ -16280,6 +18859,8 @@ export interface components {
             jira_issue_key?: string | null;
             /** @description The Jira issue URL. */
             jira_issue_url?: string | null;
+            /** @description User who created this action item */
+            created_by?: components["schemas"]["user_flat_response"] | null;
             /** @description Date of creation */
             created_at: string;
             /** @description Date of last update */
@@ -16293,6 +18874,7 @@ export interface components {
                 type: "incident_action_items";
                 attributes: components["schemas"]["incident_action_item"];
             };
+            included?: components["schemas"]["jsonapi_included_resource"][];
         };
         incident_action_item_list: {
             data: {
@@ -16304,6 +18886,7 @@ export interface components {
             }[];
             links: components["schemas"]["links"];
             meta: components["schemas"]["meta"];
+            included?: components["schemas"]["jsonapi_included_resource"][];
         };
         new_incident_custom_field_selection: {
             data: {
@@ -16344,6 +18927,7 @@ export interface components {
                 type: "incident_custom_field_selections";
                 attributes: components["schemas"]["incident_custom_field_selection"];
             };
+            included?: components["schemas"]["jsonapi_included_resource"][];
         };
         incident_custom_field_selection_list: {
             data: {
@@ -16355,6 +18939,7 @@ export interface components {
             }[];
             links: components["schemas"]["links"];
             meta: components["schemas"]["meta"];
+            included?: components["schemas"]["jsonapi_included_resource"][];
         };
         new_incident_event_functionality: {
             data: {
@@ -16405,6 +18990,7 @@ export interface components {
                 type: "incident_event_functionalities";
                 attributes: components["schemas"]["incident_event_functionality"];
             };
+            included?: components["schemas"]["jsonapi_included_resource"][];
         };
         incident_event_functionality_list: {
             data: {
@@ -16416,6 +19002,7 @@ export interface components {
             }[];
             links: components["schemas"]["links"];
             meta: components["schemas"]["meta"];
+            included?: components["schemas"]["jsonapi_included_resource"][];
         };
         new_incident_event_service: {
             data: {
@@ -16466,6 +19053,7 @@ export interface components {
                 type: "incident_event_services";
                 attributes: components["schemas"]["incident_event_service"];
             };
+            included?: components["schemas"]["jsonapi_included_resource"][];
         };
         incident_event_service_list: {
             data: {
@@ -16477,6 +19065,7 @@ export interface components {
             }[];
             links: components["schemas"]["links"];
             meta: components["schemas"]["meta"];
+            included?: components["schemas"]["jsonapi_included_resource"][];
         };
         new_incident_event: {
             data: {
@@ -16531,6 +19120,7 @@ export interface components {
                 type: "incident_events";
                 attributes: components["schemas"]["incident_event"];
             };
+            included?: components["schemas"]["jsonapi_included_resource"][];
         };
         incident_event_list: {
             data: {
@@ -16542,6 +19132,7 @@ export interface components {
             }[];
             links: components["schemas"]["links"];
             meta: components["schemas"]["meta"];
+            included?: components["schemas"]["jsonapi_included_resource"][];
         };
         new_incident_feedback: {
             data: {
@@ -16600,6 +19191,7 @@ export interface components {
                 type: "incident_feedbacks";
                 attributes: components["schemas"]["incident_feedback"];
             };
+            included?: components["schemas"]["jsonapi_included_resource"][];
         };
         incident_feedback_list: {
             data: {
@@ -16611,6 +19203,7 @@ export interface components {
             }[];
             links: components["schemas"]["links"];
             meta: components["schemas"]["meta"];
+            included?: components["schemas"]["jsonapi_included_resource"][];
         };
         new_incident_form_field_selection: {
             data: {
@@ -16677,6 +19270,7 @@ export interface components {
                 type: "incident_form_field_selections";
                 attributes: components["schemas"]["incident_form_field_selection"];
             };
+            included?: components["schemas"]["jsonapi_included_resource"][];
         };
         incident_form_field_selection_list: {
             data: {
@@ -16688,6 +19282,7 @@ export interface components {
             }[];
             links: components["schemas"]["links"];
             meta: components["schemas"]["meta"];
+            included?: components["schemas"]["jsonapi_included_resource"][];
         };
         new_incident_permission_set_boolean: {
             data: {
@@ -16769,6 +19364,7 @@ export interface components {
                 type: "incident_permission_set_booleans";
                 attributes: components["schemas"]["incident_permission_set_boolean"];
             };
+            included?: components["schemas"]["jsonapi_included_resource"][];
         };
         incident_permission_set_boolean_list: {
             data: {
@@ -16780,6 +19376,7 @@ export interface components {
             }[];
             links: components["schemas"]["links"];
             meta: components["schemas"]["meta"];
+            included?: components["schemas"]["jsonapi_included_resource"][];
         };
         new_incident_permission_set_resource: {
             data: {
@@ -16864,6 +19461,7 @@ export interface components {
                 type: "incident_permission_set_resources";
                 attributes: components["schemas"]["incident_permission_set_resource"];
             };
+            included?: components["schemas"]["jsonapi_included_resource"][];
         };
         incident_permission_set_resource_list: {
             data: {
@@ -16875,12 +19473,18 @@ export interface components {
             }[];
             links: components["schemas"]["links"];
             meta: components["schemas"]["meta"];
+            included?: components["schemas"]["jsonapi_included_resource"][];
         };
         new_incident_permission_set: {
             data: {
                 /** @enum {string} */
                 type: "incident_permission_sets";
                 attributes: {
+                    /**
+                     * @deprecated
+                     * @description Deprecated. `slug` is derived from `name`; any submitted value is ignored. This property will be removed from the request schema in a future version.
+                     */
+                    slug?: string | null;
                     /** @description The incident permission set name. */
                     name: string;
                     /** @description The incident permission set description. */
@@ -16895,6 +19499,11 @@ export interface components {
                 /** @enum {string} */
                 type: "incident_permission_sets";
                 attributes: {
+                    /**
+                     * @deprecated
+                     * @description Deprecated. `slug` is derived from `name`; any submitted value is ignored. This property will be removed from the request schema in a future version.
+                     */
+                    slug?: string | null;
                     /** @description The incident permission set name. */
                     name?: string;
                     /** @description The incident permission set description. */
@@ -16908,7 +19517,7 @@ export interface components {
             /** @description The incident permission set name. */
             name: string;
             /** @description The incident permission set slug. */
-            slug?: string;
+            readonly slug?: string;
             /** @description The incident permission set description. */
             description?: string | null;
             private_incident_permissions?: ("create" | "read" | "update" | "delete")[];
@@ -16924,6 +19533,7 @@ export interface components {
                 type: "incident_permission_sets";
                 attributes: components["schemas"]["incident_permission_set"];
             };
+            included?: components["schemas"]["jsonapi_included_resource"][];
         };
         incident_permission_set_list: {
             data: {
@@ -16935,6 +19545,7 @@ export interface components {
             }[];
             links: components["schemas"]["links"];
             meta: components["schemas"]["meta"];
+            included?: components["schemas"]["jsonapi_included_resource"][];
         };
         update_incident_post_mortem: {
             data: {
@@ -17034,6 +19645,7 @@ export interface components {
                 type: "incident_post_mortems";
                 attributes: components["schemas"]["incident_post_mortem"];
             };
+            included?: components["schemas"]["jsonapi_included_resource"][];
         };
         incident_post_mortem_list: {
             data: {
@@ -17045,6 +19657,7 @@ export interface components {
             }[];
             links: components["schemas"]["links"];
             meta: components["schemas"]["meta"];
+            included?: components["schemas"]["jsonapi_included_resource"][];
         };
         update_incident_retrospective_step: {
             data: {
@@ -17102,6 +19715,7 @@ export interface components {
                 type: "incident_retrospective_steps";
                 attributes: components["schemas"]["incident_retrospective_step"];
             };
+            included?: components["schemas"]["jsonapi_included_resource"][];
         };
         new_incident_role_task: {
             data: {
@@ -17162,6 +19776,7 @@ export interface components {
                 type: "incident_role_tasks";
                 attributes: components["schemas"]["incident_role_task"];
             };
+            included?: components["schemas"]["jsonapi_included_resource"][];
         };
         incident_role_task_list: {
             data: {
@@ -17173,12 +19788,18 @@ export interface components {
             }[];
             links: components["schemas"]["links"];
             meta: components["schemas"]["meta"];
+            included?: components["schemas"]["jsonapi_included_resource"][];
         };
         new_incident_role: {
             data: {
                 /** @enum {string} */
                 type: "incident_roles";
                 attributes: {
+                    /**
+                     * @deprecated
+                     * @description Deprecated. `slug` is derived from `name`; any submitted value is ignored. This property will be removed from the request schema in a future version.
+                     */
+                    slug?: string | null;
                     /** @description The name of the incident role */
                     name: string;
                     /** @description The summary of the incident role */
@@ -17198,6 +19819,11 @@ export interface components {
                 /** @enum {string} */
                 type: "incident_roles";
                 attributes: {
+                    /**
+                     * @deprecated
+                     * @description Deprecated. `slug` is derived from `name`; any submitted value is ignored. This property will be removed from the request schema in a future version.
+                     */
+                    slug?: string | null;
                     /** @description The name of the incident role */
                     name?: string;
                     /** @description The summary of the incident role */
@@ -17216,7 +19842,7 @@ export interface components {
             /** @description The name of the incident role */
             name: string;
             /** @description The slug of the incident role */
-            slug?: string;
+            readonly slug?: string;
             /** @description The summary of the incident role */
             summary?: string | null;
             /** @description The description of the incident role */
@@ -17239,6 +19865,7 @@ export interface components {
                 type: "incident_roles";
                 attributes: components["schemas"]["incident_role"];
             };
+            included?: components["schemas"]["jsonapi_included_resource"][];
         };
         incident_role_list: {
             data: {
@@ -17250,6 +19877,7 @@ export interface components {
             }[];
             links: components["schemas"]["links"];
             meta: components["schemas"]["meta"];
+            included?: components["schemas"]["jsonapi_included_resource"][];
         };
         new_incident_status_page_event: {
             data: {
@@ -17275,6 +19903,21 @@ export interface components {
                      * @default false
                      */
                     should_tweet: boolean | null;
+                    /**
+                     * Format: date-time
+                     * @description When the event started. Defaults to the time of creation.
+                     */
+                    started_at?: string | null;
+                    /** @description Affected status page components and their statuses. Requires the status-page-v3-phase-1 feature. Ignored for terminal event statuses (resolved, completed), which clear component impact. A status is required per component except for scheduled maintenance incidents. */
+                    status_page_components?: {
+                        /** @description Unique ID of a component on the event's status page */
+                        status_page_component_id: string;
+                        /**
+                         * @description The status to record for the component
+                         * @enum {string|null}
+                         */
+                        status?: "operational" | "degraded_performance" | "partial_outage" | "major_outage" | null;
+                    }[] | null;
                 };
             };
         };
@@ -17302,6 +19945,11 @@ export interface components {
                      * @default false
                      */
                     should_tweet: boolean | null;
+                    /**
+                     * Format: date-time
+                     * @description When the event started.
+                     */
+                    started_at?: string | null;
                 };
             };
         };
@@ -17319,6 +19967,16 @@ export interface components {
             notify_subscribers?: boolean;
             /** @description For Statuspage.io integrated pages auto publishes a tweet for your update */
             should_tweet?: boolean;
+            /** @description Affected status page components recorded on the event and their statuses */
+            status_page_components?: {
+                /** @description Unique ID of a component on the event's status page */
+                status_page_component_id: string;
+                /**
+                 * @description The status recorded for the component
+                 * @enum {string|null}
+                 */
+                status?: "operational" | "degraded_performance" | "partial_outage" | "major_outage" | null;
+            }[];
             /** @description Date of start */
             started_at: string;
             /** @description Date of creation */
@@ -17334,6 +19992,7 @@ export interface components {
                 type: "incident_status_page_events";
                 attributes: components["schemas"]["incident_status_page_event"];
             };
+            included?: components["schemas"]["jsonapi_included_resource"][];
         };
         incident_status_page_event_list: {
             data: {
@@ -17345,16 +20004,24 @@ export interface components {
             }[];
             links: components["schemas"]["links"];
             meta: components["schemas"]["meta"];
+            included?: components["schemas"]["jsonapi_included_resource"][];
         };
         new_incident_type: {
             data: {
                 /** @enum {string} */
                 type: "incident_types";
                 attributes: {
+                    /**
+                     * @deprecated
+                     * @description Deprecated. `slug` is derived from `name`; any submitted value is ignored. This property will be removed from the request schema in a future version.
+                     */
+                    slug?: string | null;
                     /** @description The name of the incident type */
                     name: string;
                     /** @description The description of the incident type */
                     description?: string | null;
+                    /** @description The status page description of the incident type */
+                    public_description?: string | null;
                     /** @description The hex color of the incident type */
                     color?: string | null;
                     /** @description Position of the incident type */
@@ -17390,10 +20057,17 @@ export interface components {
                 /** @enum {string} */
                 type: "incident_types";
                 attributes: {
+                    /**
+                     * @deprecated
+                     * @description Deprecated. `slug` is derived from `name`; any submitted value is ignored. This property will be removed from the request schema in a future version.
+                     */
+                    slug?: string | null;
                     /** @description The name of the incident type */
                     name?: string;
                     /** @description The description of the incident type */
                     description?: string | null;
+                    /** @description The status page description of the incident type */
+                    public_description?: string | null;
                     /** @description The hex color of the incident type */
                     color?: string | null;
                     /** @description Position of the incident type */
@@ -17428,9 +20102,11 @@ export interface components {
             /** @description The name of the incident type */
             name: string;
             /** @description The slug of the incident type */
-            slug?: string;
+            readonly slug?: string;
             /** @description The description of the incident type */
             description?: string | null;
+            /** @description The status page description of the incident type */
+            public_description?: string | null;
             /** @description The hex color of the incident type */
             color?: string | null;
             /** @description Position of the incident type */
@@ -17471,6 +20147,7 @@ export interface components {
                 type: "incident_types";
                 attributes: components["schemas"]["incident_type"];
             };
+            included?: components["schemas"]["jsonapi_included_resource"][];
         };
         incident_type_list: {
             data: {
@@ -17482,6 +20159,7 @@ export interface components {
             }[];
             links: components["schemas"]["links"];
             meta: components["schemas"]["meta"];
+            included?: components["schemas"]["jsonapi_included_resource"][];
         };
         new_incident: {
             data: {
@@ -17799,7 +20477,7 @@ export interface components {
             /** @description The kind of the incident */
             kind?: string;
             /** @description The slug of the incident */
-            slug?: string;
+            readonly slug?: string;
             /** @description ID of parent incident */
             parent_incident_id?: string | null;
             /** @description ID of duplicated incident */
@@ -17881,6 +20559,40 @@ export interface components {
             google_meeting_id?: string | null;
             /** @description Google meeting URL */
             google_meeting_url?: string | null;
+            /** @description Microsoft Teams meeting ID */
+            microsoft_teams_meeting_id?: string | null;
+            /** @description Microsoft Teams meeting URL */
+            microsoft_teams_meeting_url?: string | null;
+            /** @description Microsoft Teams channel ID */
+            microsoft_teams_channel_id?: string | null;
+            /** @description Microsoft Teams channel name */
+            microsoft_teams_channel_name?: string | null;
+            /** @description Microsoft Teams channel URL */
+            microsoft_teams_channel_url?: string | null;
+            /** @description Microsoft Teams channel short URL */
+            microsoft_teams_channel_short_url?: string | null;
+            /** @description Microsoft Teams chat ID */
+            microsoft_teams_chat_id?: string | null;
+            /** @description Microsoft Teams chat URL */
+            microsoft_teams_chat_url?: string | null;
+            /** @description Microsoft Teams team ID */
+            microsoft_teams_team_id?: string | null;
+            /** @description Google Chat space ID */
+            google_chat_space_id?: string | null;
+            /** @description Google Chat space name */
+            google_chat_space_name?: string | null;
+            /** @description Google Chat space URL */
+            google_chat_space_url?: string | null;
+            /** @description Google Chat space short URL */
+            google_chat_space_short_url?: string | null;
+            /** @description Whether the Google Chat space is archived */
+            google_chat_space_archived?: boolean | null;
+            /** @description Google Chat space domain ID */
+            google_chat_space_domain_id?: string | null;
+            /** @description Webex meeting ID */
+            webex_meeting_id?: string | null;
+            /** @description Webex meeting URL */
+            webex_meeting_url?: string | null;
             /** @description Jira issue key */
             jira_issue_key?: string | null;
             /** @description Jira issue ID */
@@ -18047,6 +20759,7 @@ export interface components {
                 type: "incidents";
                 attributes: components["schemas"]["incident"];
             };
+            included?: components["schemas"]["jsonapi_included_resource"][];
         };
         incident_list: {
             data: {
@@ -18058,6 +20771,7 @@ export interface components {
             }[];
             links: components["schemas"]["links"];
             meta: components["schemas"]["meta"];
+            included?: components["schemas"]["jsonapi_included_resource"][];
         };
         ip_ranges: {
             /** @description IPv4 addresses associated with Rootly integrations. */
@@ -18084,6 +20798,74 @@ export interface components {
             prev: string | null;
             next: string | null;
             last: string | null;
+        };
+        import_meeting_recording: {
+            /**
+             * @description Import source (currently only "recall_desktop_sdk")
+             * @enum {string}
+             */
+            source: "recall_desktop_sdk";
+            /**
+             * Format: uuid
+             * @description External recording UUID (required when source is recall_desktop_sdk)
+             */
+            recall_recording_id: string;
+            /**
+             * @description Meeting platform
+             * @enum {string}
+             */
+            platform: "zoom" | "google_meet" | "microsoft_teams" | "webex";
+            /**
+             * Format: date-time
+             * @description When the recording started
+             */
+            started_at?: string | null;
+            /**
+             * Format: date-time
+             * @description When the recording ended
+             */
+            ended_at?: string | null;
+            /** @description Original meeting URL */
+            meeting_url?: string | null;
+        };
+        start_session_request: {
+            /**
+             * @description Meeting platform
+             * @enum {string}
+             */
+            platform?: "zoom" | "google_meet" | "microsoft_teams" | "webex";
+            /** @description Human-readable label for the recording session */
+            title?: string | null;
+        };
+        start_session_response: {
+            data?: {
+                /**
+                 * Format: uuid
+                 * @description Meeting recording UUID
+                 */
+                session_id: string;
+                /** @description Token for the desktop client to stream audio */
+                stream_token: string;
+                /**
+                 * Format: uuid
+                 * @description Meeting recording UUID
+                 */
+                meeting_recording_id: string;
+            };
+        };
+        meeting_recording_transcript_word: {
+            /** @description Transcribed word */
+            text: string;
+            /** @description Start time in seconds from recording start */
+            start_timestamp?: number;
+            /** @description End time in seconds from recording start */
+            end_timestamp?: number;
+        };
+        meeting_recording_transcript_segment: {
+            /** @description Speaker label (e.g. Speaker 1) */
+            speaker: string;
+            /** @description Timestamped words spoken by this speaker */
+            words: components["schemas"]["meeting_recording_transcript_word"][];
         };
         meeting_recording: {
             /**
@@ -18116,8 +20898,14 @@ export interface components {
             word_count?: number;
             /** @description AI-generated summary of the meeting transcript (null if no transcript or not yet analyzed) */
             transcript_summary?: string | null;
-            /** @description Whether a video recording file is attached */
-            has_video?: boolean;
+            /** @description Human-readable label for the recording session */
+            title?: string | null;
+            /** @description Original meeting URL */
+            meeting_url?: string | null;
+            /** @description Signed URL to stream/download the video recording */
+            video_url?: string | null;
+            /** @description Source that created the recording (e.g. desktop_sdk, recall_bot) */
+            created_by?: string | null;
             /**
              * Format: date-time
              * @description When the recording session was created
@@ -18128,6 +20916,34 @@ export interface components {
              * @description When the recording session was last updated
              */
             updated_at: string;
+        };
+        meeting_recording_detail: components["schemas"]["meeting_recording"] & {
+            /** @description Array of speaker segments when populated, empty object when no transcript exists. */
+            transcript?: components["schemas"]["meeting_recording_transcript_segment"][] | Record<string, never>;
+            /** @description Recall upload identifier */
+            recall_upload_id?: string | null;
+            /** @description UUID of the associated recordable (e.g. incident) */
+            recordable_id?: string | null;
+            /** @description Type of the associated recordable (e.g. Incident) */
+            recordable_type?: string | null;
+        };
+        meeting_recording_detail_response: {
+            data: {
+                /** @description Unique UUID of the meeting recording */
+                id: string;
+                /** @enum {string} */
+                type: "meeting_recordings";
+                attributes: components["schemas"]["meeting_recording_detail"];
+            };
+        };
+        meeting_recording_response: {
+            data: {
+                /** @description Unique UUID of the meeting recording */
+                id: string;
+                /** @enum {string} */
+                type: "meeting_recordings";
+                attributes: components["schemas"]["meeting_recording"];
+            };
         };
         meeting_recording_list: {
             data: {
@@ -18147,6 +20963,75 @@ export interface components {
             total_count: number;
             total_pages: number;
         };
+        oncall: {
+            /** @description ID of the escalation policy */
+            escalation_policy_id: string;
+            /** @description Name of the escalation policy */
+            escalation_policy_name: string;
+            /** @description ID of the escalation policy path */
+            escalation_policy_path_id?: string | null;
+            /** @description Name of the escalation policy path */
+            escalation_policy_path_name?: string | null;
+            /**
+             * @description Notification type of the escalation path (audible or quiet)
+             * @enum {string|null}
+             */
+            notification_type?: "audible" | "quiet" | null;
+            /** @description Whether this is the default escalation path */
+            is_default_path?: boolean | null;
+            /** @description Level within the escalation policy */
+            escalation_level?: number;
+            /** @description ID of the schedule */
+            schedule_id?: string | null;
+            /** @description Name of the schedule */
+            schedule_name?: string | null;
+            /** @description ID of the on-call user */
+            user_id: number;
+            /**
+             * Format: date-time
+             * @description Start datetime of the on-call shift
+             */
+            starts_at: string;
+            /**
+             * Format: date-time
+             * @description End datetime of the on-call shift
+             */
+            ends_at: string;
+        };
+        oncall_list: {
+            data: {
+                /** @description Unique ID of the on-call entry */
+                id: string;
+                /** @enum {string} */
+                type: "on_call_resources";
+                attributes: components["schemas"]["oncall"];
+                relationships?: components["schemas"]["oncall_relationships"];
+            }[];
+            included?: components["schemas"]["jsonapi_included_resource"][];
+        };
+        oncall_relationships: {
+            user?: {
+                data?: {
+                    id?: string;
+                    /** @enum {string} */
+                    type?: "users";
+                } | null;
+            };
+            schedule?: {
+                data?: {
+                    id?: string;
+                    /** @enum {string} */
+                    type?: "schedules";
+                } | null;
+            };
+            escalation_policy?: {
+                data?: {
+                    id?: string;
+                    /** @enum {string} */
+                    type?: "escalation_policies";
+                } | null;
+            };
+        };
         new_on_call_pay_report: {
             data: {
                 /** @enum {string} */
@@ -18164,6 +21049,10 @@ export interface components {
                     end_date: string;
                     /** @description List of schedule UUIDs to scope the report. */
                     schedule_ids?: string[];
+                    /** @description IANA timezone used to compute day and weekend boundaries. Defaults to the team's timezone. */
+                    time_zone?: string;
+                    /** @description When true, day and weekend boundaries are computed in each responder's personal timezone instead of the report-wide timezone. */
+                    use_responders_time_zone?: boolean;
                 };
             };
         };
@@ -18184,6 +21073,10 @@ export interface components {
                     end_date?: string;
                     /** @description List of schedule UUIDs to scope the report. */
                     schedule_ids?: string[];
+                    /** @description IANA timezone used to compute day and weekend boundaries. */
+                    time_zone?: string;
+                    /** @description When true, day and weekend boundaries are computed in each responder's personal timezone instead of the report-wide timezone. */
+                    use_responders_time_zone?: boolean;
                 };
             };
         };
@@ -18233,8 +21126,10 @@ export interface components {
              * @description When the report was last generated.
              */
             last_generated_at?: string | null;
-            /** @description The team's IANA timezone used to interpret start_date and end_date. */
+            /** @description The IANA timezone used to compute day and weekend boundaries for this report. Defaults to the team's timezone. */
             time_zone?: string | null;
+            /** @description When true, each responder's personal timezone is used for their pay calculation; otherwise the report-wide time_zone is used. */
+            use_responders_time_zone?: boolean;
             /**
              * Format: uri
              * @description Download URL for the generated CSV report. Null until the report is generated.
@@ -18258,6 +21153,7 @@ export interface components {
                 type: "on_call_pay_reports";
                 attributes: components["schemas"]["on_call_pay_report"];
             };
+            included?: components["schemas"]["jsonapi_included_resource"][];
         };
         on_call_pay_report_list: {
             data: {
@@ -18269,6 +21165,7 @@ export interface components {
             }[];
             links: components["schemas"]["links"];
             meta: components["schemas"]["meta"];
+            included?: components["schemas"]["jsonapi_included_resource"][];
         };
         new_on_call_shadow: {
             data: {
@@ -18352,6 +21249,7 @@ export interface components {
                 type: "on_call_shadows";
                 attributes: components["schemas"]["on_call_shadow"];
             };
+            included?: components["schemas"]["jsonapi_included_resource"][];
         };
         on_call_shadows_list: {
             data: {
@@ -18363,12 +21261,18 @@ export interface components {
             }[];
             links: components["schemas"]["links"];
             meta: components["schemas"]["meta"];
+            included?: components["schemas"]["jsonapi_included_resource"][];
         };
         new_on_call_role: {
             data: {
                 /** @enum {string} */
                 type: "on_call_roles";
                 attributes: {
+                    /**
+                     * @deprecated
+                     * @description Deprecated. `slug` is derived from `name`; any submitted value is ignored. This property will be removed from the request schema in a future version.
+                     */
+                    slug?: string | null;
                     /** @description The role name. */
                     name: string;
                     /**
@@ -18396,8 +21300,10 @@ export interface components {
                     schedule_override_permissions?: ("create" | "update")[];
                     schedules_permissions?: ("create" | "read" | "update" | "delete")[];
                     services_permissions?: ("create" | "read" | "update" | "delete")[];
+                    functionalities_permissions?: ("create" | "read" | "update" | "delete")[];
                     webhooks_permissions?: ("create" | "read" | "update" | "delete")[];
                     workflows_permissions?: ("create" | "read" | "update" | "delete")[];
+                    catalogs_permissions?: ("create" | "read" | "update" | "delete")[];
                 };
             };
         };
@@ -18406,6 +21312,11 @@ export interface components {
                 /** @enum {string} */
                 type: "on_call_roles";
                 attributes: {
+                    /**
+                     * @deprecated
+                     * @description Deprecated. `slug` is derived from `name`; any submitted value is ignored. This property will be removed from the request schema in a future version.
+                     */
+                    slug?: string | null;
                     /** @description The role name. */
                     name?: string;
                     /**
@@ -18433,8 +21344,10 @@ export interface components {
                     schedule_override_permissions?: ("create" | "update")[];
                     schedules_permissions?: ("create" | "read" | "update" | "delete")[];
                     services_permissions?: ("create" | "read" | "update" | "delete")[];
+                    functionalities_permissions?: ("create" | "read" | "update" | "delete")[];
                     webhooks_permissions?: ("create" | "read" | "update" | "delete")[];
                     workflows_permissions?: ("create" | "read" | "update" | "delete")[];
+                    catalogs_permissions?: ("create" | "read" | "update" | "delete")[];
                 };
             };
         };
@@ -18442,7 +21355,7 @@ export interface components {
             /** @description The role name. */
             name: string;
             /** @description The role slug. */
-            slug?: string;
+            readonly slug?: string;
             /**
              * @description The kind of role
              * @default custom
@@ -18468,8 +21381,10 @@ export interface components {
             schedule_override_permissions?: ("create" | "update")[];
             schedules_permissions?: ("create" | "read" | "update" | "delete")[];
             services_permissions?: ("create" | "read" | "update" | "delete")[];
+            functionalities_permissions?: ("create" | "read" | "update" | "delete")[];
             webhooks_permissions?: ("create" | "read" | "update" | "delete")[];
             workflows_permissions?: ("create" | "read" | "update" | "delete")[];
+            catalogs_permissions?: ("create" | "read" | "update" | "delete")[];
             created_at: string;
             updated_at: string;
         };
@@ -18481,6 +21396,7 @@ export interface components {
                 type: "on_call_roles";
                 attributes: components["schemas"]["on_call_role"];
             };
+            included?: components["schemas"]["jsonapi_included_resource"][];
         };
         on_call_role_list: {
             data: {
@@ -18492,6 +21408,7 @@ export interface components {
             }[];
             links: components["schemas"]["links"];
             meta: components["schemas"]["meta"];
+            included?: components["schemas"]["jsonapi_included_resource"][];
         };
         new_override_shift: {
             data: {
@@ -18553,6 +21470,7 @@ export interface components {
                 type: "shifts";
                 attributes: components["schemas"]["override_shift"];
             };
+            included?: components["schemas"]["jsonapi_included_resource"][];
         };
         override_shift_list: {
             data: {
@@ -18564,6 +21482,7 @@ export interface components {
             }[];
             links: components["schemas"]["links"];
             meta: components["schemas"]["meta"];
+            included?: components["schemas"]["jsonapi_included_resource"][];
         };
         shift_override: {
             /** @description ID of shift */
@@ -18583,6 +21502,7 @@ export interface components {
                 type: "shift_override";
                 attributes: components["schemas"]["shift_override"];
             };
+            included?: components["schemas"]["jsonapi_included_resource"][];
         };
         new_playbook_task: {
             data: {
@@ -18633,6 +21553,7 @@ export interface components {
                 type: "playbook_tasks";
                 attributes: components["schemas"]["playbook_task"];
             };
+            included?: components["schemas"]["jsonapi_included_resource"][];
         };
         playbook_task_list: {
             data: {
@@ -18644,6 +21565,7 @@ export interface components {
             }[];
             links: components["schemas"]["links"];
             meta: components["schemas"]["meta"];
+            included?: components["schemas"]["jsonapi_included_resource"][];
         };
         new_playbook: {
             data: {
@@ -18729,6 +21651,7 @@ export interface components {
                 type: "playbooks";
                 attributes: components["schemas"]["playbook"];
             };
+            included?: components["schemas"]["jsonapi_included_resource"][];
         };
         playbook_list: {
             data: {
@@ -18740,12 +21663,18 @@ export interface components {
             }[];
             links: components["schemas"]["links"];
             meta: components["schemas"]["meta"];
+            included?: components["schemas"]["jsonapi_included_resource"][];
         };
         new_post_mortem_template: {
             data: {
                 /** @enum {string} */
                 type: "post_mortem_templates";
                 attributes: {
+                    /**
+                     * @deprecated
+                     * @description Deprecated. `slug` is derived from `name`; any submitted value is ignored. This property will be removed from the request schema in a future version.
+                     */
+                    slug?: string | null;
                     /** @description The name of the postmortem template */
                     name: string;
                     /** @description Default selected template when editing a postmortem */
@@ -18766,6 +21695,11 @@ export interface components {
                 /** @enum {string} */
                 type: "post_mortem_templates";
                 attributes: {
+                    /**
+                     * @deprecated
+                     * @description Deprecated. `slug` is derived from `name`; any submitted value is ignored. This property will be removed from the request schema in a future version.
+                     */
+                    slug?: string | null;
                     /** @description The name of the postmortem template */
                     name?: string;
                     /** @description Default selected template when editing a postmortem */
@@ -18785,7 +21719,7 @@ export interface components {
             /** @description The name of the postmortem template */
             name: string;
             /** @description The slugified name of the postmortem template */
-            slug?: string;
+            readonly slug?: string;
             /** @description Default selected template when editing a postmortem */
             default?: boolean | null;
             /** @description The postmortem template. Liquid syntax and markdown are supported */
@@ -18837,6 +21771,7 @@ export interface components {
                 type: "post_mortem_templates";
                 attributes: components["schemas"]["post_mortem_template"];
             };
+            included?: components["schemas"]["jsonapi_included_resource"][];
         };
         post_mortem_template_list: {
             data: {
@@ -18848,6 +21783,7 @@ export interface components {
             }[];
             links: components["schemas"]["links"];
             meta: components["schemas"]["meta"];
+            included?: components["schemas"]["jsonapi_included_resource"][];
         };
         new_pulse: {
             data: {
@@ -18894,7 +21830,7 @@ export interface components {
         update_pulse: {
             data: {
                 /** @enum {string} */
-                type?: "pulses";
+                type: "pulses";
                 attributes: {
                     /** @description The source of the pulse (eg: k8s) */
                     source?: string | null;
@@ -18971,6 +21907,7 @@ export interface components {
                 type: "pulses";
                 attributes: components["schemas"]["pulse"];
             };
+            included?: components["schemas"]["jsonapi_included_resource"][];
         };
         pulse_list: {
             data: {
@@ -18982,6 +21919,23 @@ export interface components {
             }[];
             links: components["schemas"]["links"];
             meta: components["schemas"]["meta"];
+            included?: components["schemas"]["jsonapi_included_resource"][];
+        };
+        receipt: {
+            /**
+             * @description Delivery state of the receipt.
+             * @enum {string}
+             */
+            state: "pending" | "done" | "failed";
+            /**
+             * @description Reason a receipt failed. Present when state is failed.
+             * @enum {string}
+             */
+            reason?: "no_route_matched" | "deduplicated" | "suppressed" | "validation_error";
+            /** @description Type of the referenced resource (present when set). */
+            resource_type?: string;
+            /** @description ID of the referenced resource (present when set). */
+            resource_id?: string;
         };
         update_retrospective_configuration: {
             data: {
@@ -19022,6 +21976,7 @@ export interface components {
                 type: "retrospective_configurations";
                 attributes: components["schemas"]["retrospective_configuration"];
             };
+            included?: components["schemas"]["jsonapi_included_resource"][];
         };
         retrospective_configuration_list: {
             data: {
@@ -19031,6 +21986,7 @@ export interface components {
                 type: "retrospective_configurations";
                 attributes: components["schemas"]["retrospective_configuration"];
             }[];
+            included?: components["schemas"]["jsonapi_included_resource"][];
         };
         new_retrospective_process: {
             data: {
@@ -19108,6 +22064,7 @@ export interface components {
                 type: "retrospective_processes";
                 attributes: components["schemas"]["retrospective_process"];
             };
+            included?: components["schemas"]["jsonapi_included_resource"][];
         };
         retrospective_process_list: {
             data: {
@@ -19119,12 +22076,18 @@ export interface components {
             }[];
             links: components["schemas"]["links"];
             meta: components["schemas"]["meta"];
+            included?: components["schemas"]["jsonapi_included_resource"][];
         };
         new_retrospective_step: {
             data: {
                 /** @enum {string} */
                 type: "retrospective_steps";
                 attributes: {
+                    /**
+                     * @deprecated
+                     * @description Deprecated. `slug` is derived from `title`; any submitted value is ignored. This property will be removed from the request schema in a future version.
+                     */
+                    slug?: string | null;
                     /** @description The name of the step */
                     title: string;
                     /** @description The description of the step */
@@ -19145,6 +22108,11 @@ export interface components {
                 /** @enum {string} */
                 type: "retrospective_steps";
                 attributes: {
+                    /**
+                     * @deprecated
+                     * @description Deprecated. `slug` is derived from `title`; any submitted value is ignored. This property will be removed from the request schema in a future version.
+                     */
+                    slug?: string | null;
                     /** @description The name of the step */
                     title?: string;
                     /** @description The description of the step */
@@ -19165,7 +22133,7 @@ export interface components {
             /** @description The name of the step */
             title: string;
             /** @description The slug of the step */
-            slug?: string;
+            readonly slug?: string;
             /** @description The description of the step */
             description?: string | null;
             /** @description Users assigned to the selected incident role will be the default owners for this step */
@@ -19189,6 +22157,7 @@ export interface components {
                 type: "retrospective_steps";
                 attributes: components["schemas"]["retrospective_step"];
             };
+            included?: components["schemas"]["jsonapi_included_resource"][];
         };
         retrospective_step_list: {
             data: {
@@ -19200,12 +22169,18 @@ export interface components {
             }[];
             links: components["schemas"]["links"];
             meta: components["schemas"]["meta"];
+            included?: components["schemas"]["jsonapi_included_resource"][];
         };
         new_role: {
             data: {
                 /** @enum {string} */
                 type: "roles";
                 attributes: {
+                    /**
+                     * @deprecated
+                     * @description Deprecated. Custom role slugs remain accepted temporarily. Stop setting `slug`; it will become read-only and be derived from `name` when this property is removed from the request schema in a future version.
+                     */
+                    slug?: string | null;
                     /** @description The role name. */
                     name: string;
                     /** @description Associated incident permissions set. */
@@ -19251,6 +22226,11 @@ export interface components {
                 /** @enum {string} */
                 type: "roles";
                 attributes: {
+                    /**
+                     * @deprecated
+                     * @description Deprecated. Custom role slugs remain accepted temporarily. Stop setting `slug`; it will become read-only and be derived from `name` when this property is removed from the request schema in a future version.
+                     */
+                    slug?: string | null;
                     /** @description The role name. */
                     name?: string;
                     /** @description Associated incident permissions set. */
@@ -19297,7 +22277,7 @@ export interface components {
             /** @description The role name. */
             name: string;
             /** @description The role slug. */
-            slug?: string;
+            readonly slug?: string;
             /** @description Associated incident permissions set. */
             incident_permission_set_id?: string | null;
             /** @description Whether the role can be deleted. */
@@ -19348,6 +22328,7 @@ export interface components {
                 type: "roles";
                 attributes: components["schemas"]["role"];
             };
+            included?: components["schemas"]["jsonapi_included_resource"][];
         };
         role_list: {
             data: {
@@ -19359,6 +22340,7 @@ export interface components {
             }[];
             links: components["schemas"]["links"];
             meta: components["schemas"]["meta"];
+            included?: components["schemas"]["jsonapi_included_resource"][];
         };
         new_schedule_rotation_active_day: {
             data: {
@@ -19445,6 +22427,7 @@ export interface components {
                 type?: "schedule_rotation_active_days";
                 attributes?: components["schemas"]["schedule_rotation_active_day"];
             };
+            included?: components["schemas"]["jsonapi_included_resource"][];
         };
         schedule_rotation_active_day_list: {
             data: {
@@ -19456,6 +22439,7 @@ export interface components {
             }[];
             links: components["schemas"]["links"];
             meta: components["schemas"]["meta"];
+            included?: components["schemas"]["jsonapi_included_resource"][];
         };
         new_schedule_rotation_user: {
             data?: {
@@ -19502,6 +22486,7 @@ export interface components {
             }[];
             links: components["schemas"]["links"];
             meta: components["schemas"]["meta"];
+            included?: components["schemas"]["jsonapi_included_resource"][];
         };
         schedule_rotation_user_response: {
             data: {
@@ -19511,6 +22496,7 @@ export interface components {
                 type: "schedule_rotation_users";
                 attributes: components["schemas"]["schedule_rotation_user"];
             };
+            included?: components["schemas"]["jsonapi_included_resource"][];
         };
         new_schedule_rotation: {
             data: {
@@ -19822,6 +22808,7 @@ export interface components {
                 type: "schedule_rotations";
                 attributes: components["schemas"]["schedule_rotation"];
             };
+            included?: components["schemas"]["jsonapi_included_resource"][];
         };
         schedule_rotation_list: {
             data: {
@@ -19833,6 +22820,7 @@ export interface components {
             }[];
             links: components["schemas"]["links"];
             meta: components["schemas"]["meta"];
+            included?: components["schemas"]["jsonapi_included_resource"][];
         };
         new_schedule: {
             data: {
@@ -19861,10 +22849,25 @@ export interface components {
                     owner_group_ids?: string[];
                     /** @description ID of the owner of the schedule */
                     owner_user_id: number;
-                    /** @description Whether shift-start notifications are enabled */
+                    /** @description Whether the schedule is synced with Linear */
+                    sync_linear_enabled?: boolean | null;
+                    /** @description Whether shadow users are included in Slack notifications and user group syncing. Requires `slack_channel` to be set; otherwise this value is forced to false on save. */
+                    include_shadows_in_slack_notifications?: boolean | null;
+                    /** @description Whether shift-start notifications are enabled. Requires `slack_channel` to be set; otherwise this value is forced to false on save. */
                     shift_start_notifications_enabled?: boolean | null;
-                    /** @description Whether shift-update notifications are enabled */
+                    /** @description Whether shift-update notifications are enabled. Requires `slack_channel` to be set; otherwise this value is forced to false on save. */
                     shift_update_notifications_enabled?: boolean | null;
+                    /** @description Whether the weekly shift summary report is enabled. Requires `slack_channel` to be set; otherwise this value is forced to false on save. */
+                    shift_report_enabled?: boolean | null;
+                    /**
+                     * @description Day of week the weekly shift summary is sent
+                     * @enum {string|null}
+                     */
+                    shift_report_day_of_week?: "monday" | "tuesday" | "wednesday" | "thursday" | "friday" | "saturday" | "sunday" | null;
+                    /** @description Time of day the weekly shift summary is sent, in HH:MM 24-hour format */
+                    shift_report_time_of_day?: string | null;
+                    /** @description IANA time zone used for the weekly shift summary */
+                    shift_report_time_zone?: string | null;
                 };
             };
         };
@@ -19895,10 +22898,25 @@ export interface components {
                     owner_group_ids?: string[];
                     /** @description ID of the owner of the schedule */
                     owner_user_id?: number | null;
-                    /** @description Whether shift-start notifications are enabled */
+                    /** @description Whether the schedule is synced with Linear */
+                    sync_linear_enabled?: boolean | null;
+                    /** @description Whether shadow users are included in Slack notifications and user group syncing. Requires `slack_channel` to be set; otherwise this value is forced to false on save. */
+                    include_shadows_in_slack_notifications?: boolean | null;
+                    /** @description Whether shift-start notifications are enabled. Requires `slack_channel` to be set; otherwise this value is forced to false on save. */
                     shift_start_notifications_enabled?: boolean | null;
-                    /** @description Whether shift-update notifications are enabled */
+                    /** @description Whether shift-update notifications are enabled. Requires `slack_channel` to be set; otherwise this value is forced to false on save. */
                     shift_update_notifications_enabled?: boolean | null;
+                    /** @description Whether the weekly shift summary report is enabled. Requires `slack_channel` to be set; otherwise this value is forced to false on save. */
+                    shift_report_enabled?: boolean | null;
+                    /**
+                     * @description Day of week the weekly shift summary is sent
+                     * @enum {string|null}
+                     */
+                    shift_report_day_of_week?: "monday" | "tuesday" | "wednesday" | "thursday" | "friday" | "saturday" | "sunday" | null;
+                    /** @description Time of day the weekly shift summary is sent, in HH:MM 24-hour format */
+                    shift_report_time_of_day?: string | null;
+                    /** @description IANA time zone used for the weekly shift summary */
+                    shift_report_time_zone?: string | null;
                 };
             };
         };
@@ -19927,10 +22945,25 @@ export interface components {
             owner_group_ids?: string[];
             /** @description ID of user assigned as owner of the schedule */
             owner_user_id: number;
-            /** @description Whether shift-start notifications are enabled */
+            /** @description Whether the schedule is synced with Linear */
+            sync_linear_enabled?: boolean;
+            /** @description Whether shadow users are included in Slack notifications and user group syncing. Requires `slack_channel` to be set; otherwise this value is forced to false on save. */
+            include_shadows_in_slack_notifications?: boolean;
+            /** @description Whether shift-start notifications are enabled. Requires `slack_channel` to be set; otherwise this value is forced to false on save. */
             shift_start_notifications_enabled?: boolean;
-            /** @description Whether shift-update notifications are enabled */
+            /** @description Whether shift-update notifications are enabled. Requires `slack_channel` to be set; otherwise this value is forced to false on save. */
             shift_update_notifications_enabled?: boolean;
+            /** @description Whether the weekly shift summary report is enabled. Requires `slack_channel` to be set; otherwise this value is forced to false on save. */
+            shift_report_enabled?: boolean;
+            /**
+             * @description Day of week the weekly shift summary is sent
+             * @enum {string}
+             */
+            shift_report_day_of_week?: "monday" | "tuesday" | "wednesday" | "thursday" | "friday" | "saturday" | "sunday";
+            /** @description Time of day the weekly shift summary is sent, in HH:MM 24-hour format */
+            shift_report_time_of_day?: string;
+            /** @description IANA time zone used for the weekly shift summary */
+            shift_report_time_zone?: string;
             /** @description Date of creation */
             created_at: string;
             /** @description Date of last update */
@@ -19944,6 +22977,7 @@ export interface components {
                 type: "schedules";
                 attributes: components["schemas"]["schedule"];
             };
+            included?: components["schemas"]["jsonapi_included_resource"][];
         };
         schedule_list: {
             data: {
@@ -19955,6 +22989,7 @@ export interface components {
             }[];
             links: components["schemas"]["links"];
             meta: components["schemas"]["meta"];
+            included?: components["schemas"]["jsonapi_included_resource"][];
         };
         new_secret: {
             data: {
@@ -20050,11 +23085,16 @@ export interface components {
                 /** @enum {string} */
                 type: "services";
                 attributes: {
+                    /**
+                     * @deprecated
+                     * @description Deprecated. `slug` is derived from `name`; any submitted value is ignored. This property will be removed from the request schema in a future version.
+                     */
+                    slug?: string | null;
                     /** @description The name of the service */
                     name: string;
                     /** @description The description of the service */
                     description?: string | null;
-                    /** @description The public description of the service */
+                    /** @description The status page description of the service */
                     public_description?: string | null;
                     /** @description Emails to attach to the service */
                     notify_emails?: string[] | null;
@@ -20155,11 +23195,16 @@ export interface components {
                 /** @enum {string} */
                 type: "services";
                 attributes: {
+                    /**
+                     * @deprecated
+                     * @description Deprecated. `slug` is derived from `name`; any submitted value is ignored. This property will be removed from the request schema in a future version.
+                     */
+                    slug?: string | null;
                     /** @description The name of the service */
                     name?: string;
                     /** @description The description of the service */
                     description?: string | null;
-                    /** @description The public description of the service */
+                    /** @description The status page description of the service */
                     public_description?: string | null;
                     /** @description Emails to attach to the service */
                     notify_emails?: string[] | null;
@@ -20249,10 +23294,15 @@ export interface components {
             /** @description The name of the service */
             name: string;
             /** @description The slug of the service */
-            slug?: string;
+            readonly slug?: string;
+            /**
+             * @description How this service is managed (provenance): web, api, terraform, etc. Read-only.
+             * @enum {string}
+             */
+            managed_by?: "web" | "admin_web" | "api" | "terraform" | "pulumi" | "backstage" | "catalog_sync";
             /** @description The description of the service */
             description?: string | null;
-            /** @description The public description of the service */
+            /** @description The status page description of the service */
             public_description?: string | null;
             /** @description Emails attached to the service */
             notify_emails?: string[] | null;
@@ -20350,6 +23400,7 @@ export interface components {
                 type: "services";
                 attributes: components["schemas"]["service"];
             };
+            included?: components["schemas"]["jsonapi_included_resource"][];
         };
         service_list: {
             data: {
@@ -20361,12 +23412,95 @@ export interface components {
             }[];
             links: components["schemas"]["links"];
             meta: components["schemas"]["meta"];
+            included?: components["schemas"]["jsonapi_included_resource"][];
+        };
+        bulk_upsert_services: {
+            /** @description Services to upsert, matched by external_id. Max 100 per request; external_ids unique within a batch. Only attributes present are written (managed-fields semantics). */
+            entities: {
+                /** @description External identifier used as the upsert key. Unique per team. */
+                external_id: string;
+                /** @description Required for new records. Optional for updates. */
+                name?: string;
+                description?: string | null;
+                public_description?: string | null;
+                color?: string | null;
+                position?: number | null;
+                show_uptime?: boolean | null;
+                show_uptime_last_days?: number | null;
+                github_repository_name?: string | null;
+                github_repository_branch?: string | null;
+                gitlab_repository_name?: string | null;
+                gitlab_repository_branch?: string | null;
+                kubernetes_deployment_name?: string | null;
+                pagerduty_id?: string | null;
+                opsgenie_id?: string | null;
+                opsgenie_team_id?: string | null;
+                cortex_id?: string | null;
+                opslevel_id?: string | null;
+                backstage_id?: string | null;
+                service_now_ci_sys_id?: string | null;
+                notify_emails?: string[] | null;
+                alerts_email_enabled?: boolean | null;
+                /** @description Catalog property values (merge semantics: only mentioned fields written). */
+                fields?: {
+                    /** @description UUID, slug, or external_id of the catalog field (required if catalog_property_id is absent) */
+                    catalog_field_id?: string;
+                    /** @description Alias for catalog_field_id (required if catalog_field_id is absent) */
+                    catalog_property_id?: string;
+                    /** @description The value for this field */
+                    value: string;
+                }[];
+            }[];
+        };
+        bulk_upsert_services_response: {
+            data?: {
+                id?: string;
+                /** @enum {string} */
+                type?: "services";
+                attributes?: components["schemas"]["service"];
+            }[];
+        };
+        bulk_upsert_services_error: {
+            errors: {
+                /** @description Position of the failed record in the batch */
+                index: number;
+                external_id: string;
+                errors: string[];
+            }[];
+        };
+        /** @description Two mutually exclusive modes. Pass exactly one of: external_ids (delete specific records) or managed_by (prune all managed records not in keep set). */
+        bulk_destroy_services: {
+            /** @description Array of external_ids to delete. Max 100 per request. */
+            external_ids: string[];
+        } | {
+            /**
+             * @description Delete all records with this managed_by value (web/admin_web not allowed).
+             * @enum {string}
+             */
+            managed_by: "api" | "terraform" | "pulumi" | "backstage" | "catalog_sync";
+            /** @description Records with these external_ids are preserved. */
+            keep_external_ids?: string[];
+        };
+        bulk_destroy_services_response: {
+            data?: {
+                /** @description External IDs that were successfully deleted */
+                deleted_external_ids?: string[];
+                /** @description External IDs whose deletion the record itself blocked (e.g. minimum-one guard, restrict associations). Records the caller is not authorized to destroy are NOT listed here. */
+                failed_external_ids?: string[];
+                /** @description External IDs that were not found or not accessible to the caller (external_ids mode only) */
+                not_found_external_ids?: string[];
+            };
         };
         new_severity: {
             data: {
                 /** @enum {string} */
                 type: "severities";
                 attributes: {
+                    /**
+                     * @deprecated
+                     * @description Deprecated. `slug` is derived from `name`; any submitted value is ignored. This property will be removed from the request schema in a future version.
+                     */
+                    slug?: string | null;
                     /** @description The name of the severity */
                     name: string;
                     /** @description The description of the severity */
@@ -20404,6 +23538,11 @@ export interface components {
                 /** @enum {string} */
                 type: "severities";
                 attributes: {
+                    /**
+                     * @deprecated
+                     * @description Deprecated. `slug` is derived from `name`; any submitted value is ignored. This property will be removed from the request schema in a future version.
+                     */
+                    slug?: string | null;
                     /** @description The name of the severity */
                     name?: string;
                     /** @description The description of the severity */
@@ -20440,7 +23579,7 @@ export interface components {
             /** @description The name of the severity */
             name: string;
             /** @description The slug of the severity */
-            slug?: string;
+            readonly slug?: string;
             /** @description The description of the severity */
             description?: string | null;
             /**
@@ -20481,6 +23620,7 @@ export interface components {
                 type: "severities";
                 attributes: components["schemas"]["severity"];
             };
+            included?: components["schemas"]["jsonapi_included_resource"][];
         };
         severity_list: {
             data: {
@@ -20492,6 +23632,7 @@ export interface components {
             }[];
             links: components["schemas"]["links"];
             meta: components["schemas"]["meta"];
+            included?: components["schemas"]["jsonapi_included_resource"][];
         };
         shift: {
             /** @description ID of schedule */
@@ -20519,6 +23660,7 @@ export interface components {
                 relationships?: components["schemas"]["shift_relationships"];
             }[];
             meta?: components["schemas"]["meta"];
+            included?: components["schemas"]["jsonapi_included_resource"][];
         };
         shift_relationships: {
             shift_override?: {
@@ -20542,6 +23684,312 @@ export interface components {
                     type?: string;
                 } | null;
             };
+        };
+        new_shift_coverage_request: {
+            data: {
+                /** @enum {string} */
+                type: "shift_coverage_requests";
+                attributes: {
+                    /**
+                     * Format: date-time
+                     * @description Start datetime of the time range to request coverage for
+                     */
+                    starts_at: string;
+                    /**
+                     * Format: date-time
+                     * @description End datetime of the time range to request coverage for
+                     */
+                    ends_at: string;
+                    /** @description Optional. Restrict coverage to shifts assigned to this user. When omitted, every shift overlapping the time range is covered. */
+                    user_id?: number;
+                };
+            };
+        };
+        shift_coverage_request: {
+            /** @description ID of schedule */
+            schedule_id: string;
+            /** @description ID of the shift being covered */
+            shift_id: string;
+            /** @description ID of the user whose shift is being covered */
+            original_shift_user_id: number;
+            /** @description ID of the user who created the coverage request */
+            created_by_user_id: number;
+            /** @description Start datetime of the coverage request */
+            starts_at: string;
+            /** @description End datetime of the coverage request */
+            ends_at: string;
+            /** @description Date of creation */
+            created_at?: string;
+            /** @description Date of last update */
+            updated_at?: string;
+            /** @description Schedule metadata */
+            schedule?: components["schemas"]["schedule_response"];
+            /** @description Shift metadata */
+            shift?: components["schemas"]["shift"];
+            /** @description User whose shift is being covered */
+            original_shift_user?: components["schemas"]["user_response"];
+            /** @description User who created the coverage request */
+            created_by_user?: components["schemas"]["user_response"];
+        };
+        shift_coverage_request_response: {
+            data: {
+                /** @description Unique ID of the coverage request */
+                id: string;
+                /** @enum {string} */
+                type: "shift_coverage_requests";
+                attributes: components["schemas"]["shift_coverage_request"];
+            };
+            included?: components["schemas"]["jsonapi_included_resource"][];
+        };
+        shift_coverage_request_list: {
+            data: {
+                /** @description Unique ID of the coverage request */
+                id: string;
+                /** @enum {string} */
+                type: "shift_coverage_requests";
+                attributes: components["schemas"]["shift_coverage_request"];
+            }[];
+            links?: components["schemas"]["links"];
+            meta?: components["schemas"]["meta"];
+            included?: components["schemas"]["jsonapi_included_resource"][];
+        };
+        slack_channel: {
+            id: string;
+            slack_channel_name: string;
+            slack_channel_id: string;
+            slack_team_id: string;
+            created_at: string;
+            updated_at: string;
+        };
+        new_status_page_announcement: {
+            data: {
+                /** @enum {string} */
+                type: "status_page_announcements";
+                attributes: {
+                    /** @description Title of the announcement */
+                    title: string;
+                    /** @description Body of the announcement */
+                    body: string;
+                    /** @description Controls if status page subscribers should be notified. Defaults to true */
+                    notify_subscribers?: boolean;
+                };
+            };
+        };
+        update_status_page_announcement: {
+            data: {
+                /** @enum {string} */
+                type: "status_page_announcements";
+                attributes: {
+                    /** @description Title of the announcement */
+                    title?: string;
+                    /** @description Body of the announcement */
+                    body?: string;
+                };
+            };
+        };
+        status_page_announcement: {
+            /** @description ID of the status page the announcement was posted to */
+            status_page_id: string;
+            /** @description Title of the announcement */
+            title: string;
+            /** @description Body of the announcement */
+            body: string;
+            /** @description ID of the user who posted the announcement */
+            user_id?: number | null;
+            /** @description Date the announcement was published */
+            published_at: string;
+            /** @description Date of creation */
+            created_at: string;
+            /** @description Date of last update */
+            updated_at: string;
+        };
+        status_page_announcement_response: {
+            data: {
+                /** @description Unique ID of the status page announcement */
+                id: string;
+                /** @enum {string} */
+                type: "status_page_announcements";
+                attributes: components["schemas"]["status_page_announcement"];
+            };
+            included?: components["schemas"]["jsonapi_included_resource"][];
+        };
+        status_page_announcement_list: {
+            data: {
+                /** @description Unique ID of the status page announcement */
+                id: string;
+                /** @enum {string} */
+                type: "status_page_announcements";
+                attributes: components["schemas"]["status_page_announcement"];
+            }[];
+            links: components["schemas"]["links"];
+            meta: components["schemas"]["meta"];
+            included?: components["schemas"]["jsonapi_included_resource"][];
+        };
+        new_status_page_component_group: {
+            data: {
+                /** @enum {string} */
+                type: "status_page_component_groups";
+                attributes: {
+                    /** @description Name of the component group */
+                    name: string;
+                    /** @description Description of the component group */
+                    description?: string | null;
+                    /** @description Position of the group on the status page's top-level list (shared with ungrouped components) */
+                    position?: number;
+                    /** @description Whether the group renders collapsed on the public page */
+                    collapsed_by_default?: boolean | null;
+                };
+            };
+        };
+        update_status_page_component_group: {
+            data: {
+                /** @enum {string} */
+                type: "status_page_component_groups";
+                attributes: {
+                    /** @description Name of the component group */
+                    name?: string;
+                    /** @description Description of the component group */
+                    description?: string | null;
+                    /** @description Position of the group on the status page's top-level list (shared with ungrouped components) */
+                    position?: number;
+                    /** @description Whether the group renders collapsed on the public page */
+                    collapsed_by_default?: boolean | null;
+                };
+            };
+        };
+        status_page_component_group: {
+            status_page_id: string;
+            /** @description Name of the component group */
+            name: string;
+            /** @description Description of the component group */
+            description?: string | null;
+            /** @description Position of the group on the status page's top-level list */
+            position: number;
+            /** @description Whether the group renders collapsed on the public page */
+            collapsed_by_default?: boolean;
+            /**
+             * Format: date-time
+             * @description Date of creation
+             */
+            created_at: string;
+            /**
+             * Format: date-time
+             * @description Date of last update
+             */
+            updated_at: string;
+        };
+        status_page_component_group_response: {
+            data: {
+                /** @description Unique ID of the status page component group */
+                id: string;
+                /** @enum {string} */
+                type: "status_page_component_groups";
+                attributes: components["schemas"]["status_page_component_group"];
+            };
+            included?: components["schemas"]["jsonapi_included_resource"][];
+        };
+        status_page_component_group_list: {
+            data: {
+                /** @description Unique ID of the status page component group */
+                id: string;
+                /** @enum {string} */
+                type: "status_page_component_groups";
+                attributes: components["schemas"]["status_page_component_group"];
+            }[];
+            links: components["schemas"]["links"];
+            meta: components["schemas"]["meta"];
+            included?: components["schemas"]["jsonapi_included_resource"][];
+        };
+        new_status_page_component: {
+            data: {
+                /** @enum {string} */
+                type: "status_page_components";
+                attributes: {
+                    /** @description Name of the component (required for ad-hoc components; derived from the source for catalog-backed ones) */
+                    name?: string | null;
+                    /** @description Description of the component (ad-hoc components only) */
+                    description?: string | null;
+                    /** @description ID of the component group on the same status page */
+                    status_page_component_group_id?: string | null;
+                    /** @description Position of the component (within its group, or on the page's top-level list when ungrouped) */
+                    position?: number;
+                    /**
+                     * @description Catalog source type backing the component
+                     * @enum {string|null}
+                     */
+                    source_type?: "Service" | "Functionality" | null;
+                    /** @description ID of the catalog source backing the component */
+                    source_id?: string | null;
+                };
+            };
+        };
+        update_status_page_component: {
+            data: {
+                /** @enum {string} */
+                type: "status_page_components";
+                attributes: {
+                    /** @description Name of the component (ad-hoc components only) */
+                    name?: string | null;
+                    /** @description Description of the component (ad-hoc components only) */
+                    description?: string | null;
+                    /** @description ID of the component group on the same status page (null moves the component to the top level) */
+                    status_page_component_group_id?: string | null;
+                    /** @description Position of the component (within its group, or on the page's top-level list when ungrouped) */
+                    position?: number;
+                };
+            };
+        };
+        status_page_component: {
+            status_page_id: string;
+            /** @description ID of the component group the component belongs to */
+            status_page_component_group_id?: string | null;
+            /** @description Name of the component (derived from the source for catalog-backed components) */
+            name?: string | null;
+            /** @description Description of the component (derived from the source for catalog-backed components) */
+            description?: string | null;
+            /** @description Position of the component */
+            position: number;
+            /** @description Catalog source type backing the component (null for ad-hoc components) */
+            source_type?: string | null;
+            /** @description ID of the catalog source backing the component (null for ad-hoc components) */
+            source_id?: string | null;
+            /**
+             * @description Latest recorded status of the component
+             * @enum {string|null}
+             */
+            status?: "operational" | "degraded_performance" | "partial_outage" | "major_outage" | "maintenance" | "impacted" | null;
+            /**
+             * Format: date-time
+             * @description Date of creation
+             */
+            created_at: string;
+            /**
+             * Format: date-time
+             * @description Date of last update
+             */
+            updated_at: string;
+        };
+        status_page_component_response: {
+            data: {
+                /** @description Unique ID of the status page component */
+                id: string;
+                /** @enum {string} */
+                type: "status_page_components";
+                attributes: components["schemas"]["status_page_component"];
+            };
+            included?: components["schemas"]["jsonapi_included_resource"][];
+        };
+        status_page_component_list: {
+            data: {
+                /** @description Unique ID of the status page component */
+                id: string;
+                /** @enum {string} */
+                type: "status_page_components";
+                attributes: components["schemas"]["status_page_component"];
+            }[];
+            links: components["schemas"]["links"];
+            meta: components["schemas"]["meta"];
+            included?: components["schemas"]["jsonapi_included_resource"][];
         };
         new_status_page_template: {
             data: {
@@ -20638,6 +24086,7 @@ export interface components {
                 type: "status_page_templates";
                 attributes: components["schemas"]["status_page_template"];
             };
+            included?: components["schemas"]["jsonapi_included_resource"][];
         };
         status_page_template_list: {
             data: {
@@ -20649,12 +24098,18 @@ export interface components {
             }[];
             links: components["schemas"]["links"];
             meta: components["schemas"]["meta"];
+            included?: components["schemas"]["jsonapi_included_resource"][];
         };
         new_status_page: {
             data: {
                 /** @enum {string} */
                 type: "status_pages";
                 attributes: {
+                    /**
+                     * @deprecated
+                     * @description Deprecated. `slug` is derived from `title`; any submitted value is ignored. This property will be removed from the request schema in a future version.
+                     */
+                    slug?: string | null;
                     /** @description The title of the status page */
                     title: string;
                     /** @description The public title of the status page */
@@ -20745,6 +24200,11 @@ export interface components {
                 /** @enum {string} */
                 type: "status_pages";
                 attributes: {
+                    /**
+                     * @deprecated
+                     * @description Deprecated. `slug` is derived from `title`; any submitted value is ignored. This property will be removed from the request schema in a future version.
+                     */
+                    slug?: string | null;
                     /** @description The title of the status page */
                     title?: string;
                     /** @description The public title of the status page */
@@ -20827,7 +24287,7 @@ export interface components {
             /** @description The title of the status page */
             title: string;
             /** @description The slug of the status page */
-            slug?: string;
+            readonly slug?: string;
             /** @description The public title of the status page */
             public_title?: string | null;
             /** @description The description of the status page */
@@ -20920,6 +24380,7 @@ export interface components {
                 type: "status_pages";
                 attributes: components["schemas"]["status_page"];
             };
+            included?: components["schemas"]["jsonapi_included_resource"][];
         };
         status_page_list: {
             data: {
@@ -20931,16 +24392,24 @@ export interface components {
             }[];
             links: components["schemas"]["links"];
             meta: components["schemas"]["meta"];
+            included?: components["schemas"]["jsonapi_included_resource"][];
         };
         new_team: {
             data: {
                 /** @enum {string} */
                 type: "groups";
                 attributes: {
+                    /**
+                     * @deprecated
+                     * @description Deprecated. `slug` is derived from `name`; any submitted value is ignored. This property will be removed from the request schema in a future version.
+                     */
+                    slug?: string | null;
                     /** @description The name of the team */
                     name: string;
                     /** @description The description of the team */
                     description?: string | null;
+                    /** @description The status page description of the team */
+                    public_description?: string | null;
                     /** @description Emails to attach to the team */
                     notify_emails?: string[] | null;
                     /** @description The hex color of the team */
@@ -21009,6 +24478,11 @@ export interface components {
                     } | null;
                     /** @description Auto add members to incident channel when team is attached */
                     auto_add_members_when_attached?: boolean | null;
+                    /**
+                     * @description Visibility-scoped auto-add behavior. Only present when the `enable_scoped_incident_channel_auto_add` feature flag is on for the organization. When set, it overrides `auto_add_members_when_attached`.
+                     * @enum {string|null}
+                     */
+                    auto_add_members_scope?: "off" | "public_only" | "public_and_test" | "all" | null;
                     /** @description Array of property values for this team. */
                     properties?: {
                         /** @description Catalog property ID */
@@ -21024,10 +24498,17 @@ export interface components {
                 /** @enum {string} */
                 type: "groups";
                 attributes: {
+                    /**
+                     * @deprecated
+                     * @description Deprecated. `slug` is derived from `name`; any submitted value is ignored. This property will be removed from the request schema in a future version.
+                     */
+                    slug?: string | null;
                     /** @description The name of the team */
                     name?: string;
                     /** @description The description of the team */
                     description?: string | null;
+                    /** @description The status page description of the team */
+                    public_description?: string | null;
                     /** @description Emails to attach to the team */
                     notify_emails?: string[] | null;
                     /** @description The hex color of the team */
@@ -21094,6 +24575,11 @@ export interface components {
                     } | null;
                     /** @description Auto add members to incident channel when team is attached */
                     auto_add_members_when_attached?: boolean | null;
+                    /**
+                     * @description Visibility-scoped auto-add behavior. Only present when the `enable_scoped_incident_channel_auto_add` feature flag is on for the organization. When set, it overrides `auto_add_members_when_attached`.
+                     * @enum {string|null}
+                     */
+                    auto_add_members_scope?: "off" | "public_only" | "public_and_test" | "all" | null;
                     /** @description Array of property values for this team. */
                     properties?: {
                         /** @description Catalog property ID */
@@ -21107,9 +24593,16 @@ export interface components {
         team: {
             /** @description The name of the team */
             name: string;
-            slug?: string;
+            readonly slug?: string;
+            /**
+             * @description How this team is managed (provenance): web, api, terraform, etc. Read-only.
+             * @enum {string}
+             */
+            managed_by?: "web" | "admin_web" | "api" | "terraform" | "pulumi" | "backstage" | "catalog_sync";
             /** @description The description of the team */
             description?: string | null;
+            /** @description The status page description of the team */
+            public_description?: string | null;
             /** @description Emails to attach to the team */
             notify_emails?: string[] | null;
             /** @description The hex color of the team */
@@ -21178,6 +24671,11 @@ export interface components {
             } | null;
             /** @description Auto add members to incident channel when team is attached */
             auto_add_members_when_attached?: boolean | null;
+            /**
+             * @description Visibility-scoped auto-add behavior. Only present when the `enable_scoped_incident_channel_auto_add` feature flag is on for the organization. When set, it overrides `auto_add_members_when_attached`.
+             * @enum {string|null}
+             */
+            auto_add_members_scope?: "off" | "public_only" | "public_and_test" | "all" | null;
             /** @description Array of property values for this team. */
             properties?: {
                 /** @description Catalog property ID */
@@ -21198,6 +24696,7 @@ export interface components {
                 type: "groups";
                 attributes: components["schemas"]["team"];
             };
+            included?: components["schemas"]["jsonapi_included_resource"][];
         };
         team_list: {
             data: {
@@ -21209,6 +24708,79 @@ export interface components {
             }[];
             links: components["schemas"]["links"];
             meta: components["schemas"]["meta"];
+            included?: components["schemas"]["jsonapi_included_resource"][];
+        };
+        bulk_upsert_teams: {
+            /** @description Teams to upsert, matched by external_id. Max 100 per request; external_ids unique within a batch. Only attributes present are written (managed-fields semantics). */
+            entities: {
+                /** @description External identifier used as the upsert key. Unique per team. */
+                external_id: string;
+                /** @description Required for new records. Optional for updates. */
+                name?: string;
+                description?: string | null;
+                public_description?: string | null;
+                color?: string | null;
+                position?: number | null;
+                notify_emails?: string[] | null;
+                pagerduty_id?: string | null;
+                pagerduty_service_id?: string | null;
+                opsgenie_id?: string | null;
+                victor_ops_id?: string | null;
+                pagertree_id?: string | null;
+                backstage_id?: string | null;
+                cortex_id?: string | null;
+                opslevel_id?: string | null;
+                service_now_ci_sys_id?: string | null;
+                alerts_email_enabled?: boolean | null;
+                /** @description Catalog property values (merge semantics: only mentioned fields written). */
+                fields?: {
+                    /** @description UUID, slug, or external_id of the catalog field (required if catalog_property_id is absent) */
+                    catalog_field_id?: string;
+                    /** @description Alias for catalog_field_id (required if catalog_field_id is absent) */
+                    catalog_property_id?: string;
+                    /** @description The value for this field */
+                    value: string;
+                }[];
+            }[];
+        };
+        bulk_upsert_teams_response: {
+            data?: {
+                id?: string;
+                /** @enum {string} */
+                type?: "groups";
+                attributes?: components["schemas"]["team"];
+            }[];
+        };
+        bulk_upsert_teams_error: {
+            errors: {
+                /** @description Position of the failed record in the batch */
+                index: number;
+                external_id: string;
+                errors: string[];
+            }[];
+        };
+        /** @description Two mutually exclusive modes. Pass exactly one of: external_ids (delete specific records) or managed_by (prune all managed records not in keep set). */
+        bulk_destroy_teams: {
+            /** @description Array of external_ids to delete. Max 100 per request. */
+            external_ids: string[];
+        } | {
+            /**
+             * @description Delete all records with this managed_by value (web/admin_web not allowed).
+             * @enum {string}
+             */
+            managed_by: "api" | "terraform" | "pulumi" | "backstage" | "catalog_sync";
+            /** @description Records with these external_ids are preserved. */
+            keep_external_ids?: string[];
+        };
+        bulk_destroy_teams_response: {
+            data?: {
+                /** @description External IDs that were successfully deleted */
+                deleted_external_ids?: string[];
+                /** @description External IDs whose deletion the record itself blocked (e.g. minimum-one guard, restrict associations). Records the caller is not authorized to destroy are NOT listed here. */
+                failed_external_ids?: string[];
+                /** @description External IDs that were not found or not accessible to the caller (external_ids mode only) */
+                not_found_external_ids?: string[];
+            };
         };
         new_user_notification_rule: {
             data: {
@@ -21228,7 +24800,7 @@ export interface components {
                     /** @description User device to which notification to be sent */
                     user_device_id?: string | null;
                     /** @description Contact types for which notification needs to be enabled */
-                    enabled_contact_types: ("email" | "sms" | "call" | "device" | "non_critical_device" | "slack")[];
+                    enabled_contact_types: ("email" | "sms" | "call" | "device" | "non_critical_device" | "slack" | "google_chat" | "microsoft_teams")[];
                 };
             };
         };
@@ -21250,7 +24822,7 @@ export interface components {
                     /** @description User device to which notification to be sent */
                     user_device_id?: string | null;
                     /** @description Contact types for which notification needs to be enabled */
-                    enabled_contact_types?: ("email" | "sms" | "call" | "device" | "non_critical_device" | "slack")[];
+                    enabled_contact_types?: ("email" | "sms" | "call" | "device" | "non_critical_device" | "slack" | "google_chat" | "microsoft_teams")[];
                 };
             };
         };
@@ -21269,7 +24841,7 @@ export interface components {
             /** @description User device to which notification to be sent */
             user_device_id?: string | null;
             /** @description Contact types for which notification needs to be enabled */
-            enabled_contact_types?: ("email" | "sms" | "call" | "device" | "non_critical_device" | "slack")[];
+            enabled_contact_types?: ("email" | "sms" | "call" | "device" | "non_critical_device" | "slack" | "google_chat" | "microsoft_teams")[];
             /**
              * @description Type of notification rule (audible or quiet). Audible notifications use sound/vibration to alert users, while quiet notifications are silent.
              * @enum {string}
@@ -21288,6 +24860,7 @@ export interface components {
                 type: "user_notification_rules";
                 attributes: components["schemas"]["user_notification_rule"];
             };
+            included?: components["schemas"]["jsonapi_included_resource"][];
         };
         user_notification_rule_list: {
             data: {
@@ -21299,6 +24872,7 @@ export interface components {
             }[];
             links: components["schemas"]["links"];
             meta: components["schemas"]["meta"];
+            included?: components["schemas"]["jsonapi_included_resource"][];
         };
         new_user_phone_number: {
             data: {
@@ -21346,6 +24920,7 @@ export interface components {
                 type: "user_phone_numbers";
                 attributes: components["schemas"]["user_phone_number"];
             };
+            included?: components["schemas"]["jsonapi_included_resource"][];
         };
         user_phone_number_list: {
             data: {
@@ -21357,6 +24932,7 @@ export interface components {
             }[];
             links: components["schemas"]["links"];
             meta: components["schemas"]["meta"];
+            included?: components["schemas"]["jsonapi_included_resource"][];
         };
         verify_phone_number_request: {
             /** @description 6-digit verification code */
@@ -21407,6 +24983,7 @@ export interface components {
                 type: "user_email_addresses";
                 attributes: components["schemas"]["user_email_address"];
             };
+            included?: components["schemas"]["jsonapi_included_resource"][];
         };
         user_email_address_list: {
             data: {
@@ -21418,6 +24995,7 @@ export interface components {
             }[];
             links: components["schemas"]["links"];
             meta: components["schemas"]["meta"];
+            included?: components["schemas"]["jsonapi_included_resource"][];
         };
         user: {
             /** @description The email of the user */
@@ -21437,25 +25015,35 @@ export interface components {
             /** @description Date of last update */
             updated_at: string;
         };
-        /** @description Flat user object as returned by serializer */
+        /** @description Flat user attributes as returned by UserFlatSerializer (no nested associations) */
         user_flat_response: {
             /** @description User ID */
             id: number;
-            /** @description User email */
+            /** @description Display name */
+            name?: string;
+            /** @description Email address */
             email: string;
-            /** @description User first name */
+            /** @description Primary phone number */
+            phone?: string | null;
+            /** @description Secondary phone number */
+            phone_2?: string | null;
+            /** @description First name */
             first_name?: string | null;
-            /** @description User last name */
+            /** @description Last name */
             last_name?: string | null;
-            /** @description User full name */
+            /** @description Preferred name */
+            preferred_name?: string | null;
+            /** @description Full name */
             full_name?: string | null;
-            /** @description User full name with team */
+            /** @description Full name with team context */
             full_name_with_team?: string | null;
-            /** @description User time zone */
+            /** @description Slack user ID */
+            slack_id?: string | null;
+            /** @description IANA time zone */
             time_zone?: string | null;
-            /** @description User creation timestamp */
+            /** @description Date of creation */
             created_at: string;
-            /** @description User last update timestamp */
+            /** @description Date of last update */
             updated_at: string;
         };
         role_relationship: {
@@ -21501,6 +25089,7 @@ export interface components {
                 attributes: components["schemas"]["user"];
                 relationships?: components["schemas"]["user_relationships"];
             };
+            included?: components["schemas"]["jsonapi_included_resource"][];
         };
         user_list: {
             data: {
@@ -21513,10 +25102,18 @@ export interface components {
             }[];
             links: components["schemas"]["links"];
             meta: components["schemas"]["meta"];
+            included?: components["schemas"]["jsonapi_included_resource"][];
         };
         webhooks_delivery: {
             endpoint_id: string;
             payload: string;
+            /**
+             * @description Delivery status
+             * @enum {string}
+             */
+            status: "pending" | "success" | "failed";
+            /** @description HTTP status code recorded for the delivery attempt. It is null before the first attempt. For SSRF and transport failures, Rootly generates this code because no destination response was received. */
+            response_status: number | null;
             delivered_at: string | null;
             /** @description Date of creation */
             created_at: string;
@@ -21531,6 +25128,7 @@ export interface components {
                 type: "webhooks_deliveries";
                 attributes: components["schemas"]["webhooks_delivery"];
             };
+            included?: components["schemas"]["jsonapi_included_resource"][];
         };
         webhooks_delivery_list: {
             data: {
@@ -21542,20 +25140,31 @@ export interface components {
             }[];
             links?: components["schemas"]["links"];
             meta?: components["schemas"]["meta"];
+            included?: components["schemas"]["jsonapi_included_resource"][];
         };
         new_webhooks_endpoint: {
             data: {
                 /** @enum {string} */
                 type: "webhooks_endpoints";
                 attributes: {
+                    /**
+                     * @deprecated
+                     * @description Deprecated. `slug` is derived from `name`; any submitted value is ignored. This property will be removed from the request schema in a future version.
+                     */
+                    slug?: string | null;
                     /** @description The name of the endpoint */
                     name: string;
                     /** @description The URL of the endpoint. */
                     url: string;
                     /** @description The webhook signing secret used to verify webhook requests. */
                     secret?: string;
-                    event_types?: ("incident.created" | "incident.updated" | "incident.in_triage" | "incident.mitigated" | "incident.resolved" | "incident.cancelled" | "incident.deleted" | "incident.scheduled.created" | "incident.scheduled.updated" | "incident.scheduled.in_progress" | "incident.scheduled.completed" | "incident.scheduled.deleted" | "incident_post_mortem.created" | "incident_post_mortem.updated" | "incident_post_mortem.published" | "incident_post_mortem.deleted" | "incident_status_page_event.created" | "incident_status_page_event.updated" | "incident_status_page_event.deleted" | "incident_event.created" | "incident_event.updated" | "incident_event.deleted" | "alert.created" | "pulse.created" | "genius_workflow_run.queued" | "genius_workflow_run.started" | "genius_workflow_run.completed" | "genius_workflow_run.failed" | "genius_workflow_run.canceled" | "audit_log.created")[];
+                    event_types?: ("incident.created" | "incident.updated" | "incident.in_triage" | "incident.mitigated" | "incident.resolved" | "incident.cancelled" | "incident.deleted" | "incident.scheduled.created" | "incident.scheduled.updated" | "incident.scheduled.in_progress" | "incident.scheduled.completed" | "incident.scheduled.deleted" | "incident_post_mortem.created" | "incident_post_mortem.updated" | "incident_post_mortem.published" | "incident_post_mortem.deleted" | "incident_status_page_event.created" | "incident_status_page_event.updated" | "incident_status_page_event.deleted" | "incident_event.created" | "incident_event.updated" | "incident_event.deleted" | "alert.created" | "alert.updated" | "pulse.created" | "shift.started" | "genius_workflow_run.queued" | "genius_workflow_run.started" | "genius_workflow_run.completed" | "genius_workflow_run.failed" | "genius_workflow_run.canceled" | "audit_log.created")[];
                     enabled?: boolean;
+                    /** @description Custom HTTP headers sent with each delivery. Max 10. Reserved names (Content-Type, X-Rootly-Signature, Host, etc.) are rejected. */
+                    custom_headers?: {
+                        name: string;
+                        value: string;
+                    }[];
                 };
             };
         };
@@ -21564,10 +25173,20 @@ export interface components {
                 /** @enum {string} */
                 type: "webhooks_endpoints";
                 attributes: {
+                    /**
+                     * @deprecated
+                     * @description Deprecated. `slug` is derived from `name`; any submitted value is ignored. This property will be removed from the request schema in a future version.
+                     */
+                    slug?: string | null;
                     /** @description The name of the endpoint */
                     name?: string;
-                    event_types?: ("incident.created" | "incident.updated" | "incident.in_triage" | "incident.mitigated" | "incident.resolved" | "incident.cancelled" | "incident.deleted" | "incident.scheduled.created" | "incident.scheduled.updated" | "incident.scheduled.in_progress" | "incident.scheduled.completed" | "incident.scheduled.deleted" | "incident_post_mortem.created" | "incident_post_mortem.updated" | "incident_post_mortem.published" | "incident_post_mortem.deleted" | "incident_status_page_event.created" | "incident_status_page_event.updated" | "incident_status_page_event.deleted" | "incident_event.created" | "incident_event.updated" | "incident_event.deleted" | "alert.created" | "pulse.created" | "genius_workflow_run.queued" | "genius_workflow_run.started" | "genius_workflow_run.completed" | "genius_workflow_run.failed" | "genius_workflow_run.canceled" | "audit_log.created")[];
+                    event_types?: ("incident.created" | "incident.updated" | "incident.in_triage" | "incident.mitigated" | "incident.resolved" | "incident.cancelled" | "incident.deleted" | "incident.scheduled.created" | "incident.scheduled.updated" | "incident.scheduled.in_progress" | "incident.scheduled.completed" | "incident.scheduled.deleted" | "incident_post_mortem.created" | "incident_post_mortem.updated" | "incident_post_mortem.published" | "incident_post_mortem.deleted" | "incident_status_page_event.created" | "incident_status_page_event.updated" | "incident_status_page_event.deleted" | "incident_event.created" | "incident_event.updated" | "incident_event.deleted" | "alert.created" | "alert.updated" | "pulse.created" | "shift.started" | "genius_workflow_run.queued" | "genius_workflow_run.started" | "genius_workflow_run.completed" | "genius_workflow_run.failed" | "genius_workflow_run.canceled" | "audit_log.created")[];
                     enabled?: boolean;
+                    /** @description Custom HTTP headers sent with each delivery. Max 10. Reserved names (Content-Type, X-Rootly-Signature, Host, etc.) are rejected. */
+                    custom_headers?: {
+                        name: string;
+                        value: string;
+                    }[];
                 };
             };
         };
@@ -21575,13 +25194,18 @@ export interface components {
             /** @description The name of the endpoint */
             name: string;
             /** @description The slug of the endpoint */
-            slug?: string;
+            readonly slug?: string;
             /** @description The URL of the endpoint. */
             url: string;
-            event_types: ("incident.created" | "incident.updated" | "incident.in_triage" | "incident.mitigated" | "incident.resolved" | "incident.cancelled" | "incident.deleted" | "incident.scheduled.created" | "incident.scheduled.updated" | "incident.scheduled.in_progress" | "incident.scheduled.completed" | "incident.scheduled.deleted" | "incident_post_mortem.created" | "incident_post_mortem.updated" | "incident_post_mortem.published" | "incident_post_mortem.deleted" | "incident_status_page_event.created" | "incident_status_page_event.updated" | "incident_status_page_event.deleted" | "incident_event.created" | "incident_event.updated" | "incident_event.deleted" | "alert.created" | "pulse.created" | "genius_workflow_run.queued" | "genius_workflow_run.started" | "genius_workflow_run.completed" | "genius_workflow_run.failed" | "genius_workflow_run.canceled" | "audit_log.created")[];
+            event_types: ("incident.created" | "incident.updated" | "incident.in_triage" | "incident.mitigated" | "incident.resolved" | "incident.cancelled" | "incident.deleted" | "incident.scheduled.created" | "incident.scheduled.updated" | "incident.scheduled.in_progress" | "incident.scheduled.completed" | "incident.scheduled.deleted" | "incident_post_mortem.created" | "incident_post_mortem.updated" | "incident_post_mortem.published" | "incident_post_mortem.deleted" | "incident_status_page_event.created" | "incident_status_page_event.updated" | "incident_status_page_event.deleted" | "incident_event.created" | "incident_event.updated" | "incident_event.deleted" | "alert.created" | "alert.updated" | "pulse.created" | "shift.started" | "genius_workflow_run.queued" | "genius_workflow_run.started" | "genius_workflow_run.completed" | "genius_workflow_run.failed" | "genius_workflow_run.canceled" | "audit_log.created")[];
             /** @description The webhook signing secret used to verify webhook requests. */
             secret: string;
             enabled: boolean;
+            /** @description Custom HTTP headers sent with each delivery. Max 10. Reserved names (Content-Type, X-Rootly-Signature, Host, etc.) are rejected. */
+            custom_headers?: {
+                name: string;
+                value: string;
+            }[];
             /** @description Date of creation */
             created_at: string;
             /** @description Date of last update */
@@ -21595,6 +25219,7 @@ export interface components {
                 type: "webhooks_endpoints";
                 attributes: components["schemas"]["webhooks_endpoint"];
             };
+            included?: components["schemas"]["jsonapi_included_resource"][];
         };
         webhooks_endpoint_list: {
             data: {
@@ -21606,10 +25231,11 @@ export interface components {
             }[];
             links?: components["schemas"]["links"];
             meta?: components["schemas"]["meta"];
+            included?: components["schemas"]["jsonapi_included_resource"][];
         };
         status: {
             name: string;
-            slug?: string;
+            readonly slug?: string;
             description?: string | null;
             color: string;
             enabled: boolean;
@@ -21624,6 +25250,7 @@ export interface components {
                 type: "statuses";
                 attributes: components["schemas"]["status"];
             };
+            included?: components["schemas"]["jsonapi_included_resource"][];
         };
         status_list: {
             data: {
@@ -21635,12 +25262,18 @@ export interface components {
             }[];
             links: components["schemas"]["links"];
             meta: components["schemas"]["meta"];
+            included?: components["schemas"]["jsonapi_included_resource"][];
         };
         new_sub_status: {
             data: {
                 /** @enum {string} */
                 type: "sub_statuses";
                 attributes: {
+                    /**
+                     * @deprecated
+                     * @description Deprecated. `slug` is derived from `name`; any submitted value is ignored. This property will be removed from the request schema in a future version.
+                     */
+                    slug?: string | null;
                     name: string;
                     description?: string | null;
                     /** @enum {string} */
@@ -21654,6 +25287,11 @@ export interface components {
                 /** @enum {string} */
                 type: "sub_statuses";
                 attributes: {
+                    /**
+                     * @deprecated
+                     * @description Deprecated. `slug` is derived from `name`; any submitted value is ignored. This property will be removed from the request schema in a future version.
+                     */
+                    slug?: string | null;
                     name?: string;
                     description?: string | null;
                     position?: number | null;
@@ -21662,7 +25300,7 @@ export interface components {
         };
         sub_status: {
             name: string;
-            slug?: string;
+            readonly slug?: string;
             description?: string | null;
             /** @enum {string} */
             parent_status: "in_triage" | "started" | "resolved" | "closed" | "cancelled" | "planning" | "scheduled" | "in_progress" | "verifying" | "completed";
@@ -21678,6 +25316,7 @@ export interface components {
                 type: "sub_statuses";
                 attributes: components["schemas"]["sub_status"];
             };
+            included?: components["schemas"]["jsonapi_included_resource"][];
         };
         sub_status_list: {
             data: {
@@ -21689,6 +25328,7 @@ export interface components {
             }[];
             links: components["schemas"]["links"];
             meta: components["schemas"]["meta"];
+            included?: components["schemas"]["jsonapi_included_resource"][];
         };
         new_incident_sub_status: {
             data: {
@@ -21729,6 +25369,7 @@ export interface components {
                 type: "incident_sub_statuses";
                 attributes: components["schemas"]["incident_sub_status"];
             };
+            included?: components["schemas"]["jsonapi_included_resource"][];
         };
         incident_sub_status_list: {
             data: {
@@ -21740,6 +25381,7 @@ export interface components {
             }[];
             links: components["schemas"]["links"];
             meta: components["schemas"]["meta"];
+            included?: components["schemas"]["jsonapi_included_resource"][];
         };
         new_retrospective_process_group: {
             data: {
@@ -21774,6 +25416,7 @@ export interface components {
                 type: "retrospective_process_groups";
                 attributes: components["schemas"]["retrospective_process_group"];
             };
+            included?: components["schemas"]["jsonapi_included_resource"][];
         };
         retrospective_process_group_list: {
             data: {
@@ -21785,6 +25428,7 @@ export interface components {
             }[];
             links: components["schemas"]["links"];
             meta: components["schemas"]["meta"];
+            included?: components["schemas"]["jsonapi_included_resource"][];
         };
         new_retrospective_process_group_step: {
             data: {
@@ -21818,6 +25462,7 @@ export interface components {
                 type: "retrospective_process_group_steps";
                 attributes: components["schemas"]["retrospective_process_group_step"];
             };
+            included?: components["schemas"]["jsonapi_included_resource"][];
         };
         retrospective_process_group_step_list: {
             data: {
@@ -21829,12 +25474,18 @@ export interface components {
             }[];
             links: components["schemas"]["links"];
             meta: components["schemas"]["meta"];
+            included?: components["schemas"]["jsonapi_included_resource"][];
         };
         new_sla: {
             data: {
                 /** @enum {string} */
                 type: "slas";
                 attributes: {
+                    /**
+                     * @deprecated
+                     * @description Deprecated. `slug` is derived from `name`; any submitted value is ignored. This property will be removed from the request schema in a future version.
+                     */
+                    slug?: string | null;
                     /** @description The name of the SLA */
                     name: string;
                     /** @description A description of the SLA */
@@ -21929,6 +25580,11 @@ export interface components {
                 /** @enum {string} */
                 type: "slas";
                 attributes: {
+                    /**
+                     * @deprecated
+                     * @description Deprecated. `slug` is derived from `name`; any submitted value is ignored. This property will be removed from the request schema in a future version.
+                     */
+                    slug?: string | null;
                     /** @description The name of the SLA */
                     name?: string;
                     /** @description A description of the SLA */
@@ -22124,6 +25780,7 @@ export interface components {
                 type: "slas";
                 attributes: components["schemas"]["sla"];
             };
+            included?: components["schemas"]["jsonapi_included_resource"][];
         };
         sla_list: {
             data: {
@@ -22135,6 +25792,81 @@ export interface components {
             }[];
             links: components["schemas"]["links"];
             meta: components["schemas"]["meta"];
+            included?: components["schemas"]["jsonapi_included_resource"][];
+        };
+        new_verified_domain: {
+            data: {
+                /** @enum {string} */
+                type: "verified_domains";
+                attributes: {
+                    /** @description The domain to verify (e.g. acme.com) */
+                    domain: string;
+                };
+            };
+        };
+        verified_domain: {
+            /** @description The domain name */
+            domain: string;
+            /**
+             * @description Verification status
+             * @enum {string}
+             */
+            verification_status: "pending" | "verified" | "failing" | "expired";
+            /** @description The verification token */
+            verification_token: string;
+            /** @description The TXT record hostname to add */
+            readonly txt_host: string;
+            /** @description The TXT record value to add */
+            readonly txt_value: string;
+            /** @description When the domain was first verified */
+            verified_at?: string | null;
+            /** @description When the domain was last checked */
+            last_checked_at?: string | null;
+            /** @description When the TXT record was last found */
+            last_check_passed_at?: string | null;
+            /** @description Number of consecutive check failures */
+            check_failures_count?: number;
+            /**
+             * @description How the domain was added
+             * @enum {string}
+             */
+            source?: "manual" | "migration" | "oauth_auto";
+            /** @description Date of creation */
+            created_at: string;
+            /** @description Date of last update */
+            updated_at: string;
+        };
+        verified_domain_response: {
+            data: {
+                /** @description Unique ID of the verified domain */
+                id: string;
+                /** @enum {string} */
+                type: "verified_domains";
+                attributes: components["schemas"]["verified_domain"];
+            };
+            included?: components["schemas"]["jsonapi_included_resource"][];
+        };
+        verified_domain_list: {
+            data: {
+                /** @description Unique ID of the verified domain */
+                id: string;
+                /** @enum {string} */
+                type: "verified_domains";
+                attributes: components["schemas"]["verified_domain"];
+            }[];
+            links: components["schemas"]["links"];
+            meta: components["schemas"]["meta"];
+            included?: components["schemas"]["jsonapi_included_resource"][];
+        };
+        jsonapi_included_resource: {
+            id: string;
+            type: string;
+            attributes?: {
+                [key: string]: unknown;
+            };
+            relationships?: {
+                [key: string]: unknown;
+            };
         };
     };
     responses: never;
@@ -22145,6 +25877,146 @@ export interface components {
 }
 export type $defs = Record<string, never>;
 export interface operations {
+    createAiChat: {
+        parameters: {
+            query: {
+                /** @description Message to send to the AI assistant */
+                message: string;
+                /** @description Resume an existing session */
+                session_id?: string;
+                /** @description Bind session to an incident for context (mutually exclusive with alert_id) */
+                incident_id?: string;
+                /** @description Bind session to an alert for context (mutually exclusive with incident_id) */
+                alert_id?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description AI chat response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/vnd.api+json": components["schemas"]["ai_chat_response"];
+                };
+            };
+            /** @description AI chat not enabled or insufficient scope */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description invalid request */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    streamAiChat: {
+        parameters: {
+            query: {
+                /** @description Message to send */
+                message: string;
+                /** @description Resume an existing session */
+                session_id?: string;
+                /** @description Bind session to an incident (mutually exclusive with alert_id) */
+                incident_id?: string;
+                /** @description Bind session to an alert (mutually exclusive with incident_id) */
+                alert_id?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description SSE event stream */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description AI chat not enabled */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    listAiChatSessionMessages: {
+        parameters: {
+            query?: {
+                /** @description Page number (default 1) */
+                "page[number]"?: number;
+                /** @description Messages per page (max 100, default 50) */
+                "page[size]"?: number;
+            };
+            header?: never;
+            path: {
+                /** @description Session UUID */
+                session_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description session messages */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/vnd.api+json": components["schemas"]["ai_chat_session_message_list"];
+                };
+            };
+            /** @description session not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    deleteAiChatSession: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Session UUID */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description session deleted */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description session not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
     listAlertEvents: {
         parameters: {
             query?: {
@@ -22204,6 +26076,41 @@ export interface operations {
                 };
                 content: {
                     "application/vnd.api+json": components["schemas"]["errors_list"];
+                };
+            };
+        };
+    };
+    listAlertEventsFeed: {
+        parameters: {
+            query?: {
+                include?: string;
+                /** @description Page size (max 50). */
+                "page[size]"?: number;
+                /** @description Cursor token from the previous response's `meta.next_cursor`. Pass the same `sort` value used to obtain the cursor. */
+                "page[after]"?: string;
+                /** @description Sort by `created_at`. Defaults to `created_at` (oldest-first). Use `-created_at` for newest-first. */
+                sort?: "created_at" | "-created_at";
+                "filter[kind]"?: "informational" | "notification" | "action" | "status_update" | "recording" | "alert_grouping" | "alert_urgency" | "alert_routing" | "note" | "noise" | "maintenance" | "deferral";
+                "filter[action]"?: "created" | "escalation_policy_paged" | "ignored_alert_request" | "call_lifecycle" | "level_skipped" | "emailed" | "slacked" | "ms_teams_messaged" | "google_chat_messaged" | "called" | "texted" | "notified" | "skipped" | "opened" | "retriggered" | "ack_timeout_retriggered" | "answered" | "acknowledged" | "escalated" | "paged" | "resolved" | "attached" | "snoozed" | "retrigger_suppressed" | "triggered" | "open" | "updated" | "added" | "removed" | "marked" | "not_marked" | "cleared" | "muted" | "deferred";
+                "filter[alert_id]"?: string;
+                "filter[created_at][gt]"?: string;
+                "filter[created_at][gte]"?: string;
+                "filter[created_at][lt]"?: string;
+                "filter[created_at][lte]"?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/vnd.api+json": components["schemas"]["alert_event_feed_list"];
                 };
             };
         };
@@ -22316,6 +26223,14 @@ export interface operations {
                 "filter[created_at][gte]"?: string;
                 "filter[created_at][lt]"?: string;
                 "filter[created_at][lte]"?: string;
+                "filter[name][eq]"?: string;
+                "filter[name][not_eq]"?: string;
+                "filter[name][in]"?: string;
+                "filter[name][not_in]"?: string;
+                "filter[kind][eq]"?: string;
+                "filter[kind][not_eq]"?: string;
+                "filter[kind][in]"?: string;
+                "filter[kind][not_in]"?: string;
                 sort?: string;
             };
             header?: never;
@@ -22487,6 +26402,14 @@ export interface operations {
         parameters: {
             query?: {
                 include?: string;
+                "filter[slug][eq]"?: string;
+                "filter[slug][not_eq]"?: string;
+                "filter[slug][in]"?: string;
+                "filter[slug][not_in]"?: string;
+                "filter[name][eq]"?: string;
+                "filter[name][not_eq]"?: string;
+                "filter[name][in]"?: string;
+                "filter[name][not_in]"?: string;
             };
             header?: never;
             path?: never;
@@ -22644,6 +26567,127 @@ export interface operations {
             };
         };
     };
+    listAlertRetriggerRules: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description alert re-trigger rules listed */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/vnd.api+json": components["schemas"]["alert_retrigger_rule_list"];
+                };
+            };
+        };
+    };
+    createAlertRetriggerRule: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/vnd.api+json": components["schemas"]["new_alert_retrigger_rule"];
+            };
+        };
+        responses: {
+            /** @description alert re-trigger rule created */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/vnd.api+json": components["schemas"]["alert_retrigger_rule_response"];
+                };
+            };
+            /** @description invalid request */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/vnd.api+json": components["schemas"]["errors_list"];
+                };
+            };
+        };
+    };
+    getAlertRetriggerRule: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description alert re-trigger rule found */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/vnd.api+json": components["schemas"]["alert_retrigger_rule_response"];
+                };
+            };
+        };
+    };
+    updateAlertRetriggerRule: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/vnd.api+json": components["schemas"]["update_alert_retrigger_rule"];
+            };
+        };
+        responses: {
+            /** @description alert re-trigger rule updated */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/vnd.api+json": components["schemas"]["alert_retrigger_rule_response"];
+                };
+            };
+        };
+    };
+    deleteAlertRetriggerRule: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description alert re-trigger rule deleted */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
     listAlertRoutes: {
         parameters: {
             query?: {
@@ -22651,6 +26695,14 @@ export interface operations {
                 "page[size]"?: number;
                 "filter[search]"?: string;
                 "filter[name]"?: string;
+                "filter[slug][eq]"?: string;
+                "filter[slug][not_eq]"?: string;
+                "filter[slug][in]"?: string;
+                "filter[slug][not_in]"?: string;
+                "filter[name][eq]"?: string;
+                "filter[name][not_eq]"?: string;
+                "filter[name][in]"?: string;
+                "filter[name][not_in]"?: string;
                 sort?: string;
             };
             header?: never;
@@ -22927,6 +26979,14 @@ export interface operations {
                 "filter[created_at][gte]"?: string;
                 "filter[created_at][lt]"?: string;
                 "filter[created_at][lte]"?: string;
+                "filter[slug][eq]"?: string;
+                "filter[slug][not_eq]"?: string;
+                "filter[slug][in]"?: string;
+                "filter[slug][not_in]"?: string;
+                "filter[name][eq]"?: string;
+                "filter[name][not_eq]"?: string;
+                "filter[name][in]"?: string;
+                "filter[name][not_in]"?: string;
                 sort?: string;
             };
             header?: never;
@@ -23097,6 +27157,10 @@ export interface operations {
                 "filter[created_at][gte]"?: string;
                 "filter[created_at][lt]"?: string;
                 "filter[created_at][lte]"?: string;
+                "filter[name][eq]"?: string;
+                "filter[name][not_eq]"?: string;
+                "filter[name][in]"?: string;
+                "filter[name][not_in]"?: string;
                 sort?: string;
             };
             header?: never;
@@ -23265,6 +27329,7 @@ export interface operations {
                 "filter[statuses]"?: string;
                 "filter[source_types]"?: string;
                 "filter[name]"?: string;
+                "filter[enabled]"?: boolean;
                 sort?: string;
             };
             header?: never;
@@ -23372,7 +27437,7 @@ export interface operations {
             };
         };
         responses: {
-            /** @description alert source updated */
+            /** @description preserves existing alert source field ids */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -23427,7 +27492,7 @@ export interface operations {
         parameters: {
             query?: {
                 /** @description comma separated if needed. eg: environments,services,groups */
-                include?: "environments" | "services" | "groups" | "responders" | "incidents" | "events" | "alert_urgency" | "heartbeat" | "live_call_router" | "alert_group" | "group_leader_alert" | "group_member_alerts" | "alert_field_values" | "alerting_targets" | "escalation_policies" | "alert_call_recording" | "alert_urgency";
+                include?: "environments" | "services" | "groups" | "functionalities" | "responders" | "incidents" | "notified_users" | "events" | "alert_urgency" | "heartbeat" | "live_call_router" | "alert_group" | "group_leader_alert" | "group_member_alerts" | "alert_field_values" | "alerting_targets" | "escalation_policies" | "alert_call_recording";
             };
             header?: never;
             path: {
@@ -23487,7 +27552,7 @@ export interface operations {
         parameters: {
             query?: {
                 /** @description comma separated if needed. eg: environments,services,groups */
-                include?: "environments" | "services" | "groups" | "responders" | "incidents" | "events" | "alert_urgency" | "heartbeat" | "live_call_router" | "alert_group" | "group_leader_alert" | "group_member_alerts" | "alert_field_values" | "alerting_targets" | "escalation_policies" | "alert_call_recording" | "alert_urgency";
+                include?: "environments" | "services" | "groups" | "functionalities" | "responders" | "incidents" | "notified_users" | "events" | "alert_urgency" | "heartbeat" | "live_call_router" | "alert_group" | "group_leader_alert" | "group_member_alerts" | "alert_field_values" | "alerting_targets" | "escalation_policies" | "alert_call_recording";
                 "filter[status]"?: string;
                 "filter[source]"?: string;
                 "filter[services]"?: string;
@@ -23510,6 +27575,30 @@ export interface operations {
                 "filter[updated_at][gte]"?: string;
                 "filter[updated_at][lt]"?: string;
                 "filter[updated_at][lte]"?: string;
+                "filter[status][eq]"?: string;
+                "filter[status][not_eq]"?: string;
+                "filter[status][in]"?: string;
+                "filter[status][not_in]"?: string;
+                "filter[source][eq]"?: string;
+                "filter[source][not_eq]"?: string;
+                "filter[source][in]"?: string;
+                "filter[source][not_in]"?: string;
+                "filter[services][eq]"?: string;
+                "filter[services][not_eq]"?: string;
+                "filter[services][in]"?: string;
+                "filter[services][not_in]"?: string;
+                "filter[groups][eq]"?: string;
+                "filter[groups][not_eq]"?: string;
+                "filter[groups][in]"?: string;
+                "filter[groups][not_in]"?: string;
+                "filter[environments][eq]"?: string;
+                "filter[environments][not_eq]"?: string;
+                "filter[environments][in]"?: string;
+                "filter[environments][not_in]"?: string;
+                "filter[labels][eq]"?: string;
+                "filter[labels][not_eq]"?: string;
+                "filter[labels][in]"?: string;
+                "filter[labels][not_in]"?: string;
                 /** @description The cursor to fetch results using cursor pagination. A cursor is provided in meta.next_cursor in the response. */
                 "page[after]"?: string;
                 "page[number]"?: number;
@@ -23578,7 +27667,7 @@ export interface operations {
         parameters: {
             query?: {
                 /** @description comma separated if needed. eg: environments,services,groups */
-                include?: "environments" | "services" | "groups" | "responders" | "incidents" | "events" | "alert_urgency" | "heartbeat" | "live_call_router" | "alert_group" | "group_leader_alert" | "group_member_alerts" | "alert_field_values" | "alerting_targets" | "escalation_policies" | "alert_call_recording" | "alert_urgency";
+                include?: "environments" | "services" | "groups" | "functionalities" | "responders" | "incidents" | "notified_users" | "events" | "alert_urgency" | "heartbeat" | "live_call_router" | "alert_group" | "group_leader_alert" | "group_member_alerts" | "alert_field_values" | "alerting_targets" | "escalation_policies" | "alert_call_recording";
             };
             header?: never;
             path: {
@@ -24091,6 +28180,22 @@ export interface operations {
                 "filter[api_key_id]"?: string;
                 "filter[source]"?: string;
                 "filter[item_type]"?: string;
+                "filter[user_id][eq]"?: string;
+                "filter[user_id][not_eq]"?: string;
+                "filter[user_id][in]"?: string;
+                "filter[user_id][not_in]"?: string;
+                "filter[api_key_id][eq]"?: string;
+                "filter[api_key_id][not_eq]"?: string;
+                "filter[api_key_id][in]"?: string;
+                "filter[api_key_id][not_in]"?: string;
+                "filter[source][eq]"?: string;
+                "filter[source][not_eq]"?: string;
+                "filter[source][in]"?: string;
+                "filter[source][not_in]"?: string;
+                "filter[item_type][eq]"?: string;
+                "filter[item_type][not_eq]"?: string;
+                "filter[item_type][in]"?: string;
+                "filter[item_type][not_in]"?: string;
                 sort?: string;
             };
             header?: never;
@@ -24270,6 +28375,77 @@ export interface operations {
                 content: {
                     "application/vnd.api+json": components["schemas"]["errors_list"];
                 };
+            };
+        };
+    };
+    createBulkImport: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/vnd.api+json": components["schemas"]["new_bulk_import"];
+            };
+        };
+        responses: {
+            /** @description bulk import created */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description unauthorized - user lacks incident create permission */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description invalid parameters */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    getBulkImport: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Bulk import ID returned from the create endpoint */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description organization API keys feature not enabled */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
         };
     };
@@ -24489,10 +28665,24 @@ export interface operations {
                 "filter[slug]"?: string;
                 "filter[name]"?: string;
                 "filter[backstage_id]"?: string;
+                "filter[external_id]"?: string;
+                "filter[managed_by]"?: string;
                 "filter[created_at][gt]"?: string;
                 "filter[created_at][gte]"?: string;
                 "filter[created_at][lt]"?: string;
                 "filter[created_at][lte]"?: string;
+                "filter[slug][eq]"?: string;
+                "filter[slug][not_eq]"?: string;
+                "filter[slug][in]"?: string;
+                "filter[slug][not_in]"?: string;
+                "filter[name][eq]"?: string;
+                "filter[name][not_eq]"?: string;
+                "filter[name][in]"?: string;
+                "filter[name][not_in]"?: string;
+                "filter[managed_by][eq]"?: string;
+                "filter[managed_by][not_eq]"?: string;
+                "filter[managed_by][in]"?: string;
+                "filter[managed_by][not_in]"?: string;
             };
             header?: never;
             path: {
@@ -24653,6 +28843,94 @@ export interface operations {
                 };
                 content: {
                     "application/vnd.api+json": components["schemas"]["errors_list"];
+                };
+            };
+        };
+    };
+    bulkUpsertCatalogEntities: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                catalog_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/vnd.api+json": components["schemas"]["bulk_upsert_catalog_entities"];
+            };
+        };
+        responses: {
+            /** @description entities upserted successfully */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/vnd.api+json": components["schemas"]["bulk_upsert_catalog_entities_response"];
+                };
+            };
+            /** @description unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/vnd.api+json": components["schemas"]["errors_list"];
+                };
+            };
+            /** @description validation or entity-level error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/vnd.api+json": components["schemas"]["errors_list"] | components["schemas"]["bulk_upsert_catalog_entities_error"];
+                };
+            };
+        };
+    };
+    bulkDeleteCatalogEntities: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                catalog_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/vnd.api+json": components["schemas"]["bulk_destroy_catalog_entities"];
+            };
+        };
+        responses: {
+            /** @description entities deleted successfully */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/vnd.api+json": components["schemas"]["bulk_destroy_catalog_entities_response"];
+                };
+            };
+            /** @description unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/vnd.api+json": components["schemas"]["errors_list"];
+                };
+            };
+            /** @description validation or partial-failure error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/vnd.api+json": components["schemas"]["errors_list"] | components["schemas"]["bulk_destroy_catalog_entities_response"];
                 };
             };
         };
@@ -25018,10 +29296,24 @@ export interface operations {
                 "filter[search]"?: string;
                 "filter[slug]"?: string;
                 "filter[name]"?: string;
+                "filter[external_id]"?: string;
+                "filter[managed_by]"?: string;
                 "filter[created_at][gt]"?: string;
                 "filter[created_at][gte]"?: string;
                 "filter[created_at][lt]"?: string;
                 "filter[created_at][lte]"?: string;
+                "filter[slug][eq]"?: string;
+                "filter[slug][not_eq]"?: string;
+                "filter[slug][in]"?: string;
+                "filter[slug][not_in]"?: string;
+                "filter[name][eq]"?: string;
+                "filter[name][not_eq]"?: string;
+                "filter[name][in]"?: string;
+                "filter[name][not_in]"?: string;
+                "filter[managed_by][eq]"?: string;
+                "filter[managed_by][not_eq]"?: string;
+                "filter[managed_by][in]"?: string;
+                "filter[managed_by][not_in]"?: string;
             };
             header?: never;
             path?: never;
@@ -25192,6 +29484,14 @@ export interface operations {
                 "filter[created_at][gte]"?: string;
                 "filter[created_at][lt]"?: string;
                 "filter[created_at][lte]"?: string;
+                "filter[slug][eq]"?: string;
+                "filter[slug][not_eq]"?: string;
+                "filter[slug][in]"?: string;
+                "filter[slug][not_in]"?: string;
+                "filter[name][eq]"?: string;
+                "filter[name][not_eq]"?: string;
+                "filter[name][in]"?: string;
+                "filter[name][not_in]"?: string;
             };
             header?: never;
             path?: never;
@@ -26272,6 +30572,22 @@ export interface operations {
                 "filter[created_at][gte]"?: string;
                 "filter[created_at][lt]"?: string;
                 "filter[created_at][lte]"?: string;
+                "filter[slug][eq]"?: string;
+                "filter[slug][not_eq]"?: string;
+                "filter[slug][in]"?: string;
+                "filter[slug][not_in]"?: string;
+                "filter[label][eq]"?: string;
+                "filter[label][not_eq]"?: string;
+                "filter[label][in]"?: string;
+                "filter[label][not_in]"?: string;
+                "filter[kind][eq]"?: string;
+                "filter[kind][not_eq]"?: string;
+                "filter[kind][in]"?: string;
+                "filter[kind][not_in]"?: string;
+                "filter[enabled][eq]"?: string;
+                "filter[enabled][not_eq]"?: string;
+                "filter[enabled][in]"?: string;
+                "filter[enabled][not_in]"?: string;
             };
             header?: never;
             path?: never;
@@ -27226,6 +31542,17 @@ export interface operations {
                             status?: "active" | "paused";
                             /** @description Array of event types to subscribe to */
                             subscriptions?: string[];
+                            /** @description Event filters. OR within dimension, AND across dimensions. */
+                            filters?: {
+                                /** @description Filter by group UUIDs */
+                                group_ids?: string[];
+                                /** @description Filter by service UUIDs */
+                                service_ids?: string[];
+                                /** @description Filter by environment UUIDs */
+                                environment_ids?: string[];
+                                /** @description Filter by functionality UUIDs */
+                                functionality_ids?: string[];
+                            };
                         };
                     };
                 };
@@ -27320,6 +31647,8 @@ export interface operations {
                             /** @enum {string} */
                             status?: "active" | "paused";
                             subscriptions?: string[];
+                            /** @description Event filters */
+                            filters?: Record<string, never>;
                         };
                     };
                 };
@@ -27356,6 +31685,18 @@ export interface operations {
                 "filter[created_at][gte]"?: string;
                 "filter[created_at][lt]"?: string;
                 "filter[created_at][lte]"?: string;
+                "filter[slug][eq]"?: string;
+                "filter[slug][not_eq]"?: string;
+                "filter[slug][in]"?: string;
+                "filter[slug][not_in]"?: string;
+                "filter[name][eq]"?: string;
+                "filter[name][not_eq]"?: string;
+                "filter[name][in]"?: string;
+                "filter[name][not_in]"?: string;
+                "filter[color][eq]"?: string;
+                "filter[color][not_eq]"?: string;
+                "filter[color][in]"?: string;
+                "filter[color][not_in]"?: string;
                 sort?: string;
             };
             header?: never;
@@ -27590,6 +31931,90 @@ export interface operations {
             };
         };
     };
+    bulkUpsertEnvironments: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/vnd.api+json": components["schemas"]["bulk_upsert_environments"];
+            };
+        };
+        responses: {
+            /** @description records upserted successfully */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/vnd.api+json": components["schemas"]["bulk_upsert_environments_response"];
+                };
+            };
+            /** @description unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/vnd.api+json": components["schemas"]["errors_list"];
+                };
+            };
+            /** @description validation or record-level error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/vnd.api+json": components["schemas"]["errors_list"] | components["schemas"]["bulk_upsert_environments_error"];
+                };
+            };
+        };
+    };
+    bulkDeleteEnvironments: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/vnd.api+json": components["schemas"]["bulk_destroy_environments"];
+            };
+        };
+        responses: {
+            /** @description records deleted successfully */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/vnd.api+json": components["schemas"]["bulk_destroy_environments_response"];
+                };
+            };
+            /** @description unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/vnd.api+json": components["schemas"]["errors_list"];
+                };
+            };
+            /** @description validation or partial-failure error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/vnd.api+json": components["schemas"]["errors_list"] | components["schemas"]["bulk_destroy_environments_response"];
+                };
+            };
+        };
+    };
     listEscalationPolicies: {
         parameters: {
             query?: {
@@ -27603,6 +32028,14 @@ export interface operations {
                 "filter[created_at][gte]"?: string;
                 "filter[created_at][lt]"?: string;
                 "filter[created_at][lte]"?: string;
+                "filter[name][eq]"?: string;
+                "filter[name][not_eq]"?: string;
+                "filter[name][in]"?: string;
+                "filter[name][not_in]"?: string;
+                "filter[team_ids][eq]"?: string;
+                "filter[team_ids][not_eq]"?: string;
+                "filter[team_ids][in]"?: string;
+                "filter[team_ids][not_in]"?: string;
                 "page[number]"?: number;
                 "page[size]"?: number;
             };
@@ -28007,6 +32440,8 @@ export interface operations {
             query?: {
                 /** @description comma separated if needed. eg: escalation_policy_levels */
                 include?: "escalation_policy_levels";
+                /** @description Filter by path_type. Returns all path types when omitted. */
+                "filter[path_type]"?: "escalation" | "deferral";
                 "page[number]"?: number;
                 "page[size]"?: number;
             };
@@ -28570,7 +33005,7 @@ export interface operations {
                     "application/vnd.api+json": components["schemas"]["errors_list"];
                 };
             };
-            /** @description invalid request */
+            /** @description cross-resource placement rejected */
             422: {
                 headers: {
                     [name: string]: unknown;
@@ -28627,7 +33062,7 @@ export interface operations {
             };
         };
         responses: {
-            /** @description form_field_placement updated with non_editable */
+            /** @description moves a custom field's placement onto an action item form */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -28638,6 +33073,15 @@ export interface operations {
             };
             /** @description resource not found */
             404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/vnd.api+json": components["schemas"]["errors_list"];
+                };
+            };
+            /** @description rejects re-pointing a placement at another team's form set */
+            422: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -28720,7 +33164,7 @@ export interface operations {
             };
         };
         responses: {
-            /** @description form_field_position created */
+            /** @description form_field_position created on an action item form */
             201: {
                 headers: {
                     [name: string]: unknown;
@@ -28731,6 +33175,15 @@ export interface operations {
             };
             /** @description responds with unauthorized for invalid token */
             401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/vnd.api+json": components["schemas"]["errors_list"];
+                };
+            };
+            /** @description rejects an action item form when the feature is disabled */
+            422: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -28804,6 +33257,15 @@ export interface operations {
                     "application/vnd.api+json": components["schemas"]["errors_list"];
                 };
             };
+            /** @description does not error when updating with a nonexistent form_field_id */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/vnd.api+json": components["schemas"]["errors_list"];
+                };
+            };
         };
     };
     deleteFormFieldPosition: {
@@ -28853,6 +33315,22 @@ export interface operations {
                 "filter[created_at][gte]"?: string;
                 "filter[created_at][lt]"?: string;
                 "filter[created_at][lte]"?: string;
+                "filter[slug][eq]"?: string;
+                "filter[slug][not_eq]"?: string;
+                "filter[slug][in]"?: string;
+                "filter[slug][not_in]"?: string;
+                "filter[name][eq]"?: string;
+                "filter[name][not_eq]"?: string;
+                "filter[name][in]"?: string;
+                "filter[name][not_in]"?: string;
+                "filter[kind][eq]"?: string;
+                "filter[kind][not_eq]"?: string;
+                "filter[kind][in]"?: string;
+                "filter[kind][not_in]"?: string;
+                "filter[enabled][eq]"?: string;
+                "filter[enabled][not_eq]"?: string;
+                "filter[enabled][in]"?: string;
+                "filter[enabled][not_in]"?: string;
             };
             header?: never;
             path?: never;
@@ -29367,6 +33845,14 @@ export interface operations {
                 "filter[created_at][gte]"?: string;
                 "filter[created_at][lt]"?: string;
                 "filter[created_at][lte]"?: string;
+                "filter[name][eq]"?: string;
+                "filter[name][not_eq]"?: string;
+                "filter[name][in]"?: string;
+                "filter[name][not_in]"?: string;
+                "filter[slug][eq]"?: string;
+                "filter[slug][not_eq]"?: string;
+                "filter[slug][in]"?: string;
+                "filter[slug][not_in]"?: string;
                 sort?: string;
             };
             header?: never;
@@ -29667,6 +34153,90 @@ export interface operations {
             };
         };
     };
+    bulkUpsertFunctionalities: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/vnd.api+json": components["schemas"]["bulk_upsert_functionalities"];
+            };
+        };
+        responses: {
+            /** @description records upserted successfully */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/vnd.api+json": components["schemas"]["bulk_upsert_functionalities_response"];
+                };
+            };
+            /** @description unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/vnd.api+json": components["schemas"]["errors_list"];
+                };
+            };
+            /** @description validation or record-level error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/vnd.api+json": components["schemas"]["errors_list"] | components["schemas"]["bulk_upsert_functionalities_error"];
+                };
+            };
+        };
+    };
+    bulkDeleteFunctionalities: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/vnd.api+json": components["schemas"]["bulk_destroy_functionalities"];
+            };
+        };
+        responses: {
+            /** @description records deleted successfully */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/vnd.api+json": components["schemas"]["bulk_destroy_functionalities_response"];
+                };
+            };
+            /** @description unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/vnd.api+json": components["schemas"]["errors_list"];
+                };
+            };
+            /** @description validation or partial-failure error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/vnd.api+json": components["schemas"]["errors_list"] | components["schemas"]["bulk_destroy_functionalities_response"];
+                };
+            };
+        };
+    };
     listWorkflowTasks: {
         parameters: {
             query?: {
@@ -29676,6 +34246,14 @@ export interface operations {
                 "filter[search]"?: string;
                 "filter[name]"?: string;
                 "filter[slug]"?: string;
+                "filter[name][eq]"?: string;
+                "filter[name][not_eq]"?: string;
+                "filter[name][in]"?: string;
+                "filter[name][not_in]"?: string;
+                "filter[slug][eq]"?: string;
+                "filter[slug][not_eq]"?: string;
+                "filter[slug][in]"?: string;
+                "filter[slug][not_in]"?: string;
             };
             header?: never;
             path: {
@@ -29815,6 +34393,180 @@ export interface operations {
                 };
                 content: {
                     "application/vnd.api+json": components["schemas"]["workflow_task_response"];
+                };
+            };
+            /** @description resource not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/vnd.api+json": components["schemas"]["errors_list"];
+                };
+            };
+        };
+    };
+    listWorkflowActionItemFormFieldConditions: {
+        parameters: {
+            query?: {
+                include?: string;
+                "page[number]"?: number;
+                "page[size]"?: number;
+            };
+            header?: never;
+            path: {
+                workflow_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/vnd.api+json": components["schemas"]["workflow_action_item_form_field_condition_list"];
+                };
+            };
+        };
+    };
+    createWorkflowActionItemFormFieldCondition: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                workflow_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/vnd.api+json": components["schemas"]["new_workflow_action_item_form_field_condition"];
+            };
+        };
+        responses: {
+            /** @description workflow_action_item_form_field_condition created */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/vnd.api+json": components["schemas"]["workflow_action_item_form_field_condition_response"];
+                };
+            };
+            /** @description responds with unauthorized for invalid token */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/vnd.api+json": components["schemas"]["errors_list"];
+                };
+            };
+            /** @description responds with forbidden when the feature flag is disabled */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description rejects conditions on a non-action-item workflow */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/vnd.api+json": components["schemas"]["errors_list"];
+                };
+            };
+        };
+    };
+    getWorkflowActionItemFormFieldCondition: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description includes native field ids */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/vnd.api+json": components["schemas"]["workflow_action_item_form_field_condition_response"];
+                };
+            };
+            /** @description resource not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/vnd.api+json": components["schemas"]["errors_list"];
+                };
+            };
+        };
+    };
+    updateWorkflowActionItemFormFieldCondition: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/vnd.api+json": components["schemas"]["update_workflow_action_item_form_field_condition"];
+            };
+        };
+        responses: {
+            /** @description ignores non-allowlisted attributes such as workflow_id */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/vnd.api+json": components["schemas"]["workflow_action_item_form_field_condition_response"];
+                };
+            };
+            /** @description resource not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/vnd.api+json": components["schemas"]["errors_list"];
+                };
+            };
+        };
+    };
+    deleteWorkflowActionItemFormFieldCondition: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description allows deleting an existing condition when the feature flag is disabled */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/vnd.api+json": components["schemas"]["workflow_action_item_form_field_condition_response"];
                 };
             };
             /** @description resource not found */
@@ -30027,7 +34779,7 @@ export interface operations {
             };
         };
         responses: {
-            /** @description workflow_form_field_condition created with environment ids for non-environment form field */
+            /** @description accepts out-of-scope selected ids when scope validation is disabled */
             201: {
                 headers: {
                     [name: string]: unknown;
@@ -30038,6 +34790,15 @@ export interface operations {
             };
             /** @description responds with unauthorized for invalid token */
             401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/vnd.api+json": components["schemas"]["errors_list"];
+                };
+            };
+            /** @description rejects out-of-scope selected ids when scope validation is enabled */
+            422: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -30093,7 +34854,7 @@ export interface operations {
             };
         };
         responses: {
-            /** @description workflow_form_field_condition updated */
+            /** @description accepts out-of-scope selected ids on update when scope validation is disabled */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -30104,6 +34865,15 @@ export interface operations {
             };
             /** @description resource not found */
             404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/vnd.api+json": components["schemas"]["errors_list"];
+                };
+            };
+            /** @description rejects out-of-scope selected ids on update when scope validation is enabled */
+            422: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -30404,6 +35174,14 @@ export interface operations {
                 "filter[created_at][gte]"?: string;
                 "filter[created_at][lt]"?: string;
                 "filter[created_at][lte]"?: string;
+                "filter[slug][eq]"?: string;
+                "filter[slug][not_eq]"?: string;
+                "filter[slug][in]"?: string;
+                "filter[slug][not_in]"?: string;
+                "filter[name][eq]"?: string;
+                "filter[name][not_eq]"?: string;
+                "filter[name][in]"?: string;
+                "filter[name][not_in]"?: string;
             };
             header?: never;
             path?: never;
@@ -30970,6 +35748,22 @@ export interface operations {
                 "filter[created_at][gte]"?: string;
                 "filter[created_at][lt]"?: string;
                 "filter[created_at][lte]"?: string;
+                "filter[kind][eq]"?: string;
+                "filter[kind][not_eq]"?: string;
+                "filter[kind][in]"?: string;
+                "filter[kind][not_in]"?: string;
+                "filter[priority][eq]"?: string;
+                "filter[priority][not_eq]"?: string;
+                "filter[priority][in]"?: string;
+                "filter[priority][not_in]"?: string;
+                "filter[status][eq]"?: string;
+                "filter[status][not_eq]"?: string;
+                "filter[status][in]"?: string;
+                "filter[status][not_in]"?: string;
+                "filter[incident_status][eq]"?: string;
+                "filter[incident_status][not_eq]"?: string;
+                "filter[incident_status][in]"?: string;
+                "filter[incident_status][not_in]"?: string;
                 sort?: string;
             };
             header?: never;
@@ -32859,6 +37653,18 @@ export interface operations {
                 "filter[created_at][gte]"?: string;
                 "filter[created_at][lt]"?: string;
                 "filter[created_at][lte]"?: string;
+                "filter[slug][eq]"?: string;
+                "filter[slug][not_eq]"?: string;
+                "filter[slug][in]"?: string;
+                "filter[slug][not_in]"?: string;
+                "filter[name][eq]"?: string;
+                "filter[name][not_eq]"?: string;
+                "filter[name][in]"?: string;
+                "filter[name][not_in]"?: string;
+                "filter[enabled][eq]"?: string;
+                "filter[enabled][not_eq]"?: string;
+                "filter[enabled][in]"?: string;
+                "filter[enabled][not_in]"?: string;
                 sort?: string;
             };
             header?: never;
@@ -33058,7 +37864,7 @@ export interface operations {
             };
         };
         responses: {
-            /** @description incident_status_page_event created */
+            /** @description incident_status_page_event created with component statuses */
             201: {
                 headers: {
                     [name: string]: unknown;
@@ -33133,7 +37939,7 @@ export interface operations {
             };
         };
         responses: {
-            /** @description incident_status_page_event updated */
+            /** @description incident_status_page_event started_at updated */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -33348,6 +38154,18 @@ export interface operations {
                 "filter[created_at][gte]"?: string;
                 "filter[created_at][lt]"?: string;
                 "filter[created_at][lte]"?: string;
+                "filter[slug][eq]"?: string;
+                "filter[slug][not_eq]"?: string;
+                "filter[slug][in]"?: string;
+                "filter[slug][not_in]"?: string;
+                "filter[name][eq]"?: string;
+                "filter[name][not_eq]"?: string;
+                "filter[name][in]"?: string;
+                "filter[name][not_in]"?: string;
+                "filter[color][eq]"?: string;
+                "filter[color][not_eq]"?: string;
+                "filter[color][in]"?: string;
+                "filter[color][not_in]"?: string;
                 sort?: string;
             };
             header?: never;
@@ -33585,6 +38403,8 @@ export interface operations {
     listIncidents: {
         parameters: {
             query?: {
+                /** @description The cursor to fetch results using cursor pagination. A cursor is provided in meta.next_cursor in the response. */
+                "page[after]"?: string;
                 "page[number]"?: number;
                 "page[size]"?: number;
                 "filter[search]"?: string;
@@ -33612,6 +38432,8 @@ export interface operations {
                 "filter[cause_ids]"?: string;
                 "filter[custom_field_selected_option_ids]"?: string;
                 "filter[slack_channel_id]"?: string;
+                /** @description Filter by the human-readable incident number (the 123 in INC-123). */
+                "filter[sequential_id]"?: string;
                 "filter[created_at][gt]"?: string;
                 "filter[created_at][gte]"?: string;
                 "filter[created_at][lt]"?: string;
@@ -33648,6 +38470,102 @@ export interface operations {
                 "filter[in_triage_at][gte]"?: string;
                 "filter[in_triage_at][lt]"?: string;
                 "filter[in_triage_at][lte]"?: string;
+                "filter[kind][eq]"?: string;
+                "filter[kind][not_eq]"?: string;
+                "filter[kind][in]"?: string;
+                "filter[kind][not_in]"?: string;
+                "filter[status][eq]"?: string;
+                "filter[status][not_eq]"?: string;
+                "filter[status][in]"?: string;
+                "filter[status][not_in]"?: string;
+                "filter[private][eq]"?: string;
+                "filter[private][not_eq]"?: string;
+                "filter[private][in]"?: string;
+                "filter[private][not_in]"?: string;
+                "filter[user_id][eq]"?: string;
+                "filter[user_id][not_eq]"?: string;
+                "filter[user_id][in]"?: string;
+                "filter[user_id][not_in]"?: string;
+                "filter[severity][eq]"?: string;
+                "filter[severity][not_eq]"?: string;
+                "filter[severity][in]"?: string;
+                "filter[severity][not_in]"?: string;
+                "filter[severity_id][eq]"?: string;
+                "filter[severity_id][not_eq]"?: string;
+                "filter[severity_id][in]"?: string;
+                "filter[severity_id][not_in]"?: string;
+                "filter[labels][eq]"?: string;
+                "filter[labels][not_eq]"?: string;
+                "filter[labels][in]"?: string;
+                "filter[labels][not_in]"?: string;
+                "filter[zendesk_ticket_id][eq]"?: string;
+                "filter[zendesk_ticket_id][not_eq]"?: string;
+                "filter[zendesk_ticket_id][in]"?: string;
+                "filter[zendesk_ticket_id][not_in]"?: string;
+                "filter[sequential_id][eq]"?: string;
+                "filter[sequential_id][not_eq]"?: string;
+                "filter[sequential_id][in]"?: string;
+                "filter[sequential_id][not_in]"?: string;
+                "filter[types][eq]"?: string;
+                "filter[types][not_eq]"?: string;
+                "filter[types][in]"?: string;
+                "filter[types][not_in]"?: string;
+                "filter[type_ids][eq]"?: string;
+                "filter[type_ids][not_eq]"?: string;
+                "filter[type_ids][in]"?: string;
+                "filter[type_ids][not_in]"?: string;
+                "filter[environments][eq]"?: string;
+                "filter[environments][not_eq]"?: string;
+                "filter[environments][in]"?: string;
+                "filter[environments][not_in]"?: string;
+                "filter[environment_ids][eq]"?: string;
+                "filter[environment_ids][not_eq]"?: string;
+                "filter[environment_ids][in]"?: string;
+                "filter[environment_ids][not_in]"?: string;
+                "filter[services][eq]"?: string;
+                "filter[services][not_eq]"?: string;
+                "filter[services][in]"?: string;
+                "filter[services][not_in]"?: string;
+                "filter[service_ids][eq]"?: string;
+                "filter[service_ids][not_eq]"?: string;
+                "filter[service_ids][in]"?: string;
+                "filter[service_ids][not_in]"?: string;
+                "filter[service_names][eq]"?: string;
+                "filter[service_names][not_eq]"?: string;
+                "filter[service_names][in]"?: string;
+                "filter[service_names][not_in]"?: string;
+                "filter[functionalities][eq]"?: string;
+                "filter[functionalities][not_eq]"?: string;
+                "filter[functionalities][in]"?: string;
+                "filter[functionalities][not_in]"?: string;
+                "filter[functionality_ids][eq]"?: string;
+                "filter[functionality_ids][not_eq]"?: string;
+                "filter[functionality_ids][in]"?: string;
+                "filter[functionality_ids][not_in]"?: string;
+                "filter[functionality_names][eq]"?: string;
+                "filter[functionality_names][not_eq]"?: string;
+                "filter[functionality_names][in]"?: string;
+                "filter[functionality_names][not_in]"?: string;
+                "filter[causes][eq]"?: string;
+                "filter[causes][not_eq]"?: string;
+                "filter[causes][in]"?: string;
+                "filter[causes][not_in]"?: string;
+                "filter[cause_ids][eq]"?: string;
+                "filter[cause_ids][not_eq]"?: string;
+                "filter[cause_ids][in]"?: string;
+                "filter[cause_ids][not_in]"?: string;
+                "filter[teams][eq]"?: string;
+                "filter[teams][not_eq]"?: string;
+                "filter[teams][in]"?: string;
+                "filter[teams][not_in]"?: string;
+                "filter[team_ids][eq]"?: string;
+                "filter[team_ids][not_eq]"?: string;
+                "filter[team_ids][in]"?: string;
+                "filter[team_ids][not_in]"?: string;
+                "filter[team_names][eq]"?: string;
+                "filter[team_names][not_eq]"?: string;
+                "filter[team_names][in]"?: string;
+                "filter[team_names][not_in]"?: string;
                 /** @description comma separated if needed. eg: created_at,updated_at */
                 sort?: "created_at" | "-created_at" | "updated_at" | "-updated_at" | "started_at" | "-started_at" | "in_triage_at" | "-in_triage_at" | "mitigated_at" | "-mitigated_at" | "resolved_at" | "-resolved_at";
                 /** @description comma separated if needed. eg: sub_statuses,causes,subscribers */
@@ -33666,6 +38584,15 @@ export interface operations {
                 };
                 content: {
                     "application/vnd.api+json": components["schemas"]["incident_list"];
+                };
+            };
+            /** @description malformed date filter */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/vnd.api+json": components["schemas"]["errors_list"];
                 };
             };
         };
@@ -34335,7 +39262,7 @@ export interface operations {
     generatePhoneNumberLiveCallRouter: {
         parameters: {
             query: {
-                country_code: "AU" | "CA" | "DE" | "NL" | "NZ" | "SE" | "GB" | "US";
+                country_code: "AU" | "CA" | "DE" | "NL" | "NZ" | "SE" | "CH" | "GB" | "US";
                 phone_type: "local" | "toll_free" | "mobile";
             };
             header?: never;
@@ -34408,7 +39335,7 @@ export interface operations {
             };
         };
         responses: {
-            /** @description live_call_router updated */
+            /** @description live_call_router multichannel notification fields updated */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -34514,7 +39441,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/vnd.api+json": components["schemas"]["meeting_recording_response"];
+                };
             };
             /** @description validation error (e.g. bot already active) */
             422: {
@@ -34525,9 +39454,139 @@ export interface operations {
             };
         };
     };
-    getMeetingRecording: {
+    importMeetingRecording: {
         parameters: {
             query?: never;
+            header?: never;
+            path: {
+                /** @description Incident UUID */
+                incident_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/vnd.api+json": components["schemas"]["import_meeting_recording"];
+            };
+        };
+        responses: {
+            /** @description recording imported */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/vnd.api+json": components["schemas"]["meeting_recording_response"];
+                };
+            };
+            /** @description validation error (e.g. unsupported source, duplicate recording) */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    listAllMeetingRecordings: {
+        parameters: {
+            query?: {
+                /** @description Filter by status */
+                status?: string;
+                /** @description Filter by platform */
+                platform?: string;
+                /** @description Filter by creator type */
+                created_by?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description meeting recordings found */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/vnd.api+json": components["schemas"]["meeting_recording_list"];
+                };
+            };
+        };
+    };
+    startRecordingSession: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/vnd.api+json": components["schemas"]["start_session_request"];
+            };
+        };
+        responses: {
+            /** @description session created */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/vnd.api+json": components["schemas"]["start_session_response"];
+                };
+            };
+            /** @description invalid platform */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    deleteStandaloneMeetingRecording: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Meeting Recording UUID */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description recording deleted */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description recording not found or not owned by user */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description cannot delete active recording */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    getMeetingRecording: {
+        parameters: {
+            query?: {
+                /** @description comma separated if needed. eg: transcript */
+                include?: "transcript";
+            };
             header?: never;
             path: {
                 /** @description Meeting Recording UUID */
@@ -34542,7 +39601,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/vnd.api+json": components["schemas"]["meeting_recording_response"];
+                };
             };
             /** @description meeting recording not found */
             404: {
@@ -34570,7 +39631,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/vnd.api+json": components["schemas"]["meeting_recording_response"];
+                };
             };
             /** @description cannot delete active recording */
             422: {
@@ -34598,7 +39661,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/vnd.api+json": components["schemas"]["meeting_recording_response"];
+                };
             };
             /** @description cannot delete video (active recording or no video) */
             422: {
@@ -34626,7 +39691,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/vnd.api+json": components["schemas"]["meeting_recording_response"];
+                };
             };
             /** @description recording is not active */
             422: {
@@ -34654,7 +39721,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/vnd.api+json": components["schemas"]["meeting_recording_response"];
+                };
             };
             /** @description recording is not paused */
             422: {
@@ -34682,7 +39751,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/vnd.api+json": components["schemas"]["meeting_recording_response"];
+                };
             };
             /** @description recording cannot be stopped */
             422: {
@@ -34710,7 +39781,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/vnd.api+json": components["schemas"]["meeting_recording_response"];
+                };
             };
             /** @description bot is not in a call */
             422: {
@@ -35256,7 +40329,7 @@ export interface operations {
                 since?: string;
                 /** @description End of time range in ISO-8601 format (e.g., 2025-01-01T00:00:00Z). Defaults to 'since' time. */
                 until?: string;
-                /** @description When true, returns only the first on-call user per escalation policy level */
+                /** @description When true, returns only the first on-call entry per escalation policy path and level */
                 earliest?: boolean;
                 /** @description Timezone for response times (e.g., America/New_York). Defaults to UTC. */
                 time_zone?: string;
@@ -35270,7 +40343,7 @@ export interface operations {
                 "filter[service_ids]"?: string;
                 /** @description Comma-separated group IDs (teams) */
                 "filter[group_ids]"?: string;
-                /** @description Comma-separated notification types to include. One or both of: audible, quiet. When present, oncalls are returned from every non-deferral escalation path whose notification_type is in the filter, sorted audible-first. When absent, only the default path's oncalls are returned (existing behavior). */
+                /** @description Comma-separated notification types to include. One or both of: audible, quiet. When omitted, returns oncalls from all non-deferral escalation paths. When provided, limits results to matching notification types and sorts audible-first. */
                 "filter[notification_types]"?: string;
             };
             header?: never;
@@ -35284,7 +40357,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/vnd.api+json": components["schemas"]["oncall_list"];
+                };
             };
             /** @description responds with unauthorized for invalid token */
             401: {
@@ -35347,6 +40422,15 @@ export interface operations {
             };
         };
         responses: {
+            /** @description returns the existing override without recreating it */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/vnd.api+json": components["schemas"]["override_shift_response"];
+                };
+            };
             /** @description returns assignee relationship when schedule nesting enabled */
             201: {
                 headers: {
@@ -35991,6 +41075,26 @@ export interface operations {
                 "filter[created_at][gte]"?: string;
                 "filter[created_at][lt]"?: string;
                 "filter[created_at][lte]"?: string;
+                "filter[source][eq]"?: string;
+                "filter[source][not_eq]"?: string;
+                "filter[source][in]"?: string;
+                "filter[source][not_in]"?: string;
+                "filter[services][eq]"?: string;
+                "filter[services][not_eq]"?: string;
+                "filter[services][in]"?: string;
+                "filter[services][not_in]"?: string;
+                "filter[environments][eq]"?: string;
+                "filter[environments][not_eq]"?: string;
+                "filter[environments][in]"?: string;
+                "filter[environments][not_in]"?: string;
+                "filter[labels][eq]"?: string;
+                "filter[labels][not_eq]"?: string;
+                "filter[labels][in]"?: string;
+                "filter[labels][not_in]"?: string;
+                "filter[refs][eq]"?: string;
+                "filter[refs][not_eq]"?: string;
+                "filter[refs][in]"?: string;
+                "filter[refs][not_in]"?: string;
                 "page[number]"?: number;
                 "page[size]"?: number;
             };
@@ -36116,6 +41220,36 @@ export interface operations {
                 content: {
                     "application/vnd.api+json": components["schemas"]["errors_list"];
                 };
+            };
+        };
+    };
+    getReceipt: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Receipt ID */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description receipt found */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["receipt"];
+                };
+            };
+            /** @description receipt not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
         };
     };
@@ -37524,10 +42658,20 @@ export interface operations {
                 include?: string;
                 "filter[search]"?: string;
                 "filter[name]"?: string;
+                /** @description Filter schedules by owning team IDs. Comma-separate multiple values. */
+                "filter[team_ids]"?: string;
                 "filter[created_at][gt]"?: string;
                 "filter[created_at][gte]"?: string;
                 "filter[created_at][lt]"?: string;
                 "filter[created_at][lte]"?: string;
+                "filter[name][eq]"?: string;
+                "filter[name][not_eq]"?: string;
+                "filter[name][in]"?: string;
+                "filter[name][not_in]"?: string;
+                "filter[team_ids][eq]"?: string;
+                "filter[team_ids][not_eq]"?: string;
+                "filter[team_ids][in]"?: string;
+                "filter[team_ids][not_in]"?: string;
                 "page[number]"?: number;
                 "page[size]"?: number;
             };
@@ -37903,6 +43047,22 @@ export interface operations {
                 "filter[created_at][gte]"?: string;
                 "filter[created_at][lt]"?: string;
                 "filter[created_at][lte]"?: string;
+                "filter[name][eq]"?: string;
+                "filter[name][not_eq]"?: string;
+                "filter[name][in]"?: string;
+                "filter[name][not_in]"?: string;
+                "filter[slug][eq]"?: string;
+                "filter[slug][not_eq]"?: string;
+                "filter[slug][in]"?: string;
+                "filter[slug][not_in]"?: string;
+                "filter[alert_broadcast_enabled][eq]"?: string;
+                "filter[alert_broadcast_enabled][not_eq]"?: string;
+                "filter[alert_broadcast_enabled][in]"?: string;
+                "filter[alert_broadcast_enabled][not_in]"?: string;
+                "filter[incident_broadcast_enabled][eq]"?: string;
+                "filter[incident_broadcast_enabled][not_eq]"?: string;
+                "filter[incident_broadcast_enabled][in]"?: string;
+                "filter[incident_broadcast_enabled][not_in]"?: string;
                 sort?: string;
             };
             header?: never;
@@ -38203,6 +43363,90 @@ export interface operations {
             };
         };
     };
+    bulkUpsertServices: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/vnd.api+json": components["schemas"]["bulk_upsert_services"];
+            };
+        };
+        responses: {
+            /** @description records upserted successfully */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/vnd.api+json": components["schemas"]["bulk_upsert_services_response"];
+                };
+            };
+            /** @description unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/vnd.api+json": components["schemas"]["errors_list"];
+                };
+            };
+            /** @description validation or record-level error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/vnd.api+json": components["schemas"]["errors_list"] | components["schemas"]["bulk_upsert_services_error"];
+                };
+            };
+        };
+    };
+    bulkDeleteServices: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/vnd.api+json": components["schemas"]["bulk_destroy_services"];
+            };
+        };
+        responses: {
+            /** @description records deleted successfully */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/vnd.api+json": components["schemas"]["bulk_destroy_services_response"];
+                };
+            };
+            /** @description unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/vnd.api+json": components["schemas"]["errors_list"];
+                };
+            };
+            /** @description validation or partial-failure error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/vnd.api+json": components["schemas"]["errors_list"] | components["schemas"]["bulk_destroy_services_response"];
+                };
+            };
+        };
+    };
     listSeverities: {
         parameters: {
             query?: {
@@ -38218,6 +43462,22 @@ export interface operations {
                 "filter[created_at][gte]"?: string;
                 "filter[created_at][lt]"?: string;
                 "filter[created_at][lte]"?: string;
+                "filter[slug][eq]"?: string;
+                "filter[slug][not_eq]"?: string;
+                "filter[slug][in]"?: string;
+                "filter[slug][not_in]"?: string;
+                "filter[name][eq]"?: string;
+                "filter[name][not_eq]"?: string;
+                "filter[name][in]"?: string;
+                "filter[name][not_in]"?: string;
+                "filter[severity][eq]"?: string;
+                "filter[severity][not_eq]"?: string;
+                "filter[severity][in]"?: string;
+                "filter[severity][not_in]"?: string;
+                "filter[color][eq]"?: string;
+                "filter[color][not_eq]"?: string;
+                "filter[color][in]"?: string;
+                "filter[color][not_in]"?: string;
                 sort?: string;
             };
             header?: never;
@@ -38376,6 +43636,107 @@ export interface operations {
             };
         };
     };
+    listShiftCoverageRequests: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                schedule_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description shift_coverage_requests listed */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/vnd.api+json": components["schemas"]["shift_coverage_request_list"];
+                };
+            };
+        };
+    };
+    createShiftCoverageRequest: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                schedule_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/vnd.api+json": components["schemas"]["new_shift_coverage_request"];
+            };
+        };
+        responses: {
+            /** @description without override permission, can request coverage for own shift */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/vnd.api+json": components["schemas"]["shift_coverage_request_list"];
+                };
+            };
+            /** @description without override permission, cannot request coverage for another user's shift */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/vnd.api+json": components["schemas"]["errors_list"];
+                };
+            };
+        };
+    };
+    getShiftCoverageRequest: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description shift_coverage_request found */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/vnd.api+json": components["schemas"]["shift_coverage_request_response"];
+                };
+            };
+        };
+    };
+    deleteShiftCoverageRequest: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description shift_coverage_request deleted */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/vnd.api+json": components["schemas"]["shift_coverage_request_response"];
+                };
+            };
+        };
+    };
     listShifts: {
         parameters: {
             query?: {
@@ -38430,6 +43791,14 @@ export interface operations {
                 "filter[created_at][gte]"?: string;
                 "filter[created_at][lt]"?: string;
                 "filter[created_at][lte]"?: string;
+                "filter[slug][eq]"?: string;
+                "filter[slug][not_eq]"?: string;
+                "filter[slug][in]"?: string;
+                "filter[slug][not_in]"?: string;
+                "filter[name][eq]"?: string;
+                "filter[name][not_eq]"?: string;
+                "filter[name][in]"?: string;
+                "filter[name][not_in]"?: string;
                 sort?: string;
             };
             header?: never;
@@ -38585,6 +43954,489 @@ export interface operations {
                 content: {
                     "application/vnd.api+json": components["schemas"]["errors_list"];
                 };
+            };
+        };
+    };
+    listStatusPageAnnouncements: {
+        parameters: {
+            query?: {
+                include?: string;
+                "page[number]"?: number;
+                "page[size]"?: number;
+            };
+            header?: never;
+            path: {
+                status_page_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/vnd.api+json": components["schemas"]["status_page_announcement_list"];
+                };
+            };
+        };
+    };
+    createStatusPageAnnouncement: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                status_page_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/vnd.api+json": components["schemas"]["new_status_page_announcement"];
+            };
+        };
+        responses: {
+            /** @description status_page_announcement created without notifying subscribers */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/vnd.api+json": components["schemas"]["status_page_announcement_response"];
+                };
+            };
+            /** @description responds with unauthorized for invalid token */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/vnd.api+json": components["schemas"]["errors_list"];
+                };
+            };
+            /** @description invalid request */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/vnd.api+json": components["schemas"]["errors_list"];
+                };
+            };
+        };
+    };
+    getStatusPageAnnouncement: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description status page announcement found */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/vnd.api+json": components["schemas"]["status_page_announcement_response"];
+                };
+            };
+            /** @description resource not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/vnd.api+json": components["schemas"]["errors_list"];
+                };
+            };
+        };
+    };
+    updateStatusPageAnnouncement: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/vnd.api+json": components["schemas"]["update_status_page_announcement"];
+            };
+        };
+        responses: {
+            /** @description status_page_announcement updated */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/vnd.api+json": components["schemas"]["status_page_announcement_response"];
+                };
+            };
+            /** @description resource not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/vnd.api+json": components["schemas"]["errors_list"];
+                };
+            };
+        };
+    };
+    deleteStatusPageAnnouncement: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description status_page_announcement deleted */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/vnd.api+json": components["schemas"]["status_page_announcement_response"];
+                };
+            };
+            /** @description resource not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/vnd.api+json": components["schemas"]["errors_list"];
+                };
+            };
+        };
+    };
+    listStatusPageComponentGroups: {
+        parameters: {
+            query?: {
+                include?: string;
+                "page[number]"?: number;
+                "page[size]"?: number;
+            };
+            header?: never;
+            path: {
+                status_page_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/vnd.api+json": components["schemas"]["status_page_component_group_list"];
+                };
+            };
+        };
+    };
+    createStatusPageComponentGroup: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                status_page_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/vnd.api+json": components["schemas"]["new_status_page_component_group"];
+            };
+        };
+        responses: {
+            /** @description component group created */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/vnd.api+json": components["schemas"]["status_page_component_group_response"];
+                };
+            };
+            /** @description responds with unauthorized for invalid token */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/vnd.api+json": components["schemas"]["errors_list"];
+                };
+            };
+            /** @description invalid request */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/vnd.api+json": components["schemas"]["errors_list"];
+                };
+            };
+        };
+    };
+    getStatusPageComponentGroup: {
+        parameters: {
+            query?: {
+                include?: string;
+            };
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/vnd.api+json": components["schemas"]["status_page_component_group_response"];
+                };
+            };
+            /** @description responds with not found for another team's token */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/vnd.api+json": components["schemas"]["errors_list"];
+                };
+            };
+        };
+    };
+    updateStatusPageComponentGroup: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/vnd.api+json": components["schemas"]["update_status_page_component_group"];
+            };
+        };
+        responses: {
+            /** @description component group reordered */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/vnd.api+json": components["schemas"]["status_page_component_group_response"];
+                };
+            };
+            /** @description invalid request */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/vnd.api+json": components["schemas"]["errors_list"];
+                };
+            };
+        };
+    };
+    deleteStatusPageComponentGroup: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description group deleted along with its member components */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    listStatusPageComponents: {
+        parameters: {
+            query?: {
+                include?: string;
+                "page[number]"?: number;
+                "page[size]"?: number;
+            };
+            header?: never;
+            path: {
+                status_page_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/vnd.api+json": components["schemas"]["status_page_component_list"];
+                };
+            };
+        };
+    };
+    createStatusPageComponent: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                status_page_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/vnd.api+json": components["schemas"]["new_status_page_component"];
+            };
+        };
+        responses: {
+            /** @description catalog-backed component created */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/vnd.api+json": components["schemas"]["status_page_component_response"];
+                };
+            };
+            /** @description responds with unauthorized for invalid token */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/vnd.api+json": components["schemas"]["errors_list"];
+                };
+            };
+            /** @description invalid request */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/vnd.api+json": components["schemas"]["errors_list"];
+                };
+            };
+        };
+    };
+    getStatusPageComponent: {
+        parameters: {
+            query?: {
+                include?: string;
+            };
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/vnd.api+json": components["schemas"]["status_page_component_response"];
+                };
+            };
+            /** @description responds with not found for another team's token */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/vnd.api+json": components["schemas"]["errors_list"];
+                };
+            };
+        };
+    };
+    updateStatusPageComponent: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/vnd.api+json": components["schemas"]["update_status_page_component"];
+            };
+        };
+        responses: {
+            /** @description catalog-backed component ignores name and description overrides */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/vnd.api+json": components["schemas"]["status_page_component_response"];
+                };
+            };
+            /** @description invalid position rejected */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/vnd.api+json": components["schemas"]["errors_list"];
+                };
+            };
+        };
+    };
+    deleteStatusPageComponent: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description catalog-backed component detached, source and catalog left intact */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
         };
     };
@@ -38768,6 +44620,14 @@ export interface operations {
                 "filter[created_at][gte]"?: string;
                 "filter[created_at][lt]"?: string;
                 "filter[created_at][lte]"?: string;
+                "filter[name][eq]"?: string;
+                "filter[name][not_eq]"?: string;
+                "filter[name][in]"?: string;
+                "filter[name][not_in]"?: string;
+                "filter[slug][eq]"?: string;
+                "filter[slug][not_eq]"?: string;
+                "filter[slug][in]"?: string;
+                "filter[slug][not_in]"?: string;
                 sort?: string;
             };
             header?: never;
@@ -39197,6 +45057,26 @@ export interface operations {
                 "filter[created_at][gte]"?: string;
                 "filter[created_at][lt]"?: string;
                 "filter[created_at][lte]"?: string;
+                "filter[slug][eq]"?: string;
+                "filter[slug][not_eq]"?: string;
+                "filter[slug][in]"?: string;
+                "filter[slug][not_in]"?: string;
+                "filter[name][eq]"?: string;
+                "filter[name][not_eq]"?: string;
+                "filter[name][in]"?: string;
+                "filter[name][not_in]"?: string;
+                "filter[color][eq]"?: string;
+                "filter[color][not_eq]"?: string;
+                "filter[color][in]"?: string;
+                "filter[color][not_in]"?: string;
+                "filter[alert_broadcast_enabled][eq]"?: string;
+                "filter[alert_broadcast_enabled][not_eq]"?: string;
+                "filter[alert_broadcast_enabled][in]"?: string;
+                "filter[alert_broadcast_enabled][not_in]"?: string;
+                "filter[incident_broadcast_enabled][eq]"?: string;
+                "filter[incident_broadcast_enabled][not_eq]"?: string;
+                "filter[incident_broadcast_enabled][in]"?: string;
+                "filter[incident_broadcast_enabled][not_in]"?: string;
                 sort?: string;
             };
             header?: never;
@@ -39463,6 +45343,90 @@ export interface operations {
                 };
                 content: {
                     "application/vnd.api+json": components["schemas"]["errors_list"];
+                };
+            };
+        };
+    };
+    bulkUpsertGroups: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/vnd.api+json": components["schemas"]["bulk_upsert_teams"];
+            };
+        };
+        responses: {
+            /** @description records upserted successfully */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/vnd.api+json": components["schemas"]["bulk_upsert_teams_response"];
+                };
+            };
+            /** @description unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/vnd.api+json": components["schemas"]["errors_list"];
+                };
+            };
+            /** @description validation or record-level error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/vnd.api+json": components["schemas"]["errors_list"] | components["schemas"]["bulk_upsert_teams_error"];
+                };
+            };
+        };
+    };
+    bulkDeleteGroups: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/vnd.api+json": components["schemas"]["bulk_destroy_teams"];
+            };
+        };
+        responses: {
+            /** @description records deleted successfully */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/vnd.api+json": components["schemas"]["bulk_destroy_teams_response"];
+                };
+            };
+            /** @description unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/vnd.api+json": components["schemas"]["errors_list"];
+                };
+            };
+            /** @description validation or partial-failure error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/vnd.api+json": components["schemas"]["errors_list"] | components["schemas"]["bulk_destroy_teams_response"];
                 };
             };
         };
@@ -40263,7 +46227,7 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description schedules include only returns schedules from the current team */
+            /** @description teams include only returns teams from the current team */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -40298,7 +46262,7 @@ export interface operations {
             };
         };
         responses: {
-            /** @description update name and role simultaneously */
+            /** @description custom role with roles_permissions can update user role (IR-5606) */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -40355,6 +46319,24 @@ export interface operations {
                 include?: string;
                 "page[number]"?: number;
                 "page[size]"?: number;
+                /** @description Delivery status: pending, success, failed. Comma-separated. Unknown values are ignored; if no valid values remain, the result set is empty. */
+                "filter[status]"?: string;
+                /** @description Created after this timestamp (exclusive). Use ISO 8601 with Z or a numeric UTC offset. */
+                "filter[created_at][gt]"?: string;
+                /** @description Created at or after this timestamp (inclusive). Use ISO 8601 with Z or a numeric UTC offset. */
+                "filter[created_at][gte]"?: string;
+                /** @description Created before this timestamp (exclusive). Use ISO 8601 with Z or a numeric UTC offset. */
+                "filter[created_at][lt]"?: string;
+                /** @description Created at or before this timestamp (inclusive). Use ISO 8601 with Z or a numeric UTC offset. */
+                "filter[created_at][lte]"?: string;
+                /** @description Delivered after this timestamp (exclusive). Use ISO 8601 with Z or a numeric UTC offset. */
+                "filter[delivered_at][gt]"?: string;
+                /** @description Delivered at or after this timestamp (inclusive). Use ISO 8601 with Z or a numeric UTC offset. */
+                "filter[delivered_at][gte]"?: string;
+                /** @description Delivered before this timestamp (exclusive). Use ISO 8601 with Z or a numeric UTC offset. */
+                "filter[delivered_at][lt]"?: string;
+                /** @description Delivered at or before this timestamp (inclusive). Use ISO 8601 with Z or a numeric UTC offset. */
+                "filter[delivered_at][lte]"?: string;
             };
             header?: never;
             path: {
@@ -40371,6 +46353,15 @@ export interface operations {
                 };
                 content: {
                     "application/vnd.api+json": components["schemas"]["webhooks_delivery_list"];
+                };
+            };
+            /** @description invalid date filter */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/vnd.api+json": components["schemas"]["errors_list"];
                 };
             };
         };
@@ -40467,7 +46458,7 @@ export interface operations {
             };
         };
         responses: {
-            /** @description webhooks_endpoint created */
+            /** @description webhooks_endpoint created with custom_headers */
             201: {
                 headers: {
                     [name: string]: unknown;
@@ -40542,7 +46533,7 @@ export interface operations {
             };
         };
         responses: {
-            /** @description webhooks_endpoint updated */
+            /** @description webhooks_endpoint custom_headers cleared with empty array */
             200: {
                 headers: {
                     [name: string]: unknown;
