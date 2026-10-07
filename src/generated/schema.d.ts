@@ -84,6 +84,24 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/alert_configuration": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Retrieves the team's alert configuration */
+        get: operations["getAlertConfiguration"];
+        /** Updates the team's alert configuration */
+        put: operations["updateAlertConfiguration"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/alerts/{alert_id}/events": {
         parameters: {
             query?: never;
@@ -268,45 +286,6 @@ export interface paths {
         patch: operations["updateAlertGroup"];
         trace?: never;
     };
-    "/v1/alert_retrigger_rules": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** List alert re-trigger rules */
-        get: operations["listAlertRetriggerRules"];
-        put?: never;
-        /** Creates an alert re-trigger rule */
-        post: operations["createAlertRetriggerRule"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/alert_retrigger_rules/{id}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                id: string;
-            };
-            cookie?: never;
-        };
-        /** Retrieves an alert re-trigger rule */
-        get: operations["getAlertRetriggerRule"];
-        /** Updates an alert re-trigger rule */
-        put: operations["updateAlertRetriggerRule"];
-        post?: never;
-        /** Deletes an alert re-trigger rule */
-        delete: operations["deleteAlertRetriggerRule"];
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
     "/v1/alert_routes": {
         parameters: {
             query?: never;
@@ -328,7 +307,9 @@ export interface paths {
          *
          *     For organizations with large numbers of routing rules, Rootly supports asynchronous rule processing to improve performance. When enabled, rule creation happens in the background.
          *
-         *     **Important**: When async processing is enabled, the rules list in the API response will not be up-to-date immediately after creation. You should refetch the alert route after a few minutes to get the updated rules.
+         *     Asynchronous processing is also applied automatically, whether or not it is enabled for your organization, when a request carries a rule graph too large to save within the request timeout. Size is measured in total dependent records — rules plus their condition groups, conditions and destinations — and for an update it includes the rules already on the route, not just those in the payload.
+         *
+         *     **Important**: Whenever rules are processed asynchronously, the rules list in the API response will not be up-to-date immediately after creation. You should refetch the alert route, or poll the async rule creation status endpoint with the `request_id` you supplied, to confirm the rules have landed.
          *
          *     If you experience slow operations when managing alert routes with many rules, contact Rootly customer support to enable asynchronous rule processing for your organization.
          */
@@ -367,7 +348,9 @@ export interface paths {
          *
          *     For organizations with large numbers of routing rules, Rootly supports asynchronous rule processing to improve performance. When enabled, rule updates happen in the background.
          *
-         *     **Important**: When async processing is enabled, the rules list in the API response will not be up-to-date immediately after update. You should refetch the alert route after a few minutes to get the updated rules.
+         *     Asynchronous processing is also applied automatically, whether or not it is enabled for your organization, when a request carries a rule graph too large to save within the request timeout. Size is measured in total dependent records — rules plus their condition groups, conditions and destinations — and includes the rules already on the route, not just those in the payload, so a small payload against a large route may still be processed asynchronously.
+         *
+         *     **Important**: Whenever rules are processed asynchronously, the rules list in the API response will not be up-to-date immediately after update. You should refetch the alert route, or poll the async rule creation status endpoint with the `request_id` you supplied, to confirm the rules have landed.
          *
          *     If you experience slow operations when managing alert routes with many rules, contact Rootly customer support to enable asynchronous rule processing for your organization.
          */
@@ -892,51 +875,6 @@ export interface paths {
          * @description Delete a specific authorization by id
          */
         delete: operations["deleteAuthorization"];
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/bulk_imports": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Create a bulk import
-         * @description Create a new bulk import for incidents. Requires global API key authentication.
-         */
-        post: operations["createBulkImport"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/bulk_imports/{id}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Get bulk import status
-         * @description Retrieves the current status of a bulk import job.
-         *
-         *     **Use this endpoint to:**
-         *     - Poll for import progress
-         *     - Check validation errors if status is `validation_failed`
-         *     - Get final results when status is `completed` or `failed`
-         */
-        get: operations["getBulkImport"];
-        put?: never;
-        post?: never;
-        delete?: never;
         options?: never;
         head?: never;
         patch?: never;
@@ -3977,7 +3915,7 @@ export interface paths {
         get: operations["ListIncidentPostmortem"];
         /**
          * Update an incident retrospective
-         * @description Update a specific incident retrospective by id
+         * @description Update a specific incident retrospective by id. The body may be written as `content` (or its alias `smart_content`) and is sanitized to the tags the retrospective editor supports. When no `title` is sent and the body opens with an `<h1>`, that heading becomes the retrospective title, matching the editor. Once a retrospective has been opened in the collaborative editor that editor owns the body, and body writes are rejected with a 409.
          */
         put: operations["updateIncidentPostmortem"];
         post?: never;
@@ -5375,6 +5313,269 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/private_agents/enrollment_tokens": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Create a one-time token for agent enrollment
+         * @description Issue a one-time token valid for 24 hours. No request body is required. Requires Private Agent management permission plus the Private Agents and AI SRE features. The agent uses this token for gRPC Enroll; the agent record is created on enrollment, not by this request. The plaintext is returned only here and is not recoverable. Repeated requests issue distinct tokens; this endpoint is not idempotent.
+         */
+        post: operations["createPrivateAgentEnrollmentToken"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/private_agents": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List private agents
+         * @description List this tenant's agents, including revoked and offline agents. Inventory pages omit provider snapshots to bound database and response costs; use Get private agent for provider inventory and last-reported health. Requires Private Agent management access plus the Private Agents and AI SRE features. Credentials and capability schemas are never returned.
+         */
+        get: operations["listPrivateAgents"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/private_agents/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        /**
+         * Get private agent
+         * @description Return provider inventory and last-reported health for one agent. Requires Private Agent read permission plus the Private Agents and AI SRE features. Credentials and capability schemas are never returned.
+         */
+        get: operations["getPrivateAgent"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /**
+         * Update private agent metadata
+         * @description Update routing metadata or pause tool execution without disconnecting the agent. The agent UUID and provider IDs remain the execution identities. Requires Private Agent update permission.
+         */
+        patch: operations["updatePrivateAgent"];
+        trace?: never;
+    };
+    "/v1/private_agents/{id}/revoke": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Revoke private agent
+         * @description Invalidate access and refresh credentials and remove provider routing registrations. Requires Private Agent delete permission plus the Private Agents and AI SRE features. Retains the agent and invocation history. Repeated revocation is safe. An executing customer-side operation is not guaranteed to stop immediately. Use a new enrollment token to re-enroll a revoked installation.
+         */
+        post: operations["revokePrivateAgent"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/problems/{problem_id}/action_items": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                problem_id: string;
+            };
+            cookie?: never;
+        };
+        /**
+         * List a problem's action items
+         * @description List action items belonging to a problem, with filter, sort and pagination support
+         */
+        get: operations["listProblemActionItems"];
+        put?: never;
+        /**
+         * Creates a problem action item
+         * @description Creates a new action item on a problem from provided data
+         */
+        post: operations["createProblemActionItem"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/problem_action_items/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        /**
+         * Retrieves a problem action item
+         * @description Retrieves a specific problem action item by id
+         */
+        get: operations["getProblemActionItem"];
+        /**
+         * Update a problem action item
+         * @description Updates a problem action item
+         */
+        put: operations["updateProblemActionItem"];
+        post?: never;
+        /**
+         * Deletes a problem action item
+         * @description Deletes a problem action item
+         */
+        delete: operations["deleteProblemActionItem"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/problem_action_items": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List all problem action items
+         * @description List all problem action items the caller can access across the team, with filter, sort and pagination support
+         */
+        get: operations["listAllProblemActionItems"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/problems": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List problems
+         * @description Sorting by incidents_count would let callers without incident read infer relative hidden incident counts, so it is rejected.
+         */
+        get: operations["listProblems"];
+        put?: never;
+        /**
+         * Creates a problem
+         * @description Creates a new problem from provided data
+         */
+        post: operations["createProblem"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/problems/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        /**
+         * Retrieves a problem
+         * @description API callers lacking access to the problem's team receive an error. The API deliberately returns 404 rather than 403 so existence is not leaked.
+         */
+        get: operations["getProblem"];
+        /**
+         * Update a problem
+         * @description When a status transition fails validation, accompanying field updates roll back with it.
+         */
+        put: operations["updateProblem"];
+        post?: never;
+        /**
+         * Deletes a problem
+         * @description Soft-deletes a problem
+         */
+        delete: operations["deleteProblem"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/problems/{id}/incidents": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Links incidents to a problem
+         * @description Links one or more incidents to a problem. Accepts `incident_id` (single) or `incident_ids` (array).
+         */
+        post: operations["linkProblemIncidents"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/problems/{id}/incidents/{incident_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+                incident_id: string;
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /**
+         * Unlinks an incident from a problem
+         * @description Unlinks an incident from a problem
+         */
+        delete: operations["unlinkProblemIncident"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/pulses": {
         parameters: {
             query?: never;
@@ -6295,7 +6496,7 @@ export interface paths {
         put?: never;
         /**
          * creates shift coverage requests
-         * @description Creates coverage requests for the shifts overlapping the requested time range. A range can span multiple consecutive shifts (e.g. across a handoff), so one or more coverage requests may be created; the response is always a list. A coverage request broadcasts to schedule members so someone can volunteer to cover the shift.
+         * @description Creates coverage requests for the shifts overlapping the requested time range. A range can span multiple consecutive shifts (e.g. across a handoff), so one or more coverage requests may be created; the response is always a list. A coverage request broadcasts to schedule members so someone can volunteer to cover the shift, or targets recipient_user_ids when targeted-shift-coverage is enabled.
          */
         post: operations["createShiftCoverageRequest"];
         delete?: never;
@@ -6567,6 +6768,63 @@ export interface paths {
          * @description Delete a status page component
          */
         delete: operations["deleteStatusPageComponent"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/status-pages/{status_page_id}/teams": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                status_page_id: string;
+            };
+            cookie?: never;
+        };
+        /**
+         * Lists the teams with access to a status page
+         * @description Lists the teams assigned to a status page, oldest first
+         */
+        get: operations["listStatusPageTeams"];
+        put?: never;
+        /**
+         * Grants a team access to a status page
+         * @description Assigns a team to a status page. Members of the team get the chosen permission level on that page in addition to their role. Requires an owner or admin role.
+         */
+        post: operations["createStatusPageTeam"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/status-pages/{status_page_id}/teams/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                status_page_id: string;
+                id: string;
+            };
+            cookie?: never;
+        };
+        /**
+         * Retrieves a status page team assignment
+         * @description Retrieves a specific status page team assignment by id
+         */
+        get: operations["getStatusPageTeam"];
+        /**
+         * Updates a status page team assignment
+         * @description Changes the permission level of a team on a status page. Requires an owner or admin role. To move the grant to another team, delete it and create a new one.
+         */
+        put: operations["updateStatusPageTeam"];
+        post?: never;
+        /**
+         * Removes a team's access to a status page
+         * @description Removes a team from a status page. Its members lose the page access the assignment granted on their next request. Requires an owner or admin role.
+         */
+        delete: operations["deleteStatusPageTeam"];
         options?: never;
         head?: never;
         patch?: never;
@@ -7130,6 +7388,50 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/phone_numbers/{id}/verify": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Send verification code
+         * @description Sends a verification code to the phone number. SMS sends are limited per recipient to 3 per hour and 5 per day. An application rate-limit 429 response includes Retry-After with the remaining wait in seconds.
+         */
+        post: operations["verifyUserPhoneNumber"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/phone_numbers/{id}/resend_verification": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Resend verification code
+         * @description Resends a verification code to the phone number. SMS sends are limited per recipient to 3 per hour and 5 per day. An application rate-limit 429 response includes Retry-After with the remaining wait in seconds.
+         */
+        post: operations["resendVerificationUserPhoneNumber"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/users": {
         parameters: {
             query?: never;
@@ -7509,6 +7811,14 @@ export interface components {
                 /** @enum {string} */
                 type: "alerts";
                 attributes: {
+                    /** @description The user to record as performing this action. Only available when actor attribution is enabled for the organization; otherwise it is ignored. Only supported with Global and Team API keys; with a Team API key the user must belong to one of the key's teams. When omitted or null, the action is attributed to the API key. Otherwise provide either `email` or `user_id`, not both. */
+                    actor?: ({
+                        /** @description Email of the user, including verified secondary emails. */
+                        email: string;
+                    } | {
+                        /** @description Rootly ID of the user. */
+                        user_id: string;
+                    }) | null;
                     /**
                      * @description Whether the alert is marked as noise
                      * @enum {string|null}
@@ -7591,9 +7901,19 @@ export interface components {
         };
         update_alert: {
             data: {
+                /** @description Accepted for JSON:API client compatibility, but ignored. The resource to update is identified by the id in the path. */
+                id?: string;
                 /** @enum {string} */
                 type: "alerts";
                 attributes: {
+                    /** @description The user to record as performing this action. Only available when actor attribution is enabled for the organization; otherwise it is ignored. Only supported with Global and Team API keys; with a Team API key the user must belong to one of the key's teams. When omitted or null, the action is attributed to the API key. Otherwise provide either `email` or `user_id`, not both. */
+                    actor?: ({
+                        /** @description Email of the user, including verified secondary emails. */
+                        email: string;
+                    } | {
+                        /** @description Rootly ID of the user. */
+                        user_id: string;
+                    }) | null;
                     /**
                      * @description Whether the alert is marked as noise
                      * @enum {string|null}
@@ -7741,6 +8061,13 @@ export interface components {
                 /** @description Type of the alerting target (e.g. team, user, escalation_policy, service, functionality, slack_channel) */
                 type: string;
             }[] | null;
+            /** @description Slack channel and root thread ts of each announcement Rootly posted for the alert. Only present when the alert-slack-message-references feature flag is enabled for the team. */
+            slack_notifications?: {
+                /** @description Slack channel ID */
+                channel_id: string;
+                /** @description Slack ts of the root announcement message */
+                thread_ts: string;
+            }[] | null;
             /**
              * Format: uri
              * @description The Rootly dashboard URL for the alert
@@ -7756,6 +8083,16 @@ export interface components {
              * @description When the alert ended
              */
             ended_at?: string | null;
+            /**
+             * Format: date-time
+             * @description When the alert was first acknowledged. Null if it has never been acknowledged. An alert that is retriggered and acknowledged again keeps its original acknowledgement timestamp.
+             */
+            acknowledged_at?: string | null;
+            /**
+             * Format: date-time
+             * @description When the alert was first resolved. Null if it has never been resolved. Like `acknowledged_at`, an alert that is retriggered and resolved again keeps its original resolution timestamp; use `ended_at` for the current resolution state.
+             */
+            resolved_at?: string | null;
             /** @description Date of creation */
             created_at: string;
             /** @description Date of last update */
@@ -7796,6 +8133,30 @@ export interface components {
                     resolution_message?: string | null;
                     /** @description Resolve all associated incidents */
                     resolve_related_incidents?: boolean | null;
+                    /** @description The user to record as performing this action. Only available when actor attribution is enabled for the organization; otherwise it is ignored. Only supported with Global and Team API keys; with a Team API key the user must belong to one of the key's teams. When omitted or null, the action is attributed to the API key. Otherwise provide either `email` or `user_id`, not both. */
+                    actor?: ({
+                        /** @description Email of the user, including verified secondary emails. */
+                        email: string;
+                    } | {
+                        /** @description Rootly ID of the user. */
+                        user_id: string;
+                    }) | null;
+                };
+            };
+        };
+        acknowledge_alert: {
+            data?: {
+                /** @enum {string} */
+                type?: "alerts";
+                attributes?: {
+                    /** @description The user to record as performing this action. Only available when actor attribution is enabled for the organization; otherwise it is ignored. Only supported with Global and Team API keys; with a Team API key the user must belong to one of the key's teams. When omitted or null, the action is attributed to the API key. Otherwise provide either `email` or `user_id`, not both. */
+                    actor?: ({
+                        /** @description Email of the user, including verified secondary emails. */
+                        email: string;
+                    } | {
+                        /** @description Rootly ID of the user. */
+                        user_id: string;
+                    }) | null;
                 };
             };
         };
@@ -7806,6 +8167,14 @@ export interface components {
                 attributes: {
                     /** @description Number of minutes to snooze the alert for */
                     delay_minutes: number;
+                    /** @description The user to record as performing this action. Only available when actor attribution is enabled for the organization; otherwise it is ignored. Only supported with Global and Team API keys; with a Team API key the user must belong to one of the key's teams. When omitted or null, the action is attributed to the API key. Otherwise provide either `email` or `user_id`, not both. */
+                    actor?: ({
+                        /** @description Email of the user, including verified secondary emails. */
+                        email: string;
+                    } | {
+                        /** @description Rootly ID of the user. */
+                        user_id: string;
+                    }) | null;
                 };
             };
         };
@@ -7818,6 +8187,14 @@ export interface components {
                     escalation_policy_id?: string;
                     /** @description The escalation policy level to escalate to. If omitted, defaults to the next level (same EP) or level 1 (different EP). */
                     escalation_policy_level?: number;
+                    /** @description The user to record as performing this action. Only available when actor attribution is enabled for the organization; otherwise it is ignored. Only supported with Global and Team API keys; with a Team API key the user must belong to one of the key's teams. When omitted or null, the action is attributed to the API key. Otherwise provide either `email` or `user_id`, not both. */
+                    actor?: ({
+                        /** @description Email of the user, including verified secondary emails. */
+                        email: string;
+                    } | {
+                        /** @description Rootly ID of the user. */
+                        user_id: string;
+                    }) | null;
                 };
             };
         };
@@ -7850,6 +8227,8 @@ export interface components {
         /** @description Update an alert event. Note: Only alert events with kind='note' can be updated. You cannot change the kind field. */
         update_alert_event: {
             data: {
+                /** @description Accepted for JSON:API client compatibility, but ignored. The resource to update is identified by the id in the path. */
+                id?: string;
                 /** @enum {string} */
                 type: "alert_events";
                 attributes: {
@@ -7866,7 +8245,16 @@ export interface components {
             /** @enum {string} */
             kind: "informational" | "notification" | "action" | "status_update" | "recording" | "alert_grouping" | "alert_urgency" | "alert_routing" | "note" | "noise" | "maintenance" | "deferral";
             /** @enum {string} */
-            action: "created" | "escalation_policy_paged" | "ignored_alert_request" | "call_lifecycle" | "level_skipped" | "emailed" | "slacked" | "ms_teams_messaged" | "google_chat_messaged" | "called" | "texted" | "notified" | "skipped" | "opened" | "retriggered" | "ack_timeout_retriggered" | "answered" | "acknowledged" | "escalated" | "paged" | "resolved" | "attached" | "snoozed" | "retrigger_suppressed" | "triggered" | "open" | "updated" | "added" | "removed" | "marked" | "not_marked" | "cleared" | "muted" | "deferred";
+            action: "created" | "escalation_policy_paged" | "ignored_alert_request" | "call_lifecycle" | "level_skipped" | "team_attached_from_payload" | "user_paged" | "emailed" | "slacked" | "ms_teams_messaged" | "google_chat_messaged" | "called" | "texted" | "notified" | "skipped" | "opened" | "retriggered" | "ack_timeout_retriggered" | "answered" | "acknowledged" | "escalated" | "paged" | "resolved" | "attached" | "snoozed" | "retrigger_suppressed" | "retrigger_cancelled" | "triggered" | "open" | "updated" | "added" | "removed" | "marked" | "not_marked" | "cleared" | "muted" | "deferred";
+            /**
+             * @description Present on paged events when a user explicitly reassigns the alert to another notification target.
+             * @enum {string|null}
+             */
+            page_reason?: "manual_reassignment" | null;
+            /** @description Slack thread ts of the message Rootly posted for this event, when present. */
+            slack_message_ts?: string | null;
+            /** @description Permalink to the Slack message Rootly posted for this event, when present. */
+            slack_message_permalink?: string | null;
             source: string;
             /** @description Author of the note. */
             user_id?: number | null;
@@ -8026,7 +8414,7 @@ export interface components {
                         /** @description The ID of the alert urgency */
                         alert_urgency_id?: string;
                     }[];
-                    /** @description Provide additional attributes for the underlying source. `auto_resolve`, `resolve_state` and `field_mappings_attributes` apply to generic_webhook sources; `accept_threaded_emails` applies to email sources. */
+                    /** @description Provide additional attributes for the underlying source. `auto_resolve`, `resolve_state` and `field_mappings_attributes` apply to generic_webhook sources; `accept_threaded_emails`, `notification_target_type` and `notification_target_id` apply to email sources. */
                     sourceable_attributes?: {
                         /** @description Set this to true to auto-resolve alerts based on field_mappings_attributes conditions */
                         auto_resolve?: boolean;
@@ -8034,6 +8422,13 @@ export interface components {
                         resolve_state?: string | null;
                         /** @description Set this to false to reject threaded emails */
                         accept_threaded_emails?: boolean;
+                        /**
+                         * @description Email sources only. The type of the notification target every alert from this source pages directly; While it points to an active, pageable target, Alert Routes are not evaluated. Only used when the `email-alert-source-notification-target` feature flag is on for the team.
+                         * @enum {string|null}
+                         */
+                        notification_target_type?: "EscalationPolicy" | "Group" | "Service" | "Functionality" | "User" | null;
+                        /** @description Email sources only. The ID of the notification target. Set to null to clear it; this also clears `notification_target_type`. Only used when the `email-alert-source-notification-target` feature flag is on for the team. */
+                        notification_target_id?: string | null;
                         /** @description Specify rules to auto resolve alerts */
                         field_mappings_attributes?: {
                             /**
@@ -8107,6 +8502,8 @@ export interface components {
         };
         update_alerts_source: {
             data: {
+                /** @description Accepted for JSON:API client compatibility, but ignored. The resource to update is identified by the id in the path. */
+                id?: string;
                 /** @enum {string} */
                 type: "alert_sources";
                 attributes: {
@@ -8168,7 +8565,7 @@ export interface components {
                         /** @description The ID of the alert urgency */
                         alert_urgency_id?: string;
                     }[];
-                    /** @description Provide additional attributes for the underlying source. `auto_resolve`, `resolve_state` and `field_mappings_attributes` apply to generic_webhook sources; `accept_threaded_emails` applies to email sources. */
+                    /** @description Provide additional attributes for the underlying source. `auto_resolve`, `resolve_state` and `field_mappings_attributes` apply to generic_webhook sources; `accept_threaded_emails`, `notification_target_type` and `notification_target_id` apply to email sources. */
                     sourceable_attributes?: {
                         /** @description Set this to true to auto-resolve alerts based on field_mappings_attributes conditions */
                         auto_resolve?: boolean;
@@ -8176,6 +8573,13 @@ export interface components {
                         resolve_state?: string | null;
                         /** @description Set this to false to reject threaded emails */
                         accept_threaded_emails?: boolean;
+                        /**
+                         * @description Email sources only. The type of the notification target every alert from this source pages directly; While it points to an active, pageable target, Alert Routes are not evaluated. Only used when the `email-alert-source-notification-target` feature flag is on for the team.
+                         * @enum {string|null}
+                         */
+                        notification_target_type?: "EscalationPolicy" | "Group" | "Service" | "Functionality" | "User" | null;
+                        /** @description Email sources only. The ID of the notification target. Set to null to clear it; this also clears `notification_target_type`. Only used when the `email-alert-source-notification-target` feature flag is on for the team. */
+                        notification_target_id?: string | null;
                         /** @description Specify rules to auto resolve alerts */
                         field_mappings_attributes?: {
                             /**
@@ -8239,10 +8643,12 @@ export interface components {
                     } | null;
                     /** @description List of alert fields to be added to the alert source. Note: This attribute requires the alert field feature to be enabled on your account. Contact Rootly customer support if you need assistance with this feature. */
                     alert_source_fields_attributes?: {
-                        /** @description The ID of the alert field */
+                        /** @description The ID of the alert field. Must be visible to the caller; unknown or hidden IDs return 404 */
                         alert_field_id?: string;
                         /** @description Liquid expression to extract a specific value from the alert's payload for evaluation */
                         template_body?: string | null;
+                        /** @description Set to true to unbind the alert field from the alert source. Built-in fields cannot be unbound (422) */
+                        _destroy?: boolean | null;
                     }[];
                 };
             };
@@ -8306,7 +8712,7 @@ export interface components {
                 /** @description The ID of the alert urgency */
                 alert_urgency_id?: string;
             }[];
-            /** @description Provide additional attributes for the underlying source. `auto_resolve`, `resolve_state` and `field_mappings_attributes` apply to generic_webhook sources; `accept_threaded_emails` applies to email sources. */
+            /** @description Provide additional attributes for the underlying source. `auto_resolve`, `resolve_state` and `field_mappings_attributes` apply to generic_webhook sources; `accept_threaded_emails`, `notification_target_type` and `notification_target_id` apply to email sources. */
             sourceable_attributes?: {
                 /**
                  * Format: uuid
@@ -8319,6 +8725,13 @@ export interface components {
                 resolve_state?: string | null;
                 /** @description Set this to false to reject threaded emails */
                 accept_threaded_emails?: boolean;
+                /**
+                 * @description Email sources only. The type of the notification target every alert from this source pages directly; While it points to an active, pageable target, Alert Routes are not evaluated. Only used when the `email-alert-source-notification-target` feature flag is on for the team.
+                 * @enum {string|null}
+                 */
+                notification_target_type?: "EscalationPolicy" | "Group" | "Service" | "Functionality" | "User" | null;
+                /** @description Email sources only. The ID of the notification target. Set to null to clear it; this also clears `notification_target_type`. Only used when the `email-alert-source-notification-target` feature flag is on for the team. */
+                notification_target_id?: string | null;
                 /** @description Specify rules to auto resolve alerts */
                 field_mappings_attributes?: {
                     /**
@@ -8491,6 +8904,8 @@ export interface components {
         };
         update_alert_route: {
             data: {
+                /** @description Accepted for JSON:API client compatibility, but ignored. The resource to update is identified by the id in the path. */
+                id?: string;
                 /** @enum {string} */
                 type: "alert_routes";
                 attributes: {
@@ -8555,6 +8970,8 @@ export interface components {
         };
         patch_alert_route: {
             data: {
+                /** @description Accepted for JSON:API client compatibility, but ignored. The resource to update is identified by the id in the path. */
+                id?: string;
                 /** @enum {string} */
                 type: "alert_routes";
                 attributes: {
@@ -8681,24 +9098,24 @@ export interface components {
                         /** @enum {string} */
                         property_field_condition_type: "is_one_of" | "is_not_one_of" | "contains" | "does_not_contain" | "starts_with" | "ends_with" | "matches_regex" | "is_empty";
                         /** @description The name of the property field */
-                        property_field_name?: string;
+                        property_field_name: string;
                         /** @enum {string} */
                         property_field_type: "attribute" | "payload" | "alert_field";
                         /** @description The value of the property field */
-                        property_field_value?: string | null;
-                        property_field_values?: string[] | null;
+                        property_field_value: string | null;
+                        property_field_values: string[] | null;
                         /** @description The Alert Urgency IDs to check in the condition */
-                        alert_urgency_ids?: string[] | null;
+                        alert_urgency_ids: string[] | null;
                         /**
                          * @description The type of the conditionable
                          * @enum {string|null}
                          */
-                        conditionable_type?: "AlertField" | null;
+                        conditionable_type: "AlertField" | null;
                         /**
                          * Format: uuid
                          * @description The ID of the conditionable
                          */
-                        conditionable_id?: string | null;
+                        conditionable_id: string | null;
                     }[];
                 }[];
             }[];
@@ -8781,6 +9198,8 @@ export interface components {
         };
         update_alert_routing_rule: {
             data: {
+                /** @description Accepted for JSON:API client compatibility, but ignored. The resource to update is identified by the id in the path. */
+                id?: string;
                 /** @enum {string} */
                 type: "alert_routing_rules";
                 attributes: {
@@ -9029,150 +9448,77 @@ export interface components {
             /** @description Date of last update */
             updated_at?: string;
         };
-        new_alert_retrigger_rule: {
+        update_alert_configuration: {
             data: {
+                /** @description Accepted for JSON:API client compatibility, but ignored. Each team has a single alert configuration, so no id is needed. */
+                id?: string;
                 /** @enum {string} */
-                type: "alert_retrigger_rules";
+                type: "alert_configurations";
+                /** @description Every attribute is optional and replaces its stored value. An attribute whose feature is not enabled for the team is refused with 403. */
                 attributes: {
-                    /** @description A human-readable name for the rule */
-                    name: string;
-                    /**
-                     * @description Whether all or any of the conditions must match
-                     * @enum {string}
-                     */
-                    match_mode?: "match-all-rules" | "match-any-rule";
-                    /**
-                     * @description Re-trigger the alert this many minutes after acknowledgment. Null means never re-trigger.
-                     * @enum {integer|null}
-                     */
-                    timeout_minutes?: 10 | 20 | 30 | 40 | 50 | 60 | 90 | 120 | 180 | 240 | 300 | 360 | 720 | 1440 | null;
-                    /** @description The position of the rule; the first matching rule (by position) decides the outcome */
-                    position?: number;
-                    /** @description The conditions that determine which alerts this rule applies to. An empty array applies to every alert. */
-                    conditions?: {
+                    /** @description Re-trigger behaviour for acknowledged alerts. Replaces the stored object as a whole. */
+                    alert_acknowledgment?: {
+                        /** @description Re-trigger an acknowledged alert after the timeout. */
+                        timeout_enabled?: boolean;
                         /**
-                         * @description The operand the condition matches on. Native operands (urgency, source, service, group) match by record; alert_field/payload match a field value.
-                         * @enum {string}
+                         * @description Minutes before an acknowledged alert re-triggers.
+                         * @enum {integer}
                          */
-                        kind: "urgency" | "source" | "service" | "group" | "alert_field" | "payload";
-                        /**
-                         * @description How the operand is compared. Native operands support is_one_of/is_not_one_of/is_set/is_not_set; alert_field/payload additionally support the string/regex operators.
-                         * @enum {string}
-                         */
-                        operator: "is_one_of" | "is_not_one_of" | "is_set" | "is_not_set" | "contains" | "does_not_contain" | "starts_with" | "ends_with" | "matches_regex";
-                        /** @description For urgency/service/group/source conditions: the IDs of the matched records (AlertUrgency, Service, Group, or Alerts::Source). */
-                        record_ids?: string[];
-                        /** @description For source conditions: non-integration source aliases (e.g. manual, api). For alert_field/payload conditions: the values to compare against. */
-                        values?: string[];
-                        /** @description For alert_field conditions: the alert field id. For payload conditions: a JSON Path (e.g. $.priority). */
-                        property_field_name?: string;
-                    }[];
+                        timeout_minutes?: 10 | 20 | 30 | 40 | 50 | 60 | 90 | 120 | 180 | 240 | 300 | 360 | 720 | 1440;
+                        /** @description Whether alerts created from a manual page also re-trigger. Changing it is rejected with 422 until the manual page re-trigger opt-out is enabled for the team. */
+                        retrigger_manual_alerts?: boolean;
+                    };
+                    /** @description Stored entity types for the manual paging form, as configured; at least one is required. The form itself may hide a type the team cannot use yet, such as functionality. */
+                    manual_paging_form_settings?: ("user" | "team" | "service" | "functionality" | "escalation_policy")[];
+                    /** @description Alert urgency ids allowed when manually paging. Empty means all; deleted urgencies are left out. Present and accepted only while the manual-page-urgency-allowlist feature is on for the team. */
+                    manual_paging_urgency_ids?: string[];
+                    /** @description Channel defaults for new users, per urgency level. Omitted levels keep the built-in defaults; existing users are never changed. Present and accepted only while org-default-notification-settings is on for the team. */
+                    default_user_notification_settings?: {
+                        /** @description Channels enabled on a newly created user's audible notification rule. At least one channel is required. */
+                        audible_contact_types?: ("email" | "device" | "sms" | "call")[];
+                        /** @description Channels enabled on a newly created user's quiet notification rule. At least one channel is required. */
+                        quiet_contact_types?: ("email" | "non_critical_device" | "sms" | "call")[];
+                    };
                 };
             };
         };
-        update_alert_retrigger_rule: {
-            data: {
-                /** @enum {string} */
-                type: "alert_retrigger_rules";
-                attributes: {
-                    /** @description A human-readable name for the rule */
-                    name?: string;
-                    /**
-                     * @description Whether all or any of the conditions must match
-                     * @enum {string}
-                     */
-                    match_mode?: "match-all-rules" | "match-any-rule";
-                    /**
-                     * @description Re-trigger the alert this many minutes after acknowledgment. Null means never re-trigger.
-                     * @enum {integer|null}
-                     */
-                    timeout_minutes?: 10 | 20 | 30 | 40 | 50 | 60 | 90 | 120 | 180 | 240 | 300 | 360 | 720 | 1440 | null;
-                    /** @description The position of the rule for ordering evaluation */
-                    position?: number;
-                    /** @description The full desired set of conditions; replaces the rule's existing conditions. An empty array applies to every alert. */
-                    conditions?: {
-                        /**
-                         * @description The operand the condition matches on. Native operands (urgency, source, service, group) match by record; alert_field/payload match a field value.
-                         * @enum {string}
-                         */
-                        kind: "urgency" | "source" | "service" | "group" | "alert_field" | "payload";
-                        /**
-                         * @description How the operand is compared. Native operands support is_one_of/is_not_one_of/is_set/is_not_set; alert_field/payload additionally support the string/regex operators.
-                         * @enum {string}
-                         */
-                        operator: "is_one_of" | "is_not_one_of" | "is_set" | "is_not_set" | "contains" | "does_not_contain" | "starts_with" | "ends_with" | "matches_regex";
-                        /** @description For urgency/service/group/source conditions: the IDs of the matched records (AlertUrgency, Service, Group, or Alerts::Source). */
-                        record_ids?: string[];
-                        /** @description For source conditions: non-integration source aliases (e.g. manual, api). For alert_field/payload conditions: the values to compare against. */
-                        values?: string[];
-                        /** @description For alert_field conditions: the alert field id. For payload conditions: a JSON Path (e.g. $.priority). */
-                        property_field_name?: string;
-                    }[];
-                };
+        alert_configuration: {
+            /** @description Re-trigger behaviour for acknowledged alerts. Replaces the stored object as a whole. */
+            alert_acknowledgment?: {
+                /** @description Re-trigger an acknowledged alert after the timeout. */
+                timeout_enabled?: boolean;
+                /**
+                 * @description Minutes before an acknowledged alert re-triggers.
+                 * @enum {integer}
+                 */
+                timeout_minutes?: 10 | 20 | 30 | 40 | 50 | 60 | 90 | 120 | 180 | 240 | 300 | 360 | 720 | 1440;
+                /** @description Whether alerts created from a manual page also re-trigger. Changing it is rejected with 422 until the manual page re-trigger opt-out is enabled for the team. */
+                retrigger_manual_alerts?: boolean;
             };
-        };
-        alert_retrigger_rule: {
-            /** @description A human-readable name for the rule */
-            name?: string;
-            /**
-             * @description Whether all or any of the conditions must match
-             * @enum {string}
-             */
-            match_mode?: "match-all-rules" | "match-any-rule";
-            /** @description Minutes after acknowledgment to re-trigger. Null means never re-trigger. */
-            timeout_minutes?: number | null;
-            /** @description The position of the rule for ordering evaluation */
-            position?: number;
-            /** @description The conditions for the rule */
-            conditions?: {
-                /**
-                 * Format: uuid
-                 * @description Unique ID of the condition
-                 */
-                id: string;
-                /**
-                 * @description The operand the condition matches on. Native operands (urgency, source, service, group) match by record; alert_field/payload match a field value.
-                 * @enum {string}
-                 */
-                kind: "urgency" | "source" | "service" | "group" | "alert_field" | "payload";
-                /**
-                 * @description How the operand is compared. Native operands support is_one_of/is_not_one_of/is_set/is_not_set; alert_field/payload additionally support the string/regex operators.
-                 * @enum {string}
-                 */
-                operator: "is_one_of" | "is_not_one_of" | "is_set" | "is_not_set" | "contains" | "does_not_contain" | "starts_with" | "ends_with" | "matches_regex";
-                /** @description For urgency/service/group/source conditions: the IDs of the matched records (AlertUrgency, Service, Group, or Alerts::Source). */
-                record_ids?: string[];
-                /** @description For source conditions: non-integration source aliases (e.g. manual, api). For alert_field/payload conditions: the values to compare against. */
-                values?: string[];
-                /** @description For alert_field conditions: the alert field id. For payload conditions: a JSON Path (e.g. $.priority). */
-                property_field_name?: string;
-            }[];
+            /** @description Stored entity types for the manual paging form, as configured; at least one is required. The form itself may hide a type the team cannot use yet, such as functionality. */
+            manual_paging_form_settings?: ("user" | "team" | "service" | "functionality" | "escalation_policy")[];
+            /** @description Alert urgency ids allowed when manually paging. Empty means all; deleted urgencies are left out. Present and accepted only while the manual-page-urgency-allowlist feature is on for the team. */
+            manual_paging_urgency_ids?: string[];
+            /** @description Channel defaults for new users, per urgency level. Omitted levels keep the built-in defaults; existing users are never changed. Present and accepted only while org-default-notification-settings is on for the team. */
+            default_user_notification_settings?: {
+                /** @description Channels enabled on a newly created user's audible notification rule. At least one channel is required. */
+                audible_contact_types?: ("email" | "device" | "sms" | "call")[];
+                /** @description Channels enabled on a newly created user's quiet notification rule. At least one channel is required. */
+                quiet_contact_types?: ("email" | "non_critical_device" | "sms" | "call")[];
+            };
             /** Format: date-time */
             created_at?: string;
             /** Format: date-time */
             updated_at?: string;
         };
-        alert_retrigger_rule_response: {
+        alert_configuration_response: {
             data: {
-                /** @description Unique ID of the alert_retrigger_rule */
+                /** @description Unique ID of the alert_configuration */
                 id: string;
                 /** @enum {string} */
-                type: "alert_retrigger_rules";
-                attributes: components["schemas"]["alert_retrigger_rule"];
+                type: "alert_configurations";
+                attributes: components["schemas"]["alert_configuration"];
             };
-            included?: components["schemas"]["jsonapi_included_resource"][];
-        };
-        alert_retrigger_rule_list: {
-            data: {
-                /** @description Unique ID of the alert_retrigger_rule */
-                id: string;
-                /** @enum {string} */
-                type: "alert_retrigger_rules";
-                attributes: components["schemas"]["alert_retrigger_rule"];
-            }[];
-            links: components["schemas"]["links"];
-            meta: components["schemas"]["meta"];
-            included?: components["schemas"]["jsonapi_included_resource"][];
         };
         new_alert_field: {
             data: {
@@ -9186,11 +9532,15 @@ export interface components {
                     slug?: string | null;
                     /** @description The name of the alert field */
                     name: string;
+                    /** @description IDs of the teams that own the alert field. Callers with org-wide alert field permissions may omit it or pass an empty list to create an org-wide field. Callers without them (team admins, team-scoped API keys) get their administered teams by default when it is omitted, and must otherwise pass at least one team they administer; an explicit empty list or null is rejected. */
+                    owner_group_ids?: string[] | null;
                 };
             };
         };
         update_alert_field: {
             data: {
+                /** @description Accepted for JSON:API client compatibility, but ignored. The resource to update is identified by the id in the path. */
+                id?: string;
                 /** @enum {string} */
                 type: "alert_fields";
                 attributes: {
@@ -9201,6 +9551,8 @@ export interface components {
                     slug?: string | null;
                     /** @description The name of the alert field */
                     name?: string;
+                    /** @description IDs of the teams that own the alert field. Callers with org-wide alert field permissions replace the full set. Callers without them may only add teams they administer, must leave at least one owner, and owners they do not administer are preserved. */
+                    owner_group_ids?: string[] | null;
                 };
             };
         };
@@ -9211,6 +9563,8 @@ export interface components {
             name: string;
             /** @description The kind of alert field */
             kind: string;
+            /** @description IDs of the teams that own the alert field. Empty for org-wide fields. */
+            owner_group_ids?: string[];
             /** @description Date of creation */
             created_at: string;
             /** @description Date of last update */
@@ -9249,13 +9603,18 @@ export interface components {
                     description: string;
                     /** @description Position of the alert urgency */
                     position?: number | null;
-                    /** @description Re-trigger acknowledged alerts of this urgency after N minutes; null inherits the workspace default, negative = never. */
-                    retrigger_timeout_minutes?: number | null;
+                    /**
+                     * @description Re-trigger acknowledged alerts of this urgency after N minutes; null inherits the workspace default, -1 = never.
+                     * @enum {integer|null}
+                     */
+                    retrigger_timeout_minutes?: -1 | 10 | 20 | 30 | 40 | 50 | 60 | 90 | 120 | 180 | 240 | 300 | 360 | 720 | 1440 | null;
                 };
             };
         };
         update_alert_urgency: {
             data: {
+                /** @description Accepted for JSON:API client compatibility, but ignored. The resource to update is identified by the id in the path. */
+                id?: string;
                 /** @enum {string} */
                 type: "alert_urgencies";
                 attributes: {
@@ -9265,8 +9624,11 @@ export interface components {
                     description?: string;
                     /** @description Position of the alert urgency */
                     position?: number | null;
-                    /** @description Re-trigger acknowledged alerts of this urgency after N minutes; null inherits the workspace default, negative = never. */
-                    retrigger_timeout_minutes?: number | null;
+                    /**
+                     * @description Re-trigger acknowledged alerts of this urgency after N minutes; null inherits the workspace default, -1 = never.
+                     * @enum {integer|null}
+                     */
+                    retrigger_timeout_minutes?: -1 | 10 | 20 | 30 | 40 | 50 | 60 | 90 | 120 | 180 | 240 | 300 | 360 | 720 | 1440 | null;
                 };
             };
         };
@@ -9279,7 +9641,7 @@ export interface components {
             description: string;
             /** @description Position of the alert urgency */
             position: number;
-            /** @description Re-trigger acknowledged alerts of this urgency after N minutes; null inherits the workspace default, negative = never. */
+            /** @description Re-trigger acknowledged alerts of this urgency after N minutes; null inherits the workspace default, -1 = never. */
             retrigger_timeout_minutes?: number | null;
             /** @description The urgency level */
             urgency?: string | null;
@@ -9332,6 +9694,8 @@ export interface components {
                     description?: string | null;
                     /** @description The length of time an Alert Group should stay open and accept new alerts */
                     time_window?: number;
+                    /** @description Teams that own this alert group. Admins of an owning team can manage it, and an owned alert group can only target destinations that belong to its owning teams. Only available when owning teams for alert groups are enabled for the organization. */
+                    owner_group_ids?: string[];
                     targets?: {
                         /**
                          * @description The type of the target. Please contact support if you encounter issues using `Functionality` as a target type.
@@ -9401,6 +9765,8 @@ export interface components {
         };
         update_alert_group: {
             data: {
+                /** @description Accepted for JSON:API client compatibility, but ignored. The resource to update is identified by the id in the path. */
+                id?: string;
                 /** @enum {string} */
                 type: "alert_groups";
                 attributes: {
@@ -9415,6 +9781,8 @@ export interface components {
                     description?: string | null;
                     /** @description The length of time an Alert Group should stay open and accept new alerts */
                     time_window?: number;
+                    /** @description Teams that own this alert group. Admins of an owning team can manage it, and an owned alert group can only target destinations that belong to its owning teams. Only available when owning teams for alert groups are enabled for the organization. */
+                    owner_group_ids?: string[];
                     targets?: {
                         /**
                          * @description The type of the target. Please contact support if you encounter issues using `Functionality` as a target type.
@@ -9503,6 +9871,8 @@ export interface components {
              * @description [DEPRECATED] Whether the alerts are grouped by urgency or not. This field is deprecated. Please use the `conditions` field with advanced alert grouping instead.
              */
             group_by_alert_urgency?: boolean;
+            /** @description Teams that own this alert group. Admins of an owning team can manage it, and an owned alert group can only target destinations that belong to its owning teams. Only available when owning teams for alert groups are enabled for the organization. */
+            owner_group_ids?: string[];
             targets?: {
                 /**
                  * @description The type of the target. Please contact support if you encounter issues using `Functionality` as a target type.
@@ -9614,6 +9984,8 @@ export interface components {
         };
         update_api_key: {
             data: {
+                /** @description Accepted for JSON:API client compatibility, but ignored. The resource to update is identified by the id in the path. */
+                id?: string;
                 /** @enum {string} */
                 type: "api_keys";
                 attributes: {
@@ -9657,6 +10029,8 @@ export interface components {
              * @enum {string}
              */
             kind: "personal" | "team" | "organization";
+            /** @description The group (team) ID for team API keys. Keys created via the API have exactly one group; for keys with multiple groups this is the first group. */
+            group_id?: string | null;
             /** @description The role ID */
             role_id?: string | null;
             /** @description The on-call role ID */
@@ -9708,13 +10082,15 @@ export interface components {
             included?: components["schemas"]["jsonapi_included_resource"][];
         };
         audit: {
-            /** @description Describes the action that was taken. */
+            /** @description The raw stored action that was taken. Rows written before IR-6875 may carry a trailing `!` for status transitions (e.g. `mark_as_resolved!`); prefer `event_display` for presentation. */
             event: string;
+            /** @description Human-friendly display name for the action, normalized so a status change reads the same regardless of the surface it came from */
+            event_display?: string;
             /**
              * @description Describes the object in which the action was taken on
              * @enum {string|null}
              */
-            item_type?: "AlertRoute" | "AlertRoutingRule" | "Alerts::Source" | "ApiKey" | "Catalog" | "CatalogEntity" | "CatalogEntityProperty" | "CatalogField" | "Cause" | "CustomField" | "CustomFieldOption" | "CustomForm" | "Dashboard" | "EdgeConnector" | "EdgeConnector::Action" | "Environment" | "EscalationPolicy" | "EscalationPolicyPath" | "ExportJob" | "FormField" | "Functionality" | "GeniusWorkflow" | "GeniusWorkflowGroup" | "GeniusWorkflowRun" | "Group" | "GroupUser" | "Heartbeat" | "Incident" | "IncidentActionItem" | "IncidentEvent" | "IncidentFormFieldSelection" | "IncidentFormFieldSelectionUser" | "IncidentPermissionSet" | "IncidentPostMortem" | "IncidentRoleAssignment" | "IncidentRoleTask" | "IncidentStatusPageEvent" | "IncidentTask" | "IncidentType" | "Integrations::DatadogAccount" | "Integrations::GithubAccount" | "Integrations::GoogleMeetAccount" | "Integrations::JiraAccount" | "Integrations::MicrosoftTeamsAccount" | "Integrations::NotionAccount" | "Integrations::OpsgenieAccount" | "Integrations::PagerdutyAccount" | "Integrations::ServiceNowAccount" | "Integrations::SlackAccount" | "Integrations::StatusPageIoAccount" | "Integrations::ZendeskAccount" | "Integrations::ZoomAccount" | "LiveCallRouter" | "LoginActivity" | "Membership" | "OnCallRole" | "Playbook" | "PlaybookTask" | "Role" | "Schedule" | "Secret" | "Service" | "Severity" | "StatusPage" | null;
+            item_type?: "AlertRoute" | "AlertRoutingRule" | "Alerts::Source" | "ApiKey" | "BrowserIpPolicy" | "Catalog" | "CatalogEntity" | "CatalogEntityProperty" | "CatalogField" | "Cause" | "CustomField" | "CustomFieldOption" | "CustomForm" | "Dashboard" | "EdgeConnector" | "EdgeConnector::Action" | "Environment" | "EscalationPolicy" | "EscalationPolicyPath" | "ExportJob" | "FormField" | "Functionality" | "GeniusWorkflow" | "GeniusWorkflowGroup" | "GeniusWorkflowRun" | "Group" | "GroupUser" | "Heartbeat" | "Incident" | "IncidentActionItem" | "IncidentEvent" | "IncidentFormFieldSelection" | "IncidentFormFieldSelectionUser" | "IncidentPermissionSet" | "IncidentPostMortem" | "IncidentRoleAssignment" | "IncidentRoleTask" | "IncidentStatusPageEvent" | "IncidentTask" | "IncidentType" | "Integrations::DatadogAccount" | "Integrations::GithubAccount" | "Integrations::GoogleMeetAccount" | "Integrations::JiraAccount" | "Integrations::MicrosoftTeamsAccount" | "Integrations::NotionAccount" | "Integrations::OpsgenieAccount" | "Integrations::PagerdutyAccount" | "Integrations::ServiceNowAccount" | "Integrations::SlackAccount" | "Integrations::StatusPageIoAccount" | "Integrations::ZendeskAccount" | "Integrations::ZoomAccount" | "LiveCallRouter" | "LoginActivity" | "Membership" | "OauthApplication" | "OnCallRole" | "Playbook" | "PlaybookTask" | "Role" | "Schedule" | "Secret" | "Service" | "Severity" | "StatusPage" | null;
             /** @description Human-friendly display name for the item type */
             item_type_display?: string | null;
             /** @description The object in which the action was taken on */
@@ -9779,6 +10155,8 @@ export interface components {
         };
         update_authorization: {
             data: {
+                /** @description Accepted for JSON:API client compatibility, but ignored. The resource to update is identified by the id in the path. */
+                id?: string;
                 /** @enum {string} */
                 type: "authorizations";
                 attributes: {
@@ -9827,93 +10205,6 @@ export interface components {
             meta: components["schemas"]["meta"];
             included?: components["schemas"]["jsonapi_included_resource"][];
         };
-        bulk_import_attributes: {
-            /**
-             * @description Type of entity being imported
-             * @enum {string}
-             */
-            entity_type?: "Incident";
-            /**
-             * @description Current status of the import
-             * @enum {string}
-             */
-            status: "pending" | "validating" | "validation_failed" | "importing" | "indexing" | "completed" | "failed";
-            /**
-             * Format: uri
-             * @description URL of the JSONL file being imported
-             */
-            file_url?: string;
-            /**
-             * Format: email
-             * @description Email address for notifications
-             */
-            notification_email?: string;
-            /** @description Total number of records in the file */
-            total_records?: number | null;
-            /** @description Number of records processed so far */
-            processed_records: number;
-            /** @description Number of records that failed to import */
-            failed_records: number;
-            /** @description Validation errors encountered during validation phase */
-            validation_errors?: Record<string, never> | null;
-            /** @description Error message if import failed */
-            error_message?: string | null;
-            /**
-             * Format: float
-             * @description Import progress percentage (0-100)
-             */
-            progress_percentage: number;
-            /**
-             * Format: date-time
-             * @description When import processing started
-             */
-            started_at?: string | null;
-            /**
-             * Format: date-time
-             * @description When import completed or failed
-             */
-            completed_at?: string | null;
-            /**
-             * Format: date-time
-             * @description When the bulk import was created
-             */
-            created_at?: string;
-            /**
-             * Format: date-time
-             * @description When the bulk import was last updated
-             */
-            updated_at?: string;
-        };
-        new_bulk_import: {
-            data: {
-                attributes: {
-                    /**
-                     * @description Type of entity to import (currently only 'Incident' is supported)
-                     * @enum {string}
-                     */
-                    entity_type: "Incident";
-                    /**
-                     * Format: uri
-                     * @description URL of the JSONL file to import. Must be accessible via HTTPS.
-                     */
-                    file_url: string;
-                    /**
-                     * Format: email
-                     * @description Email address to receive import status notifications
-                     */
-                    notification_email: string;
-                };
-            };
-        };
-        bulk_import_response: {
-            data: {
-                /** Format: uuid */
-                id: string;
-                /** @enum {string} */
-                type: "bulk_import";
-                attributes: components["schemas"]["bulk_import_attributes"];
-            };
-        };
         new_catalog: {
             data: {
                 /** @enum {string} */
@@ -9937,6 +10228,8 @@ export interface components {
         };
         update_catalog: {
             data: {
+                /** @description Accepted for JSON:API client compatibility, but ignored. The resource to update is identified by the id in the path. */
+                id?: string;
                 /** @enum {string} */
                 type: "catalogs";
                 attributes: {
@@ -10031,6 +10324,8 @@ export interface components {
         };
         update_catalog_field: {
             data: {
+                /** @description Accepted for JSON:API client compatibility, but ignored. The resource to update is identified by the id in the path. */
+                id?: string;
                 /** @enum {string} */
                 type: "catalog_properties";
                 attributes: {
@@ -10143,6 +10438,8 @@ export interface components {
         };
         update_catalog_property: {
             data: {
+                /** @description Accepted for JSON:API client compatibility, but ignored. The resource to update is identified by the id in the path. */
+                id?: string;
                 /** @enum {string} */
                 type: "catalog_properties";
                 attributes: {
@@ -10253,6 +10550,8 @@ export interface components {
         };
         update_catalog_entity: {
             data: {
+                /** @description Accepted for JSON:API client compatibility, but ignored. The resource to update is identified by the id in the path. */
+                id?: string;
                 /** @enum {string} */
                 type: "catalog_entities";
                 attributes: {
@@ -10415,6 +10714,8 @@ export interface components {
          */
         update_catalog_entity_property: {
             data: {
+                /** @description Accepted for JSON:API client compatibility, but ignored. The resource to update is identified by the id in the path. */
+                id?: string;
                 /** @enum {string} */
                 type: "catalog_entity_properties";
                 attributes: {
@@ -10522,6 +10823,8 @@ export interface components {
         };
         update_catalog_checklist_template: {
             data: {
+                /** @description Accepted for JSON:API client compatibility, but ignored. The resource to update is identified by the id in the path. */
+                id?: string;
                 /** @enum {string} */
                 type: "catalog_checklist_templates";
                 attributes: {
@@ -10755,6 +11058,8 @@ export interface components {
         };
         update_cause: {
             data: {
+                /** @description Accepted for JSON:API client compatibility, but ignored. The resource to update is identified by the id in the path. */
+                id?: string;
                 /** @enum {string} */
                 type: "causes";
                 attributes: {
@@ -10853,6 +11158,8 @@ export interface components {
         };
         update_communications_stage: {
             data: {
+                /** @description Accepted for JSON:API client compatibility, but ignored. The resource to update is identified by the id in the path. */
+                id?: string;
                 /** @enum {string} */
                 type: "communications_stages";
                 attributes: {
@@ -10929,6 +11236,8 @@ export interface components {
         };
         update_communications_type: {
             data: {
+                /** @description Accepted for JSON:API client compatibility, but ignored. The resource to update is identified by the id in the path. */
+                id?: string;
                 /** @enum {string} */
                 type: "communications_types";
                 attributes: {
@@ -11017,6 +11326,8 @@ export interface components {
         };
         update_communications_template: {
             data: {
+                /** @description Accepted for JSON:API client compatibility, but ignored. The resource to update is identified by the id in the path. */
+                id?: string;
                 /** @enum {string} */
                 type: "communications_templates";
                 attributes: {
@@ -11181,6 +11492,8 @@ export interface components {
         };
         update_communications_group: {
             data: {
+                /** @description Accepted for JSON:API client compatibility, but ignored. The resource to update is identified by the id in the path. */
+                id?: string;
                 /** @enum {string} */
                 type: "communications_groups";
                 attributes: {
@@ -11336,6 +11649,8 @@ export interface components {
         };
         update_custom_field_option: {
             data: {
+                /** @description Accepted for JSON:API client compatibility, but ignored. The resource to update is identified by the id in the path. */
+                id?: string;
                 /** @enum {string} */
                 type: "custom_field_options";
                 attributes: {
@@ -11406,6 +11721,8 @@ export interface components {
         };
         update_custom_field: {
             data: {
+                /** @description Accepted for JSON:API client compatibility, but ignored. The resource to update is identified by the id in the path. */
+                id?: string;
                 /** @enum {string} */
                 type: "custom_fields";
                 attributes: {
@@ -11492,6 +11809,8 @@ export interface components {
         };
         update_custom_form: {
             data: {
+                /** @description Accepted for JSON:API client compatibility, but ignored. The resource to update is identified by the id in the path. */
+                id?: string;
                 /** @enum {string} */
                 type: "custom_forms";
                 attributes: {
@@ -11607,6 +11926,8 @@ export interface components {
         };
         update_dashboard_panel: {
             data: {
+                /** @description Accepted for JSON:API client compatibility, but ignored. The resource to update is identified by the id in the path. */
+                id?: string;
                 /** @enum {string} */
                 type?: "dashboard_panels";
                 attributes?: {
@@ -11781,6 +12102,8 @@ export interface components {
         };
         update_dashboard: {
             data: {
+                /** @description Accepted for JSON:API client compatibility, but ignored. The resource to update is identified by the id in the path. */
+                id?: string;
                 /** @enum {string} */
                 type?: "dashboards";
                 attributes?: {
@@ -11888,6 +12211,8 @@ export interface components {
                     status: "active" | "paused";
                     /** @description Array of event types to subscribe to */
                     subscriptions?: string[];
+                    /** @description IDs of the teams (groups) that own this connector. Empty means the connector is not scoped to a team */
+                    owner_group_ids?: string[];
                     /**
                      * Format: date-time
                      * @description Last time connector polled
@@ -11925,6 +12250,8 @@ export interface components {
                 status?: "active" | "paused";
                 /** @description Array of event types to subscribe to */
                 subscriptions?: string[];
+                /** @description IDs of the teams (groups) that own this connector. Required when the caller is a team admin without tenant-wide edge connector permissions */
+                owner_group_ids?: string[];
             };
         };
         update_edge_connector: {
@@ -11934,6 +12261,162 @@ export interface components {
                 /** @enum {string} */
                 status?: "active" | "paused";
                 subscriptions?: string[];
+                owner_group_ids?: string[];
+            };
+        };
+        private_agent: {
+            /** Format: uuid */
+            id: string;
+            /** @enum {string} */
+            type: "private_agents";
+            attributes: {
+                name: string;
+                /** @description Non-sensitive routing metadata. Do not include secrets or personal data. */
+                description: string | null;
+                /** @description For active agents, whether Rootly may advertise tools and assign new work. */
+                enabled: boolean;
+                /** @enum {string} */
+                status: "active" | "revoked";
+                /** @description Active agent seen within two minutes; does not imply all providers are healthy. */
+                online: boolean;
+                /** @enum {string} */
+                deployment_mode: "combined" | "split-core";
+                agent_version: string;
+                /** Format: date-time */
+                last_seen_at: string | null;
+                schema_digest: string | null;
+                /** Format: date-time */
+                created_at: string;
+                /** Format: date-time */
+                updated_at: string;
+                providers: {
+                    id: string;
+                    /** @description Provider adapter type, such as kubernetes, prometheus, loki, tempo, pyroscope, elasticsearch, opensearch, postgresql, mysql, mcp, http, kafka, redis, or valkey. */
+                    type: string;
+                    version: string | null;
+                    /** @description Last reported provider health; may be stale when the agent is offline. Invalid or absent fields are omitted. */
+                    health: {
+                        status?: string;
+                        observed_at?: string;
+                        message?: string;
+                    } | null;
+                    /** @description Reported local policy, not credentials or provider connection configuration. Fields are provider-type specific: Kubernetes reports namespace scope; search providers report index scope; databases report database/schema scope; HTTP reports method/path/header scope; Kafka reports topic and message-read scope; Redis and Valkey report diagnostic limits; and each provider family normally reports only its applicable numeric limits. Management responses may preserve legacy cross-family fields for backwards compatibility; capability catalog and dispatch use provider-scoped execution metadata. Invalid or absent fields are omitted. */
+                    policy: {
+                        digest?: string;
+                        cluster_scoped?: boolean;
+                        pod_logs?: boolean;
+                        maximum_concurrency?: number;
+                        maximum_attribute_values?: number;
+                        maximum_documents?: number;
+                        maximum_entries?: number;
+                        maximum_exemplars?: number;
+                        maximum_indices?: number;
+                        maximum_label_values?: number;
+                        maximum_nodes?: number;
+                        maximum_pattern_points?: number;
+                        maximum_points_per_series?: number;
+                        maximum_profile_types?: number;
+                        maximum_query_bytes?: number;
+                        maximum_request_bytes?: number;
+                        maximum_response_bytes?: number;
+                        maximum_range_seconds?: number;
+                        maximum_rows?: number;
+                        maximum_result_bytes?: number;
+                        maximum_items?: number;
+                        maximum_messages?: number;
+                        maximum_message_bytes?: number;
+                        maximum_scan_records?: number;
+                        maximum_scan_bytes?: number;
+                        maximum_series?: number;
+                        maximum_shards?: number;
+                        maximum_slowlog_entries?: number;
+                        maximum_spans_per_span_set?: number;
+                        maximum_stale_values?: number;
+                        maximum_timeout_seconds?: number;
+                        maximum_traces?: number;
+                        stuck_transaction_seconds?: number;
+                        namespaces?: string[];
+                        allowed_indices?: string[];
+                        timestamp_field?: string;
+                        database?: string;
+                        allowed_schemas?: string[];
+                        allowed_methods?: string[];
+                        allowed_path_prefixes?: string[];
+                        allowed_request_headers?: string[];
+                        exposed_response_headers?: string[];
+                        allowed_topics?: string[];
+                        denied_topics?: string[];
+                        include_internal_topics?: boolean;
+                        allow_message_reads?: boolean;
+                        include_message_values?: boolean;
+                    } | null;
+                    capabilities: {
+                        name: string;
+                        version: string;
+                        description?: string;
+                        sensitivity?: string;
+                    }[];
+                }[];
+            };
+        };
+        private_agent_response: {
+            data: components["schemas"]["private_agent"];
+        };
+        private_agent_update: {
+            data: {
+                /** @enum {string} */
+                type: "private_agents";
+                attributes: {
+                    name?: string;
+                    enabled?: boolean;
+                    /** @description Non-sensitive routing metadata. Do not include secrets or personal data. */
+                    description?: string | null;
+                };
+            };
+        };
+        private_agent_list: {
+            data: components["schemas"]["private_agent_summary"][];
+            meta: Record<string, never>;
+        };
+        private_agent_enrollment_token_response: {
+            data: {
+                /** Format: uuid */
+                id: string;
+                /** @enum {string} */
+                type: "private_agent_enrollment_tokens";
+                attributes: {
+                    /** @description One-time secret. Returned only on creation; do not log or store in source control. */
+                    token: string;
+                    /** Format: date-time */
+                    expires_at: string;
+                };
+            };
+        };
+        private_agent_summary: {
+            /** Format: uuid */
+            id: string;
+            /** @enum {string} */
+            type: "private_agents";
+            attributes: {
+                name: string;
+                /** @description Non-sensitive routing metadata. Do not include secrets or personal data. */
+                description: string | null;
+                /** @description For active agents, whether Rootly may advertise tools and assign new work. */
+                enabled: boolean;
+                /** @enum {string} */
+                status: "active" | "revoked";
+                /** @description Active agent seen within two minutes; does not imply all providers are healthy. */
+                online: boolean;
+                /** @enum {string} */
+                deployment_mode: "combined" | "split-core";
+                agent_version: string;
+                /** Format: date-time */
+                last_seen_at: string | null;
+                schema_digest: string | null;
+                /** Format: date-time */
+                created_at: string;
+                /** Format: date-time */
+                updated_at: string;
             };
         };
         edge_connector_action: {
@@ -12066,6 +12549,8 @@ export interface components {
         };
         update_environment: {
             data: {
+                /** @description Accepted for JSON:API client compatibility, but ignored. The resource to update is identified by the id in the path. */
+                id?: string;
                 /** @enum {string} */
                 type: "environments";
                 attributes: {
@@ -12273,7 +12758,7 @@ export interface components {
                          * @description Time zone for business hours
                          * @enum {string|null}
                          */
-                        time_zone?: "International Date Line West" | "Etc/GMT+12" | "American Samoa" | "Pacific/Pago_Pago" | "Midway Island" | "Pacific/Midway" | "Hawaii" | "Pacific/Honolulu" | "Alaska" | "America/Juneau" | "Pacific Time (US & Canada)" | "America/Los_Angeles" | "Tijuana" | "America/Tijuana" | "Arizona" | "America/Phoenix" | "Mazatlan" | "America/Mazatlan" | "Mountain Time (US & Canada)" | "America/Denver" | "Central America" | "America/Guatemala" | "Central Time (US & Canada)" | "America/Chicago" | "Chihuahua" | "America/Chihuahua" | "Guadalajara" | "America/Mexico_City" | "Mexico City" | "Monterrey" | "America/Monterrey" | "Saskatchewan" | "America/Regina" | "Bogota" | "America/Bogota" | "Eastern Time (US & Canada)" | "America/New_York" | "Indiana (East)" | "America/Indiana/Indianapolis" | "Lima" | "America/Lima" | "Quito" | "Atlantic Time (Canada)" | "America/Halifax" | "Caracas" | "America/Caracas" | "Georgetown" | "America/Guyana" | "La Paz" | "America/La_Paz" | "Puerto Rico" | "America/Puerto_Rico" | "Santiago" | "America/Santiago" | "Newfoundland" | "America/St_Johns" | "Asuncion" | "America/Asuncion" | "Brasilia" | "America/Sao_Paulo" | "Buenos Aires" | "America/Argentina/Buenos_Aires" | "Montevideo" | "America/Montevideo" | "Greenland" | "America/Nuuk" | "Mid-Atlantic" | "Atlantic/South_Georgia" | "Azores" | "Atlantic/Azores" | "Cape Verde Is." | "Atlantic/Cape_Verde" | "Edinburgh" | "Europe/London" | "Lisbon" | "Europe/Lisbon" | "London" | "Monrovia" | "Africa/Monrovia" | "UTC" | "Etc/UTC" | "Amsterdam" | "Europe/Amsterdam" | "Belgrade" | "Europe/Belgrade" | "Berlin" | "Europe/Berlin" | "Bern" | "Europe/Zurich" | "Bratislava" | "Europe/Bratislava" | "Brussels" | "Europe/Brussels" | "Budapest" | "Europe/Budapest" | "Casablanca" | "Africa/Casablanca" | "Copenhagen" | "Europe/Copenhagen" | "Dublin" | "Europe/Dublin" | "Ljubljana" | "Europe/Ljubljana" | "Madrid" | "Europe/Madrid" | "Paris" | "Europe/Paris" | "Prague" | "Europe/Prague" | "Rome" | "Europe/Rome" | "Sarajevo" | "Europe/Sarajevo" | "Skopje" | "Europe/Skopje" | "Stockholm" | "Europe/Stockholm" | "Vienna" | "Europe/Vienna" | "Warsaw" | "Europe/Warsaw" | "West Central Africa" | "Africa/Algiers" | "Zagreb" | "Europe/Zagreb" | "Zurich" | "Athens" | "Europe/Athens" | "Bucharest" | "Europe/Bucharest" | "Cairo" | "Africa/Cairo" | "Harare" | "Africa/Harare" | "Helsinki" | "Europe/Helsinki" | "Jerusalem" | "Asia/Jerusalem" | "Kaliningrad" | "Europe/Kaliningrad" | "Pretoria" | "Africa/Johannesburg" | "Riga" | "Europe/Riga" | "Sofia" | "Europe/Sofia" | "Tallinn" | "Europe/Tallinn" | "Vilnius" | "Europe/Vilnius" | "Baghdad" | "Asia/Baghdad" | "Istanbul" | "Europe/Istanbul" | "Kuwait" | "Asia/Kuwait" | "Minsk" | "Europe/Minsk" | "Moscow" | "Europe/Moscow" | "Nairobi" | "Africa/Nairobi" | "Riyadh" | "Asia/Riyadh" | "St. Petersburg" | "Volgograd" | "Europe/Volgograd" | "Tehran" | "Asia/Tehran" | "Abu Dhabi" | "Asia/Muscat" | "Baku" | "Asia/Baku" | "Muscat" | "Samara" | "Europe/Samara" | "Tbilisi" | "Asia/Tbilisi" | "Yerevan" | "Asia/Yerevan" | "Kabul" | "Asia/Kabul" | "Almaty" | "Asia/Almaty" | "Astana" | "Ekaterinburg" | "Asia/Yekaterinburg" | "Islamabad" | "Asia/Karachi" | "Karachi" | "Tashkent" | "Asia/Tashkent" | "Chennai" | "Asia/Kolkata" | "Kolkata" | "Mumbai" | "New Delhi" | "Sri Jayawardenepura" | "Asia/Colombo" | "Kathmandu" | "Asia/Kathmandu" | "Dhaka" | "Asia/Dhaka" | "Urumqi" | "Asia/Urumqi" | "Bangkok" | "Asia/Bangkok" | "Hanoi" | "Jakarta" | "Asia/Jakarta" | "Krasnoyarsk" | "Asia/Krasnoyarsk" | "Novosibirsk" | "Asia/Novosibirsk" | "Beijing" | "Asia/Shanghai" | "Chongqing" | "Asia/Chongqing" | "Hong Kong" | "Asia/Hong_Kong" | "Irkutsk" | "Asia/Irkutsk" | "Kuala Lumpur" | "Asia/Kuala_Lumpur" | "Perth" | "Australia/Perth" | "Singapore" | "Asia/Singapore" | "Taipei" | "Asia/Taipei" | "Ulaanbaatar" | "Asia/Ulaanbaatar" | "Osaka" | "Asia/Tokyo" | "Sapporo" | "Seoul" | "Asia/Seoul" | "Tokyo" | "Yakutsk" | "Asia/Yakutsk" | "Adelaide" | "Australia/Adelaide" | "Darwin" | "Australia/Darwin" | "Brisbane" | "Australia/Brisbane" | "Canberra" | "Australia/Canberra" | "Guam" | "Pacific/Guam" | "Hobart" | "Australia/Hobart" | "Melbourne" | "Australia/Melbourne" | "Port Moresby" | "Pacific/Port_Moresby" | "Sydney" | "Australia/Sydney" | "Vladivostok" | "Asia/Vladivostok" | "Magadan" | "Asia/Magadan" | "New Caledonia" | "Pacific/Noumea" | "Solomon Is." | "Pacific/Guadalcanal" | "Srednekolymsk" | "Asia/Srednekolymsk" | "Auckland" | "Pacific/Auckland" | "Fiji" | "Pacific/Fiji" | "Kamchatka" | "Asia/Kamchatka" | "Marshall Is." | "Pacific/Majuro" | "Wellington" | "Chatham Is." | "Pacific/Chatham" | "Nuku'alofa" | "Pacific/Tongatapu" | "Samoa" | "Pacific/Apia" | "Tokelau Is." | "Pacific/Fakaofo" | "America/Adak" | "America/Atka" | "US/Aleutian" | "America/Vancouver" | "Canada/Pacific" | "America/Miquelon" | "Australia/Eucla" | "Australia/LHI" | "Australia/Lord_Howe" | "Chile/EasterIsland" | "Pacific/Easter" | "Pacific/Gambier" | "Pacific/Pitcairn" | "Pacific/Marquesas" | "Pacific/Kiritimati" | "Pacific/Norfolk" | null;
+                        time_zone?: "International Date Line West" | "Etc/GMT+12" | "American Samoa" | "Pacific/Pago_Pago" | "Midway Island" | "Pacific/Midway" | "Hawaii" | "Pacific/Honolulu" | "Alaska" | "America/Juneau" | "Pacific Time (US & Canada)" | "America/Los_Angeles" | "Tijuana" | "America/Tijuana" | "Arizona" | "America/Phoenix" | "Mazatlan" | "America/Mazatlan" | "Mountain Time (US & Canada)" | "America/Denver" | "Central America" | "America/Guatemala" | "Central Time (US & Canada)" | "America/Chicago" | "Chihuahua" | "America/Chihuahua" | "Guadalajara" | "America/Mexico_City" | "Mexico City" | "Monterrey" | "America/Monterrey" | "Saskatchewan" | "America/Regina" | "Bogota" | "America/Bogota" | "Eastern Time (US & Canada)" | "America/New_York" | "Indiana (East)" | "America/Indiana/Indianapolis" | "Lima" | "America/Lima" | "Quito" | "Atlantic Time (Canada)" | "America/Halifax" | "Caracas" | "America/Caracas" | "Georgetown" | "America/Guyana" | "La Paz" | "America/La_Paz" | "Puerto Rico" | "America/Puerto_Rico" | "Santiago" | "America/Santiago" | "Newfoundland" | "America/St_Johns" | "Asuncion" | "America/Asuncion" | "Brasilia" | "America/Sao_Paulo" | "Buenos Aires" | "America/Argentina/Buenos_Aires" | "Montevideo" | "America/Montevideo" | "Greenland" | "America/Nuuk" | "Mid-Atlantic" | "Atlantic/South_Georgia" | "Azores" | "Atlantic/Azores" | "Cape Verde Is." | "Atlantic/Cape_Verde" | "Casablanca" | "Africa/Casablanca" | "Edinburgh" | "Europe/London" | "Lisbon" | "Europe/Lisbon" | "London" | "Monrovia" | "Africa/Monrovia" | "UTC" | "Etc/UTC" | "Amsterdam" | "Europe/Amsterdam" | "Belgrade" | "Europe/Belgrade" | "Berlin" | "Europe/Berlin" | "Bern" | "Europe/Zurich" | "Bratislava" | "Europe/Bratislava" | "Brussels" | "Europe/Brussels" | "Budapest" | "Europe/Budapest" | "Copenhagen" | "Europe/Copenhagen" | "Dublin" | "Europe/Dublin" | "Ljubljana" | "Europe/Ljubljana" | "Madrid" | "Europe/Madrid" | "Paris" | "Europe/Paris" | "Prague" | "Europe/Prague" | "Rome" | "Europe/Rome" | "Sarajevo" | "Europe/Sarajevo" | "Skopje" | "Europe/Skopje" | "Stockholm" | "Europe/Stockholm" | "Vienna" | "Europe/Vienna" | "Warsaw" | "Europe/Warsaw" | "West Central Africa" | "Africa/Algiers" | "Zagreb" | "Europe/Zagreb" | "Zurich" | "Athens" | "Europe/Athens" | "Bucharest" | "Europe/Bucharest" | "Cairo" | "Africa/Cairo" | "Harare" | "Africa/Harare" | "Helsinki" | "Europe/Helsinki" | "Jerusalem" | "Asia/Jerusalem" | "Kaliningrad" | "Europe/Kaliningrad" | "Kyiv" | "Europe/Kyiv" | "Pretoria" | "Africa/Johannesburg" | "Riga" | "Europe/Riga" | "Sofia" | "Europe/Sofia" | "Tallinn" | "Europe/Tallinn" | "Vilnius" | "Europe/Vilnius" | "Baghdad" | "Asia/Baghdad" | "Istanbul" | "Europe/Istanbul" | "Kuwait" | "Asia/Kuwait" | "Minsk" | "Europe/Minsk" | "Moscow" | "Europe/Moscow" | "Nairobi" | "Africa/Nairobi" | "Riyadh" | "Asia/Riyadh" | "St. Petersburg" | "Volgograd" | "Europe/Volgograd" | "Tehran" | "Asia/Tehran" | "Abu Dhabi" | "Asia/Muscat" | "Baku" | "Asia/Baku" | "Muscat" | "Samara" | "Europe/Samara" | "Tbilisi" | "Asia/Tbilisi" | "Yerevan" | "Asia/Yerevan" | "Kabul" | "Asia/Kabul" | "Almaty" | "Asia/Almaty" | "Astana" | "Ekaterinburg" | "Asia/Yekaterinburg" | "Islamabad" | "Asia/Karachi" | "Karachi" | "Tashkent" | "Asia/Tashkent" | "Chennai" | "Asia/Kolkata" | "Kolkata" | "Mumbai" | "New Delhi" | "Sri Jayawardenepura" | "Asia/Colombo" | "Kathmandu" | "Asia/Kathmandu" | "Dhaka" | "Asia/Dhaka" | "Urumqi" | "Asia/Urumqi" | "Rangoon" | "Asia/Yangon" | "Bangkok" | "Asia/Bangkok" | "Hanoi" | "Jakarta" | "Asia/Jakarta" | "Krasnoyarsk" | "Asia/Krasnoyarsk" | "Novosibirsk" | "Asia/Novosibirsk" | "Beijing" | "Asia/Shanghai" | "Chongqing" | "Asia/Chongqing" | "Hong Kong" | "Asia/Hong_Kong" | "Irkutsk" | "Asia/Irkutsk" | "Kuala Lumpur" | "Asia/Kuala_Lumpur" | "Perth" | "Australia/Perth" | "Singapore" | "Asia/Singapore" | "Taipei" | "Asia/Taipei" | "Ulaanbaatar" | "Asia/Ulaanbaatar" | "Osaka" | "Asia/Tokyo" | "Sapporo" | "Seoul" | "Asia/Seoul" | "Tokyo" | "Yakutsk" | "Asia/Yakutsk" | "Adelaide" | "Australia/Adelaide" | "Darwin" | "Australia/Darwin" | "Brisbane" | "Australia/Brisbane" | "Canberra" | "Australia/Canberra" | "Guam" | "Pacific/Guam" | "Hobart" | "Australia/Hobart" | "Melbourne" | "Australia/Melbourne" | "Port Moresby" | "Pacific/Port_Moresby" | "Sydney" | "Australia/Sydney" | "Vladivostok" | "Asia/Vladivostok" | "Magadan" | "Asia/Magadan" | "New Caledonia" | "Pacific/Noumea" | "Solomon Is." | "Pacific/Guadalcanal" | "Srednekolymsk" | "Asia/Srednekolymsk" | "Auckland" | "Pacific/Auckland" | "Fiji" | "Pacific/Fiji" | "Kamchatka" | "Asia/Kamchatka" | "Marshall Is." | "Pacific/Majuro" | "Wellington" | "Chatham Is." | "Pacific/Chatham" | "Nuku'alofa" | "Pacific/Tongatapu" | "Samoa" | "Pacific/Apia" | "Tokelau Is." | "Pacific/Fakaofo" | "America/Adak" | "America/Atka" | "US/Aleutian" | "America/Vancouver" | "Canada/Pacific" | "America/Miquelon" | "Australia/Eucla" | "Australia/LHI" | "Australia/Lord_Howe" | "Chile/EasterIsland" | "Pacific/Easter" | "Pacific/Gambier" | "Pacific/Pitcairn" | "Pacific/Marquesas" | "Pacific/Kiritimati" | "Pacific/Norfolk" | "Asia/Rangoon" | "Europe/Kiev" | null;
                         /** @description Business days */
                         days?: ("M" | "T" | "W" | "R" | "F" | "U" | "S")[] | null;
                         /** @description Start time for business hours (HH:MM) */
@@ -12286,6 +12771,8 @@ export interface components {
         };
         update_escalation_policy: {
             data: {
+                /** @description Accepted for JSON:API client compatibility, but ignored. The resource to update is identified by the id in the path. */
+                id?: string;
                 /** @enum {string} */
                 type: "escalation_policies";
                 attributes: {
@@ -12305,7 +12792,7 @@ export interface components {
                          * @description Time zone for business hours
                          * @enum {string|null}
                          */
-                        time_zone?: "International Date Line West" | "Etc/GMT+12" | "American Samoa" | "Pacific/Pago_Pago" | "Midway Island" | "Pacific/Midway" | "Hawaii" | "Pacific/Honolulu" | "Alaska" | "America/Juneau" | "Pacific Time (US & Canada)" | "America/Los_Angeles" | "Tijuana" | "America/Tijuana" | "Arizona" | "America/Phoenix" | "Mazatlan" | "America/Mazatlan" | "Mountain Time (US & Canada)" | "America/Denver" | "Central America" | "America/Guatemala" | "Central Time (US & Canada)" | "America/Chicago" | "Chihuahua" | "America/Chihuahua" | "Guadalajara" | "America/Mexico_City" | "Mexico City" | "Monterrey" | "America/Monterrey" | "Saskatchewan" | "America/Regina" | "Bogota" | "America/Bogota" | "Eastern Time (US & Canada)" | "America/New_York" | "Indiana (East)" | "America/Indiana/Indianapolis" | "Lima" | "America/Lima" | "Quito" | "Atlantic Time (Canada)" | "America/Halifax" | "Caracas" | "America/Caracas" | "Georgetown" | "America/Guyana" | "La Paz" | "America/La_Paz" | "Puerto Rico" | "America/Puerto_Rico" | "Santiago" | "America/Santiago" | "Newfoundland" | "America/St_Johns" | "Asuncion" | "America/Asuncion" | "Brasilia" | "America/Sao_Paulo" | "Buenos Aires" | "America/Argentina/Buenos_Aires" | "Montevideo" | "America/Montevideo" | "Greenland" | "America/Nuuk" | "Mid-Atlantic" | "Atlantic/South_Georgia" | "Azores" | "Atlantic/Azores" | "Cape Verde Is." | "Atlantic/Cape_Verde" | "Edinburgh" | "Europe/London" | "Lisbon" | "Europe/Lisbon" | "London" | "Monrovia" | "Africa/Monrovia" | "UTC" | "Etc/UTC" | "Amsterdam" | "Europe/Amsterdam" | "Belgrade" | "Europe/Belgrade" | "Berlin" | "Europe/Berlin" | "Bern" | "Europe/Zurich" | "Bratislava" | "Europe/Bratislava" | "Brussels" | "Europe/Brussels" | "Budapest" | "Europe/Budapest" | "Casablanca" | "Africa/Casablanca" | "Copenhagen" | "Europe/Copenhagen" | "Dublin" | "Europe/Dublin" | "Ljubljana" | "Europe/Ljubljana" | "Madrid" | "Europe/Madrid" | "Paris" | "Europe/Paris" | "Prague" | "Europe/Prague" | "Rome" | "Europe/Rome" | "Sarajevo" | "Europe/Sarajevo" | "Skopje" | "Europe/Skopje" | "Stockholm" | "Europe/Stockholm" | "Vienna" | "Europe/Vienna" | "Warsaw" | "Europe/Warsaw" | "West Central Africa" | "Africa/Algiers" | "Zagreb" | "Europe/Zagreb" | "Zurich" | "Athens" | "Europe/Athens" | "Bucharest" | "Europe/Bucharest" | "Cairo" | "Africa/Cairo" | "Harare" | "Africa/Harare" | "Helsinki" | "Europe/Helsinki" | "Jerusalem" | "Asia/Jerusalem" | "Kaliningrad" | "Europe/Kaliningrad" | "Pretoria" | "Africa/Johannesburg" | "Riga" | "Europe/Riga" | "Sofia" | "Europe/Sofia" | "Tallinn" | "Europe/Tallinn" | "Vilnius" | "Europe/Vilnius" | "Baghdad" | "Asia/Baghdad" | "Istanbul" | "Europe/Istanbul" | "Kuwait" | "Asia/Kuwait" | "Minsk" | "Europe/Minsk" | "Moscow" | "Europe/Moscow" | "Nairobi" | "Africa/Nairobi" | "Riyadh" | "Asia/Riyadh" | "St. Petersburg" | "Volgograd" | "Europe/Volgograd" | "Tehran" | "Asia/Tehran" | "Abu Dhabi" | "Asia/Muscat" | "Baku" | "Asia/Baku" | "Muscat" | "Samara" | "Europe/Samara" | "Tbilisi" | "Asia/Tbilisi" | "Yerevan" | "Asia/Yerevan" | "Kabul" | "Asia/Kabul" | "Almaty" | "Asia/Almaty" | "Astana" | "Ekaterinburg" | "Asia/Yekaterinburg" | "Islamabad" | "Asia/Karachi" | "Karachi" | "Tashkent" | "Asia/Tashkent" | "Chennai" | "Asia/Kolkata" | "Kolkata" | "Mumbai" | "New Delhi" | "Sri Jayawardenepura" | "Asia/Colombo" | "Kathmandu" | "Asia/Kathmandu" | "Dhaka" | "Asia/Dhaka" | "Urumqi" | "Asia/Urumqi" | "Bangkok" | "Asia/Bangkok" | "Hanoi" | "Jakarta" | "Asia/Jakarta" | "Krasnoyarsk" | "Asia/Krasnoyarsk" | "Novosibirsk" | "Asia/Novosibirsk" | "Beijing" | "Asia/Shanghai" | "Chongqing" | "Asia/Chongqing" | "Hong Kong" | "Asia/Hong_Kong" | "Irkutsk" | "Asia/Irkutsk" | "Kuala Lumpur" | "Asia/Kuala_Lumpur" | "Perth" | "Australia/Perth" | "Singapore" | "Asia/Singapore" | "Taipei" | "Asia/Taipei" | "Ulaanbaatar" | "Asia/Ulaanbaatar" | "Osaka" | "Asia/Tokyo" | "Sapporo" | "Seoul" | "Asia/Seoul" | "Tokyo" | "Yakutsk" | "Asia/Yakutsk" | "Adelaide" | "Australia/Adelaide" | "Darwin" | "Australia/Darwin" | "Brisbane" | "Australia/Brisbane" | "Canberra" | "Australia/Canberra" | "Guam" | "Pacific/Guam" | "Hobart" | "Australia/Hobart" | "Melbourne" | "Australia/Melbourne" | "Port Moresby" | "Pacific/Port_Moresby" | "Sydney" | "Australia/Sydney" | "Vladivostok" | "Asia/Vladivostok" | "Magadan" | "Asia/Magadan" | "New Caledonia" | "Pacific/Noumea" | "Solomon Is." | "Pacific/Guadalcanal" | "Srednekolymsk" | "Asia/Srednekolymsk" | "Auckland" | "Pacific/Auckland" | "Fiji" | "Pacific/Fiji" | "Kamchatka" | "Asia/Kamchatka" | "Marshall Is." | "Pacific/Majuro" | "Wellington" | "Chatham Is." | "Pacific/Chatham" | "Nuku'alofa" | "Pacific/Tongatapu" | "Samoa" | "Pacific/Apia" | "Tokelau Is." | "Pacific/Fakaofo" | "America/Adak" | "America/Atka" | "US/Aleutian" | "America/Vancouver" | "Canada/Pacific" | "America/Miquelon" | "Australia/Eucla" | "Australia/LHI" | "Australia/Lord_Howe" | "Chile/EasterIsland" | "Pacific/Easter" | "Pacific/Gambier" | "Pacific/Pitcairn" | "Pacific/Marquesas" | "Pacific/Kiritimati" | "Pacific/Norfolk" | null;
+                        time_zone?: "International Date Line West" | "Etc/GMT+12" | "American Samoa" | "Pacific/Pago_Pago" | "Midway Island" | "Pacific/Midway" | "Hawaii" | "Pacific/Honolulu" | "Alaska" | "America/Juneau" | "Pacific Time (US & Canada)" | "America/Los_Angeles" | "Tijuana" | "America/Tijuana" | "Arizona" | "America/Phoenix" | "Mazatlan" | "America/Mazatlan" | "Mountain Time (US & Canada)" | "America/Denver" | "Central America" | "America/Guatemala" | "Central Time (US & Canada)" | "America/Chicago" | "Chihuahua" | "America/Chihuahua" | "Guadalajara" | "America/Mexico_City" | "Mexico City" | "Monterrey" | "America/Monterrey" | "Saskatchewan" | "America/Regina" | "Bogota" | "America/Bogota" | "Eastern Time (US & Canada)" | "America/New_York" | "Indiana (East)" | "America/Indiana/Indianapolis" | "Lima" | "America/Lima" | "Quito" | "Atlantic Time (Canada)" | "America/Halifax" | "Caracas" | "America/Caracas" | "Georgetown" | "America/Guyana" | "La Paz" | "America/La_Paz" | "Puerto Rico" | "America/Puerto_Rico" | "Santiago" | "America/Santiago" | "Newfoundland" | "America/St_Johns" | "Asuncion" | "America/Asuncion" | "Brasilia" | "America/Sao_Paulo" | "Buenos Aires" | "America/Argentina/Buenos_Aires" | "Montevideo" | "America/Montevideo" | "Greenland" | "America/Nuuk" | "Mid-Atlantic" | "Atlantic/South_Georgia" | "Azores" | "Atlantic/Azores" | "Cape Verde Is." | "Atlantic/Cape_Verde" | "Casablanca" | "Africa/Casablanca" | "Edinburgh" | "Europe/London" | "Lisbon" | "Europe/Lisbon" | "London" | "Monrovia" | "Africa/Monrovia" | "UTC" | "Etc/UTC" | "Amsterdam" | "Europe/Amsterdam" | "Belgrade" | "Europe/Belgrade" | "Berlin" | "Europe/Berlin" | "Bern" | "Europe/Zurich" | "Bratislava" | "Europe/Bratislava" | "Brussels" | "Europe/Brussels" | "Budapest" | "Europe/Budapest" | "Copenhagen" | "Europe/Copenhagen" | "Dublin" | "Europe/Dublin" | "Ljubljana" | "Europe/Ljubljana" | "Madrid" | "Europe/Madrid" | "Paris" | "Europe/Paris" | "Prague" | "Europe/Prague" | "Rome" | "Europe/Rome" | "Sarajevo" | "Europe/Sarajevo" | "Skopje" | "Europe/Skopje" | "Stockholm" | "Europe/Stockholm" | "Vienna" | "Europe/Vienna" | "Warsaw" | "Europe/Warsaw" | "West Central Africa" | "Africa/Algiers" | "Zagreb" | "Europe/Zagreb" | "Zurich" | "Athens" | "Europe/Athens" | "Bucharest" | "Europe/Bucharest" | "Cairo" | "Africa/Cairo" | "Harare" | "Africa/Harare" | "Helsinki" | "Europe/Helsinki" | "Jerusalem" | "Asia/Jerusalem" | "Kaliningrad" | "Europe/Kaliningrad" | "Kyiv" | "Europe/Kyiv" | "Pretoria" | "Africa/Johannesburg" | "Riga" | "Europe/Riga" | "Sofia" | "Europe/Sofia" | "Tallinn" | "Europe/Tallinn" | "Vilnius" | "Europe/Vilnius" | "Baghdad" | "Asia/Baghdad" | "Istanbul" | "Europe/Istanbul" | "Kuwait" | "Asia/Kuwait" | "Minsk" | "Europe/Minsk" | "Moscow" | "Europe/Moscow" | "Nairobi" | "Africa/Nairobi" | "Riyadh" | "Asia/Riyadh" | "St. Petersburg" | "Volgograd" | "Europe/Volgograd" | "Tehran" | "Asia/Tehran" | "Abu Dhabi" | "Asia/Muscat" | "Baku" | "Asia/Baku" | "Muscat" | "Samara" | "Europe/Samara" | "Tbilisi" | "Asia/Tbilisi" | "Yerevan" | "Asia/Yerevan" | "Kabul" | "Asia/Kabul" | "Almaty" | "Asia/Almaty" | "Astana" | "Ekaterinburg" | "Asia/Yekaterinburg" | "Islamabad" | "Asia/Karachi" | "Karachi" | "Tashkent" | "Asia/Tashkent" | "Chennai" | "Asia/Kolkata" | "Kolkata" | "Mumbai" | "New Delhi" | "Sri Jayawardenepura" | "Asia/Colombo" | "Kathmandu" | "Asia/Kathmandu" | "Dhaka" | "Asia/Dhaka" | "Urumqi" | "Asia/Urumqi" | "Rangoon" | "Asia/Yangon" | "Bangkok" | "Asia/Bangkok" | "Hanoi" | "Jakarta" | "Asia/Jakarta" | "Krasnoyarsk" | "Asia/Krasnoyarsk" | "Novosibirsk" | "Asia/Novosibirsk" | "Beijing" | "Asia/Shanghai" | "Chongqing" | "Asia/Chongqing" | "Hong Kong" | "Asia/Hong_Kong" | "Irkutsk" | "Asia/Irkutsk" | "Kuala Lumpur" | "Asia/Kuala_Lumpur" | "Perth" | "Australia/Perth" | "Singapore" | "Asia/Singapore" | "Taipei" | "Asia/Taipei" | "Ulaanbaatar" | "Asia/Ulaanbaatar" | "Osaka" | "Asia/Tokyo" | "Sapporo" | "Seoul" | "Asia/Seoul" | "Tokyo" | "Yakutsk" | "Asia/Yakutsk" | "Adelaide" | "Australia/Adelaide" | "Darwin" | "Australia/Darwin" | "Brisbane" | "Australia/Brisbane" | "Canberra" | "Australia/Canberra" | "Guam" | "Pacific/Guam" | "Hobart" | "Australia/Hobart" | "Melbourne" | "Australia/Melbourne" | "Port Moresby" | "Pacific/Port_Moresby" | "Sydney" | "Australia/Sydney" | "Vladivostok" | "Asia/Vladivostok" | "Magadan" | "Asia/Magadan" | "New Caledonia" | "Pacific/Noumea" | "Solomon Is." | "Pacific/Guadalcanal" | "Srednekolymsk" | "Asia/Srednekolymsk" | "Auckland" | "Pacific/Auckland" | "Fiji" | "Pacific/Fiji" | "Kamchatka" | "Asia/Kamchatka" | "Marshall Is." | "Pacific/Majuro" | "Wellington" | "Chatham Is." | "Pacific/Chatham" | "Nuku'alofa" | "Pacific/Tongatapu" | "Samoa" | "Pacific/Apia" | "Tokelau Is." | "Pacific/Fakaofo" | "America/Adak" | "America/Atka" | "US/Aleutian" | "America/Vancouver" | "Canada/Pacific" | "America/Miquelon" | "Australia/Eucla" | "Australia/LHI" | "Australia/Lord_Howe" | "Chile/EasterIsland" | "Pacific/Easter" | "Pacific/Gambier" | "Pacific/Pitcairn" | "Pacific/Marquesas" | "Pacific/Kiritimati" | "Pacific/Norfolk" | "Asia/Rangoon" | "Europe/Kiev" | null;
                         /** @description Business days */
                         days?: ("M" | "T" | "W" | "R" | "F" | "U" | "S")[] | null;
                         /** @description Start time for business hours (HH:MM) */
@@ -12337,7 +12824,7 @@ export interface components {
                  * @description Time zone for business hours
                  * @enum {string|null}
                  */
-                time_zone?: "International Date Line West" | "Etc/GMT+12" | "American Samoa" | "Pacific/Pago_Pago" | "Midway Island" | "Pacific/Midway" | "Hawaii" | "Pacific/Honolulu" | "Alaska" | "America/Juneau" | "Pacific Time (US & Canada)" | "America/Los_Angeles" | "Tijuana" | "America/Tijuana" | "Arizona" | "America/Phoenix" | "Mazatlan" | "America/Mazatlan" | "Mountain Time (US & Canada)" | "America/Denver" | "Central America" | "America/Guatemala" | "Central Time (US & Canada)" | "America/Chicago" | "Chihuahua" | "America/Chihuahua" | "Guadalajara" | "America/Mexico_City" | "Mexico City" | "Monterrey" | "America/Monterrey" | "Saskatchewan" | "America/Regina" | "Bogota" | "America/Bogota" | "Eastern Time (US & Canada)" | "America/New_York" | "Indiana (East)" | "America/Indiana/Indianapolis" | "Lima" | "America/Lima" | "Quito" | "Atlantic Time (Canada)" | "America/Halifax" | "Caracas" | "America/Caracas" | "Georgetown" | "America/Guyana" | "La Paz" | "America/La_Paz" | "Puerto Rico" | "America/Puerto_Rico" | "Santiago" | "America/Santiago" | "Newfoundland" | "America/St_Johns" | "Asuncion" | "America/Asuncion" | "Brasilia" | "America/Sao_Paulo" | "Buenos Aires" | "America/Argentina/Buenos_Aires" | "Montevideo" | "America/Montevideo" | "Greenland" | "America/Nuuk" | "Mid-Atlantic" | "Atlantic/South_Georgia" | "Azores" | "Atlantic/Azores" | "Cape Verde Is." | "Atlantic/Cape_Verde" | "Edinburgh" | "Europe/London" | "Lisbon" | "Europe/Lisbon" | "London" | "Monrovia" | "Africa/Monrovia" | "UTC" | "Etc/UTC" | "Amsterdam" | "Europe/Amsterdam" | "Belgrade" | "Europe/Belgrade" | "Berlin" | "Europe/Berlin" | "Bern" | "Europe/Zurich" | "Bratislava" | "Europe/Bratislava" | "Brussels" | "Europe/Brussels" | "Budapest" | "Europe/Budapest" | "Casablanca" | "Africa/Casablanca" | "Copenhagen" | "Europe/Copenhagen" | "Dublin" | "Europe/Dublin" | "Ljubljana" | "Europe/Ljubljana" | "Madrid" | "Europe/Madrid" | "Paris" | "Europe/Paris" | "Prague" | "Europe/Prague" | "Rome" | "Europe/Rome" | "Sarajevo" | "Europe/Sarajevo" | "Skopje" | "Europe/Skopje" | "Stockholm" | "Europe/Stockholm" | "Vienna" | "Europe/Vienna" | "Warsaw" | "Europe/Warsaw" | "West Central Africa" | "Africa/Algiers" | "Zagreb" | "Europe/Zagreb" | "Zurich" | "Athens" | "Europe/Athens" | "Bucharest" | "Europe/Bucharest" | "Cairo" | "Africa/Cairo" | "Harare" | "Africa/Harare" | "Helsinki" | "Europe/Helsinki" | "Jerusalem" | "Asia/Jerusalem" | "Kaliningrad" | "Europe/Kaliningrad" | "Pretoria" | "Africa/Johannesburg" | "Riga" | "Europe/Riga" | "Sofia" | "Europe/Sofia" | "Tallinn" | "Europe/Tallinn" | "Vilnius" | "Europe/Vilnius" | "Baghdad" | "Asia/Baghdad" | "Istanbul" | "Europe/Istanbul" | "Kuwait" | "Asia/Kuwait" | "Minsk" | "Europe/Minsk" | "Moscow" | "Europe/Moscow" | "Nairobi" | "Africa/Nairobi" | "Riyadh" | "Asia/Riyadh" | "St. Petersburg" | "Volgograd" | "Europe/Volgograd" | "Tehran" | "Asia/Tehran" | "Abu Dhabi" | "Asia/Muscat" | "Baku" | "Asia/Baku" | "Muscat" | "Samara" | "Europe/Samara" | "Tbilisi" | "Asia/Tbilisi" | "Yerevan" | "Asia/Yerevan" | "Kabul" | "Asia/Kabul" | "Almaty" | "Asia/Almaty" | "Astana" | "Ekaterinburg" | "Asia/Yekaterinburg" | "Islamabad" | "Asia/Karachi" | "Karachi" | "Tashkent" | "Asia/Tashkent" | "Chennai" | "Asia/Kolkata" | "Kolkata" | "Mumbai" | "New Delhi" | "Sri Jayawardenepura" | "Asia/Colombo" | "Kathmandu" | "Asia/Kathmandu" | "Dhaka" | "Asia/Dhaka" | "Urumqi" | "Asia/Urumqi" | "Bangkok" | "Asia/Bangkok" | "Hanoi" | "Jakarta" | "Asia/Jakarta" | "Krasnoyarsk" | "Asia/Krasnoyarsk" | "Novosibirsk" | "Asia/Novosibirsk" | "Beijing" | "Asia/Shanghai" | "Chongqing" | "Asia/Chongqing" | "Hong Kong" | "Asia/Hong_Kong" | "Irkutsk" | "Asia/Irkutsk" | "Kuala Lumpur" | "Asia/Kuala_Lumpur" | "Perth" | "Australia/Perth" | "Singapore" | "Asia/Singapore" | "Taipei" | "Asia/Taipei" | "Ulaanbaatar" | "Asia/Ulaanbaatar" | "Osaka" | "Asia/Tokyo" | "Sapporo" | "Seoul" | "Asia/Seoul" | "Tokyo" | "Yakutsk" | "Asia/Yakutsk" | "Adelaide" | "Australia/Adelaide" | "Darwin" | "Australia/Darwin" | "Brisbane" | "Australia/Brisbane" | "Canberra" | "Australia/Canberra" | "Guam" | "Pacific/Guam" | "Hobart" | "Australia/Hobart" | "Melbourne" | "Australia/Melbourne" | "Port Moresby" | "Pacific/Port_Moresby" | "Sydney" | "Australia/Sydney" | "Vladivostok" | "Asia/Vladivostok" | "Magadan" | "Asia/Magadan" | "New Caledonia" | "Pacific/Noumea" | "Solomon Is." | "Pacific/Guadalcanal" | "Srednekolymsk" | "Asia/Srednekolymsk" | "Auckland" | "Pacific/Auckland" | "Fiji" | "Pacific/Fiji" | "Kamchatka" | "Asia/Kamchatka" | "Marshall Is." | "Pacific/Majuro" | "Wellington" | "Chatham Is." | "Pacific/Chatham" | "Nuku'alofa" | "Pacific/Tongatapu" | "Samoa" | "Pacific/Apia" | "Tokelau Is." | "Pacific/Fakaofo" | "America/Adak" | "America/Atka" | "US/Aleutian" | "America/Vancouver" | "Canada/Pacific" | "America/Miquelon" | "Australia/Eucla" | "Australia/LHI" | "Australia/Lord_Howe" | "Chile/EasterIsland" | "Pacific/Easter" | "Pacific/Gambier" | "Pacific/Pitcairn" | "Pacific/Marquesas" | "Pacific/Kiritimati" | "Pacific/Norfolk" | null;
+                time_zone?: "International Date Line West" | "Etc/GMT+12" | "American Samoa" | "Pacific/Pago_Pago" | "Midway Island" | "Pacific/Midway" | "Hawaii" | "Pacific/Honolulu" | "Alaska" | "America/Juneau" | "Pacific Time (US & Canada)" | "America/Los_Angeles" | "Tijuana" | "America/Tijuana" | "Arizona" | "America/Phoenix" | "Mazatlan" | "America/Mazatlan" | "Mountain Time (US & Canada)" | "America/Denver" | "Central America" | "America/Guatemala" | "Central Time (US & Canada)" | "America/Chicago" | "Chihuahua" | "America/Chihuahua" | "Guadalajara" | "America/Mexico_City" | "Mexico City" | "Monterrey" | "America/Monterrey" | "Saskatchewan" | "America/Regina" | "Bogota" | "America/Bogota" | "Eastern Time (US & Canada)" | "America/New_York" | "Indiana (East)" | "America/Indiana/Indianapolis" | "Lima" | "America/Lima" | "Quito" | "Atlantic Time (Canada)" | "America/Halifax" | "Caracas" | "America/Caracas" | "Georgetown" | "America/Guyana" | "La Paz" | "America/La_Paz" | "Puerto Rico" | "America/Puerto_Rico" | "Santiago" | "America/Santiago" | "Newfoundland" | "America/St_Johns" | "Asuncion" | "America/Asuncion" | "Brasilia" | "America/Sao_Paulo" | "Buenos Aires" | "America/Argentina/Buenos_Aires" | "Montevideo" | "America/Montevideo" | "Greenland" | "America/Nuuk" | "Mid-Atlantic" | "Atlantic/South_Georgia" | "Azores" | "Atlantic/Azores" | "Cape Verde Is." | "Atlantic/Cape_Verde" | "Casablanca" | "Africa/Casablanca" | "Edinburgh" | "Europe/London" | "Lisbon" | "Europe/Lisbon" | "London" | "Monrovia" | "Africa/Monrovia" | "UTC" | "Etc/UTC" | "Amsterdam" | "Europe/Amsterdam" | "Belgrade" | "Europe/Belgrade" | "Berlin" | "Europe/Berlin" | "Bern" | "Europe/Zurich" | "Bratislava" | "Europe/Bratislava" | "Brussels" | "Europe/Brussels" | "Budapest" | "Europe/Budapest" | "Copenhagen" | "Europe/Copenhagen" | "Dublin" | "Europe/Dublin" | "Ljubljana" | "Europe/Ljubljana" | "Madrid" | "Europe/Madrid" | "Paris" | "Europe/Paris" | "Prague" | "Europe/Prague" | "Rome" | "Europe/Rome" | "Sarajevo" | "Europe/Sarajevo" | "Skopje" | "Europe/Skopje" | "Stockholm" | "Europe/Stockholm" | "Vienna" | "Europe/Vienna" | "Warsaw" | "Europe/Warsaw" | "West Central Africa" | "Africa/Algiers" | "Zagreb" | "Europe/Zagreb" | "Zurich" | "Athens" | "Europe/Athens" | "Bucharest" | "Europe/Bucharest" | "Cairo" | "Africa/Cairo" | "Harare" | "Africa/Harare" | "Helsinki" | "Europe/Helsinki" | "Jerusalem" | "Asia/Jerusalem" | "Kaliningrad" | "Europe/Kaliningrad" | "Kyiv" | "Europe/Kyiv" | "Pretoria" | "Africa/Johannesburg" | "Riga" | "Europe/Riga" | "Sofia" | "Europe/Sofia" | "Tallinn" | "Europe/Tallinn" | "Vilnius" | "Europe/Vilnius" | "Baghdad" | "Asia/Baghdad" | "Istanbul" | "Europe/Istanbul" | "Kuwait" | "Asia/Kuwait" | "Minsk" | "Europe/Minsk" | "Moscow" | "Europe/Moscow" | "Nairobi" | "Africa/Nairobi" | "Riyadh" | "Asia/Riyadh" | "St. Petersburg" | "Volgograd" | "Europe/Volgograd" | "Tehran" | "Asia/Tehran" | "Abu Dhabi" | "Asia/Muscat" | "Baku" | "Asia/Baku" | "Muscat" | "Samara" | "Europe/Samara" | "Tbilisi" | "Asia/Tbilisi" | "Yerevan" | "Asia/Yerevan" | "Kabul" | "Asia/Kabul" | "Almaty" | "Asia/Almaty" | "Astana" | "Ekaterinburg" | "Asia/Yekaterinburg" | "Islamabad" | "Asia/Karachi" | "Karachi" | "Tashkent" | "Asia/Tashkent" | "Chennai" | "Asia/Kolkata" | "Kolkata" | "Mumbai" | "New Delhi" | "Sri Jayawardenepura" | "Asia/Colombo" | "Kathmandu" | "Asia/Kathmandu" | "Dhaka" | "Asia/Dhaka" | "Urumqi" | "Asia/Urumqi" | "Rangoon" | "Asia/Yangon" | "Bangkok" | "Asia/Bangkok" | "Hanoi" | "Jakarta" | "Asia/Jakarta" | "Krasnoyarsk" | "Asia/Krasnoyarsk" | "Novosibirsk" | "Asia/Novosibirsk" | "Beijing" | "Asia/Shanghai" | "Chongqing" | "Asia/Chongqing" | "Hong Kong" | "Asia/Hong_Kong" | "Irkutsk" | "Asia/Irkutsk" | "Kuala Lumpur" | "Asia/Kuala_Lumpur" | "Perth" | "Australia/Perth" | "Singapore" | "Asia/Singapore" | "Taipei" | "Asia/Taipei" | "Ulaanbaatar" | "Asia/Ulaanbaatar" | "Osaka" | "Asia/Tokyo" | "Sapporo" | "Seoul" | "Asia/Seoul" | "Tokyo" | "Yakutsk" | "Asia/Yakutsk" | "Adelaide" | "Australia/Adelaide" | "Darwin" | "Australia/Darwin" | "Brisbane" | "Australia/Brisbane" | "Canberra" | "Australia/Canberra" | "Guam" | "Pacific/Guam" | "Hobart" | "Australia/Hobart" | "Melbourne" | "Australia/Melbourne" | "Port Moresby" | "Pacific/Port_Moresby" | "Sydney" | "Australia/Sydney" | "Vladivostok" | "Asia/Vladivostok" | "Magadan" | "Asia/Magadan" | "New Caledonia" | "Pacific/Noumea" | "Solomon Is." | "Pacific/Guadalcanal" | "Srednekolymsk" | "Asia/Srednekolymsk" | "Auckland" | "Pacific/Auckland" | "Fiji" | "Pacific/Fiji" | "Kamchatka" | "Asia/Kamchatka" | "Marshall Is." | "Pacific/Majuro" | "Wellington" | "Chatham Is." | "Pacific/Chatham" | "Nuku'alofa" | "Pacific/Tongatapu" | "Samoa" | "Pacific/Apia" | "Tokelau Is." | "Pacific/Fakaofo" | "America/Adak" | "America/Atka" | "US/Aleutian" | "America/Vancouver" | "Canada/Pacific" | "America/Miquelon" | "Australia/Eucla" | "Australia/LHI" | "Australia/Lord_Howe" | "Chile/EasterIsland" | "Pacific/Easter" | "Pacific/Gambier" | "Pacific/Pitcairn" | "Pacific/Marquesas" | "Pacific/Kiritimati" | "Pacific/Norfolk" | "Asia/Rangoon" | "Europe/Kiev" | null;
                 /** @description Business days */
                 days?: ("M" | "T" | "W" | "R" | "F" | "U" | "S")[] | null;
                 /** @description Start time for business hours (HH:MM) */
@@ -12414,8 +12901,11 @@ export interface components {
                     repeat_count?: number | null;
                     /** @description Initial delay for escalation path in minutes. Maximum 1 week (10080). */
                     initial_delay?: number;
-                    /** @description Re-trigger acknowledged alerts on this path after N minutes; null inherits the urgency/workspace default, negative = never. */
-                    retrigger_timeout_minutes?: number | null;
+                    /**
+                     * @description Re-trigger acknowledged alerts on this path after N minutes; null inherits the urgency/workspace default, -1 = never.
+                     * @enum {integer|null}
+                     */
+                    retrigger_timeout_minutes?: -1 | 10 | 20 | 30 | 40 | 50 | 60 | 90 | 120 | 180 | 240 | 300 | 360 | 720 | 1440 | null;
                     /** @description Escalation path conditions */
                     rules?: ({
                         /**
@@ -12425,6 +12915,12 @@ export interface components {
                         rule_type: "alert_urgency";
                         /** @description Alert urgency ids for which this escalation path should be used */
                         urgency_ids: string[];
+                        /**
+                         * @description How the alert's urgency should be matched. is and is_not take exactly one id
+                         * @default is_one_of
+                         * @enum {string}
+                         */
+                        operator: "is" | "is_not" | "is_one_of" | "is_not_one_of";
                     } | {
                         /**
                          * @description The type of the escalation path rule
@@ -12475,6 +12971,12 @@ export interface components {
                         rule_type: "service";
                         /** @description Service ids for which this escalation path should be used */
                         service_ids: string[];
+                        /**
+                         * @description How the alert's services should be matched. is and is_not take exactly one id
+                         * @default is_one_of
+                         * @enum {string}
+                         */
+                        operator: "is" | "is_not" | "is_one_of" | "is_not_one_of";
                     } | {
                         /**
                          * @description The type of the escalation path rule
@@ -12485,9 +12987,11 @@ export interface components {
                          * @description Time zone for the deferral window
                          * @enum {string}
                          */
-                        time_zone: "International Date Line West" | "Etc/GMT+12" | "American Samoa" | "Pacific/Pago_Pago" | "Midway Island" | "Pacific/Midway" | "Hawaii" | "Pacific/Honolulu" | "Alaska" | "America/Juneau" | "Pacific Time (US & Canada)" | "America/Los_Angeles" | "Tijuana" | "America/Tijuana" | "Arizona" | "America/Phoenix" | "Mazatlan" | "America/Mazatlan" | "Mountain Time (US & Canada)" | "America/Denver" | "Central America" | "America/Guatemala" | "Central Time (US & Canada)" | "America/Chicago" | "Chihuahua" | "America/Chihuahua" | "Guadalajara" | "America/Mexico_City" | "Mexico City" | "Monterrey" | "America/Monterrey" | "Saskatchewan" | "America/Regina" | "Bogota" | "America/Bogota" | "Eastern Time (US & Canada)" | "America/New_York" | "Indiana (East)" | "America/Indiana/Indianapolis" | "Lima" | "America/Lima" | "Quito" | "Atlantic Time (Canada)" | "America/Halifax" | "Caracas" | "America/Caracas" | "Georgetown" | "America/Guyana" | "La Paz" | "America/La_Paz" | "Puerto Rico" | "America/Puerto_Rico" | "Santiago" | "America/Santiago" | "Newfoundland" | "America/St_Johns" | "Asuncion" | "America/Asuncion" | "Brasilia" | "America/Sao_Paulo" | "Buenos Aires" | "America/Argentina/Buenos_Aires" | "Montevideo" | "America/Montevideo" | "Greenland" | "America/Nuuk" | "Mid-Atlantic" | "Atlantic/South_Georgia" | "Azores" | "Atlantic/Azores" | "Cape Verde Is." | "Atlantic/Cape_Verde" | "Edinburgh" | "Europe/London" | "Lisbon" | "Europe/Lisbon" | "London" | "Monrovia" | "Africa/Monrovia" | "UTC" | "Etc/UTC" | "Amsterdam" | "Europe/Amsterdam" | "Belgrade" | "Europe/Belgrade" | "Berlin" | "Europe/Berlin" | "Bern" | "Europe/Zurich" | "Bratislava" | "Europe/Bratislava" | "Brussels" | "Europe/Brussels" | "Budapest" | "Europe/Budapest" | "Casablanca" | "Africa/Casablanca" | "Copenhagen" | "Europe/Copenhagen" | "Dublin" | "Europe/Dublin" | "Ljubljana" | "Europe/Ljubljana" | "Madrid" | "Europe/Madrid" | "Paris" | "Europe/Paris" | "Prague" | "Europe/Prague" | "Rome" | "Europe/Rome" | "Sarajevo" | "Europe/Sarajevo" | "Skopje" | "Europe/Skopje" | "Stockholm" | "Europe/Stockholm" | "Vienna" | "Europe/Vienna" | "Warsaw" | "Europe/Warsaw" | "West Central Africa" | "Africa/Algiers" | "Zagreb" | "Europe/Zagreb" | "Zurich" | "Athens" | "Europe/Athens" | "Bucharest" | "Europe/Bucharest" | "Cairo" | "Africa/Cairo" | "Harare" | "Africa/Harare" | "Helsinki" | "Europe/Helsinki" | "Jerusalem" | "Asia/Jerusalem" | "Kaliningrad" | "Europe/Kaliningrad" | "Pretoria" | "Africa/Johannesburg" | "Riga" | "Europe/Riga" | "Sofia" | "Europe/Sofia" | "Tallinn" | "Europe/Tallinn" | "Vilnius" | "Europe/Vilnius" | "Baghdad" | "Asia/Baghdad" | "Istanbul" | "Europe/Istanbul" | "Kuwait" | "Asia/Kuwait" | "Minsk" | "Europe/Minsk" | "Moscow" | "Europe/Moscow" | "Nairobi" | "Africa/Nairobi" | "Riyadh" | "Asia/Riyadh" | "St. Petersburg" | "Volgograd" | "Europe/Volgograd" | "Tehran" | "Asia/Tehran" | "Abu Dhabi" | "Asia/Muscat" | "Baku" | "Asia/Baku" | "Muscat" | "Samara" | "Europe/Samara" | "Tbilisi" | "Asia/Tbilisi" | "Yerevan" | "Asia/Yerevan" | "Kabul" | "Asia/Kabul" | "Almaty" | "Asia/Almaty" | "Astana" | "Ekaterinburg" | "Asia/Yekaterinburg" | "Islamabad" | "Asia/Karachi" | "Karachi" | "Tashkent" | "Asia/Tashkent" | "Chennai" | "Asia/Kolkata" | "Kolkata" | "Mumbai" | "New Delhi" | "Sri Jayawardenepura" | "Asia/Colombo" | "Kathmandu" | "Asia/Kathmandu" | "Dhaka" | "Asia/Dhaka" | "Urumqi" | "Asia/Urumqi" | "Bangkok" | "Asia/Bangkok" | "Hanoi" | "Jakarta" | "Asia/Jakarta" | "Krasnoyarsk" | "Asia/Krasnoyarsk" | "Novosibirsk" | "Asia/Novosibirsk" | "Beijing" | "Asia/Shanghai" | "Chongqing" | "Asia/Chongqing" | "Hong Kong" | "Asia/Hong_Kong" | "Irkutsk" | "Asia/Irkutsk" | "Kuala Lumpur" | "Asia/Kuala_Lumpur" | "Perth" | "Australia/Perth" | "Singapore" | "Asia/Singapore" | "Taipei" | "Asia/Taipei" | "Ulaanbaatar" | "Asia/Ulaanbaatar" | "Osaka" | "Asia/Tokyo" | "Sapporo" | "Seoul" | "Asia/Seoul" | "Tokyo" | "Yakutsk" | "Asia/Yakutsk" | "Adelaide" | "Australia/Adelaide" | "Darwin" | "Australia/Darwin" | "Brisbane" | "Australia/Brisbane" | "Canberra" | "Australia/Canberra" | "Guam" | "Pacific/Guam" | "Hobart" | "Australia/Hobart" | "Melbourne" | "Australia/Melbourne" | "Port Moresby" | "Pacific/Port_Moresby" | "Sydney" | "Australia/Sydney" | "Vladivostok" | "Asia/Vladivostok" | "Magadan" | "Asia/Magadan" | "New Caledonia" | "Pacific/Noumea" | "Solomon Is." | "Pacific/Guadalcanal" | "Srednekolymsk" | "Asia/Srednekolymsk" | "Auckland" | "Pacific/Auckland" | "Fiji" | "Pacific/Fiji" | "Kamchatka" | "Asia/Kamchatka" | "Marshall Is." | "Pacific/Majuro" | "Wellington" | "Chatham Is." | "Pacific/Chatham" | "Nuku'alofa" | "Pacific/Tongatapu" | "Samoa" | "Pacific/Apia" | "Tokelau Is." | "Pacific/Fakaofo" | "America/Adak" | "America/Atka" | "US/Aleutian" | "America/Vancouver" | "Canada/Pacific" | "America/Miquelon" | "Australia/Eucla" | "Australia/LHI" | "Australia/Lord_Howe" | "Chile/EasterIsland" | "Pacific/Easter" | "Pacific/Gambier" | "Pacific/Pitcairn" | "Pacific/Marquesas" | "Pacific/Kiritimati" | "Pacific/Norfolk";
+                        time_zone: "International Date Line West" | "Etc/GMT+12" | "American Samoa" | "Pacific/Pago_Pago" | "Midway Island" | "Pacific/Midway" | "Hawaii" | "Pacific/Honolulu" | "Alaska" | "America/Juneau" | "Pacific Time (US & Canada)" | "America/Los_Angeles" | "Tijuana" | "America/Tijuana" | "Arizona" | "America/Phoenix" | "Mazatlan" | "America/Mazatlan" | "Mountain Time (US & Canada)" | "America/Denver" | "Central America" | "America/Guatemala" | "Central Time (US & Canada)" | "America/Chicago" | "Chihuahua" | "America/Chihuahua" | "Guadalajara" | "America/Mexico_City" | "Mexico City" | "Monterrey" | "America/Monterrey" | "Saskatchewan" | "America/Regina" | "Bogota" | "America/Bogota" | "Eastern Time (US & Canada)" | "America/New_York" | "Indiana (East)" | "America/Indiana/Indianapolis" | "Lima" | "America/Lima" | "Quito" | "Atlantic Time (Canada)" | "America/Halifax" | "Caracas" | "America/Caracas" | "Georgetown" | "America/Guyana" | "La Paz" | "America/La_Paz" | "Puerto Rico" | "America/Puerto_Rico" | "Santiago" | "America/Santiago" | "Newfoundland" | "America/St_Johns" | "Asuncion" | "America/Asuncion" | "Brasilia" | "America/Sao_Paulo" | "Buenos Aires" | "America/Argentina/Buenos_Aires" | "Montevideo" | "America/Montevideo" | "Greenland" | "America/Nuuk" | "Mid-Atlantic" | "Atlantic/South_Georgia" | "Azores" | "Atlantic/Azores" | "Cape Verde Is." | "Atlantic/Cape_Verde" | "Casablanca" | "Africa/Casablanca" | "Edinburgh" | "Europe/London" | "Lisbon" | "Europe/Lisbon" | "London" | "Monrovia" | "Africa/Monrovia" | "UTC" | "Etc/UTC" | "Amsterdam" | "Europe/Amsterdam" | "Belgrade" | "Europe/Belgrade" | "Berlin" | "Europe/Berlin" | "Bern" | "Europe/Zurich" | "Bratislava" | "Europe/Bratislava" | "Brussels" | "Europe/Brussels" | "Budapest" | "Europe/Budapest" | "Copenhagen" | "Europe/Copenhagen" | "Dublin" | "Europe/Dublin" | "Ljubljana" | "Europe/Ljubljana" | "Madrid" | "Europe/Madrid" | "Paris" | "Europe/Paris" | "Prague" | "Europe/Prague" | "Rome" | "Europe/Rome" | "Sarajevo" | "Europe/Sarajevo" | "Skopje" | "Europe/Skopje" | "Stockholm" | "Europe/Stockholm" | "Vienna" | "Europe/Vienna" | "Warsaw" | "Europe/Warsaw" | "West Central Africa" | "Africa/Algiers" | "Zagreb" | "Europe/Zagreb" | "Zurich" | "Athens" | "Europe/Athens" | "Bucharest" | "Europe/Bucharest" | "Cairo" | "Africa/Cairo" | "Harare" | "Africa/Harare" | "Helsinki" | "Europe/Helsinki" | "Jerusalem" | "Asia/Jerusalem" | "Kaliningrad" | "Europe/Kaliningrad" | "Kyiv" | "Europe/Kyiv" | "Pretoria" | "Africa/Johannesburg" | "Riga" | "Europe/Riga" | "Sofia" | "Europe/Sofia" | "Tallinn" | "Europe/Tallinn" | "Vilnius" | "Europe/Vilnius" | "Baghdad" | "Asia/Baghdad" | "Istanbul" | "Europe/Istanbul" | "Kuwait" | "Asia/Kuwait" | "Minsk" | "Europe/Minsk" | "Moscow" | "Europe/Moscow" | "Nairobi" | "Africa/Nairobi" | "Riyadh" | "Asia/Riyadh" | "St. Petersburg" | "Volgograd" | "Europe/Volgograd" | "Tehran" | "Asia/Tehran" | "Abu Dhabi" | "Asia/Muscat" | "Baku" | "Asia/Baku" | "Muscat" | "Samara" | "Europe/Samara" | "Tbilisi" | "Asia/Tbilisi" | "Yerevan" | "Asia/Yerevan" | "Kabul" | "Asia/Kabul" | "Almaty" | "Asia/Almaty" | "Astana" | "Ekaterinburg" | "Asia/Yekaterinburg" | "Islamabad" | "Asia/Karachi" | "Karachi" | "Tashkent" | "Asia/Tashkent" | "Chennai" | "Asia/Kolkata" | "Kolkata" | "Mumbai" | "New Delhi" | "Sri Jayawardenepura" | "Asia/Colombo" | "Kathmandu" | "Asia/Kathmandu" | "Dhaka" | "Asia/Dhaka" | "Urumqi" | "Asia/Urumqi" | "Rangoon" | "Asia/Yangon" | "Bangkok" | "Asia/Bangkok" | "Hanoi" | "Jakarta" | "Asia/Jakarta" | "Krasnoyarsk" | "Asia/Krasnoyarsk" | "Novosibirsk" | "Asia/Novosibirsk" | "Beijing" | "Asia/Shanghai" | "Chongqing" | "Asia/Chongqing" | "Hong Kong" | "Asia/Hong_Kong" | "Irkutsk" | "Asia/Irkutsk" | "Kuala Lumpur" | "Asia/Kuala_Lumpur" | "Perth" | "Australia/Perth" | "Singapore" | "Asia/Singapore" | "Taipei" | "Asia/Taipei" | "Ulaanbaatar" | "Asia/Ulaanbaatar" | "Osaka" | "Asia/Tokyo" | "Sapporo" | "Seoul" | "Asia/Seoul" | "Tokyo" | "Yakutsk" | "Asia/Yakutsk" | "Adelaide" | "Australia/Adelaide" | "Darwin" | "Australia/Darwin" | "Brisbane" | "Australia/Brisbane" | "Canberra" | "Australia/Canberra" | "Guam" | "Pacific/Guam" | "Hobart" | "Australia/Hobart" | "Melbourne" | "Australia/Melbourne" | "Port Moresby" | "Pacific/Port_Moresby" | "Sydney" | "Australia/Sydney" | "Vladivostok" | "Asia/Vladivostok" | "Magadan" | "Asia/Magadan" | "New Caledonia" | "Pacific/Noumea" | "Solomon Is." | "Pacific/Guadalcanal" | "Srednekolymsk" | "Asia/Srednekolymsk" | "Auckland" | "Pacific/Auckland" | "Fiji" | "Pacific/Fiji" | "Kamchatka" | "Asia/Kamchatka" | "Marshall Is." | "Pacific/Majuro" | "Wellington" | "Chatham Is." | "Pacific/Chatham" | "Nuku'alofa" | "Pacific/Tongatapu" | "Samoa" | "Pacific/Apia" | "Tokelau Is." | "Pacific/Fakaofo" | "America/Adak" | "America/Atka" | "US/Aleutian" | "America/Vancouver" | "Canada/Pacific" | "America/Miquelon" | "Australia/Eucla" | "Australia/LHI" | "Australia/Lord_Howe" | "Chile/EasterIsland" | "Pacific/Easter" | "Pacific/Gambier" | "Pacific/Pitcairn" | "Pacific/Marquesas" | "Pacific/Kiritimati" | "Pacific/Norfolk" | "Asia/Rangoon" | "Europe/Kiev";
                         /** @description Time windows during which alerts are deferred */
                         time_blocks: {
+                            /** @description Unique ID of the time block */
+                            readonly id?: string;
                             /** @default false */
                             monday: boolean;
                             /** @default false */
@@ -12508,7 +13012,10 @@ export interface components {
                             end_time?: string;
                             /** @default false */
                             all_day: boolean;
+                            /** @description Order of this time block, starting at 1. Defaults to the block's 1-based position in time_blocks when omitted. */
                             position?: number | null;
+                            /** @description Whether the window crosses midnight. Derived from start_time and end_time; accepted and ignored on write. */
+                            readonly ends_next_day?: boolean;
                         }[];
                     } | {
                         /**
@@ -12535,11 +13042,168 @@ export interface components {
                          */
                         operator: "is_set" | "is_not_set";
                     })[];
+                    /** @description Rules deciding whether an alert pages audible or quiet, evaluated in order — the first matching rule's notification_type wins, otherwise notification_type_fallback applies. When present, the path's notification_type is aligned to notification_type_fallback. Only available when notification type conditions are enabled for the team. */
+                    notification_type_rules?: {
+                        /**
+                         * @description Outcome when this rule matches
+                         * @default audible
+                         * @enum {string}
+                         */
+                        notification_type: "audible" | "quiet";
+                        /**
+                         * @description Whether all or any of the rule's conditions must match
+                         * @default match-all-rules
+                         * @enum {string}
+                         */
+                        match_mode: "match-all-rules" | "match-any-rule";
+                        /** @description Conditions combined per match_mode, at least one per rule. A deferral_window condition matches when the alert falls inside its time blocks. */
+                        conditions: ({
+                            /**
+                             * @description The type of the escalation path rule
+                             * @enum {string}
+                             */
+                            rule_type: "alert_urgency";
+                            /** @description Alert urgency ids for which this escalation path should be used */
+                            urgency_ids: string[];
+                            /**
+                             * @description How the alert's urgency should be matched. is and is_not take exactly one id
+                             * @default is_one_of
+                             * @enum {string}
+                             */
+                            operator: "is" | "is_not" | "is_one_of" | "is_not_one_of";
+                        } | {
+                            /**
+                             * @description The type of the escalation path rule
+                             * @enum {string}
+                             */
+                            rule_type: "working_hour";
+                            /** @description Whether the escalation path should be used within working hours */
+                            within_working_hour: boolean;
+                        } | {
+                            /**
+                             * @description The type of the escalation path rule
+                             * @enum {string}
+                             */
+                            rule_type: "json_path";
+                            /** @description JSON path to extract value from payload */
+                            json_path: string;
+                            /**
+                             * @description How JSON path value should be matched
+                             * @enum {string}
+                             */
+                            operator: "is" | "is_not" | "contains" | "does_not_contain" | "contains_key" | "does_not_contain_key" | "starts_with" | "does_not_start_with" | "matches" | "does_not_match" | "is_one_of" | "is_not_one_of" | "is_set" | "is_not_set";
+                            /** @description Value with which JSON path value should be matched */
+                            value?: string | null;
+                            /** @description Values to match against (for is_one_of / is_not_one_of operators) */
+                            values?: string[];
+                        } | {
+                            /**
+                             * @description The type of the escalation path rule
+                             * @enum {string}
+                             */
+                            rule_type: "field";
+                            /** @description The type of the fieldable (e.g., AlertField) */
+                            fieldable_type: string;
+                            /** @description The ID of the alert field */
+                            fieldable_id: string;
+                            /**
+                             * @description How the alert field value should be matched
+                             * @enum {string}
+                             */
+                            operator: "is" | "is_not" | "is_one_of" | "is_not_one_of" | "contains" | "does_not_contain" | "is_empty" | "is_not_empty" | "contains_key" | "does_not_contain_key" | "starts_with" | "does_not_start_with" | "matches" | "does_not_match";
+                            /** @description Values to match against */
+                            values?: string[];
+                        } | {
+                            /**
+                             * @description The type of the escalation path rule
+                             * @enum {string}
+                             */
+                            rule_type: "service";
+                            /** @description Service ids for which this escalation path should be used */
+                            service_ids: string[];
+                            /**
+                             * @description How the alert's services should be matched. is and is_not take exactly one id
+                             * @default is_one_of
+                             * @enum {string}
+                             */
+                            operator: "is" | "is_not" | "is_one_of" | "is_not_one_of";
+                        } | {
+                            /**
+                             * @description The type of the escalation path rule
+                             * @enum {string}
+                             */
+                            rule_type: "deferral_window";
+                            /**
+                             * @description Time zone for the deferral window
+                             * @enum {string}
+                             */
+                            time_zone: "International Date Line West" | "Etc/GMT+12" | "American Samoa" | "Pacific/Pago_Pago" | "Midway Island" | "Pacific/Midway" | "Hawaii" | "Pacific/Honolulu" | "Alaska" | "America/Juneau" | "Pacific Time (US & Canada)" | "America/Los_Angeles" | "Tijuana" | "America/Tijuana" | "Arizona" | "America/Phoenix" | "Mazatlan" | "America/Mazatlan" | "Mountain Time (US & Canada)" | "America/Denver" | "Central America" | "America/Guatemala" | "Central Time (US & Canada)" | "America/Chicago" | "Chihuahua" | "America/Chihuahua" | "Guadalajara" | "America/Mexico_City" | "Mexico City" | "Monterrey" | "America/Monterrey" | "Saskatchewan" | "America/Regina" | "Bogota" | "America/Bogota" | "Eastern Time (US & Canada)" | "America/New_York" | "Indiana (East)" | "America/Indiana/Indianapolis" | "Lima" | "America/Lima" | "Quito" | "Atlantic Time (Canada)" | "America/Halifax" | "Caracas" | "America/Caracas" | "Georgetown" | "America/Guyana" | "La Paz" | "America/La_Paz" | "Puerto Rico" | "America/Puerto_Rico" | "Santiago" | "America/Santiago" | "Newfoundland" | "America/St_Johns" | "Asuncion" | "America/Asuncion" | "Brasilia" | "America/Sao_Paulo" | "Buenos Aires" | "America/Argentina/Buenos_Aires" | "Montevideo" | "America/Montevideo" | "Greenland" | "America/Nuuk" | "Mid-Atlantic" | "Atlantic/South_Georgia" | "Azores" | "Atlantic/Azores" | "Cape Verde Is." | "Atlantic/Cape_Verde" | "Casablanca" | "Africa/Casablanca" | "Edinburgh" | "Europe/London" | "Lisbon" | "Europe/Lisbon" | "London" | "Monrovia" | "Africa/Monrovia" | "UTC" | "Etc/UTC" | "Amsterdam" | "Europe/Amsterdam" | "Belgrade" | "Europe/Belgrade" | "Berlin" | "Europe/Berlin" | "Bern" | "Europe/Zurich" | "Bratislava" | "Europe/Bratislava" | "Brussels" | "Europe/Brussels" | "Budapest" | "Europe/Budapest" | "Copenhagen" | "Europe/Copenhagen" | "Dublin" | "Europe/Dublin" | "Ljubljana" | "Europe/Ljubljana" | "Madrid" | "Europe/Madrid" | "Paris" | "Europe/Paris" | "Prague" | "Europe/Prague" | "Rome" | "Europe/Rome" | "Sarajevo" | "Europe/Sarajevo" | "Skopje" | "Europe/Skopje" | "Stockholm" | "Europe/Stockholm" | "Vienna" | "Europe/Vienna" | "Warsaw" | "Europe/Warsaw" | "West Central Africa" | "Africa/Algiers" | "Zagreb" | "Europe/Zagreb" | "Zurich" | "Athens" | "Europe/Athens" | "Bucharest" | "Europe/Bucharest" | "Cairo" | "Africa/Cairo" | "Harare" | "Africa/Harare" | "Helsinki" | "Europe/Helsinki" | "Jerusalem" | "Asia/Jerusalem" | "Kaliningrad" | "Europe/Kaliningrad" | "Kyiv" | "Europe/Kyiv" | "Pretoria" | "Africa/Johannesburg" | "Riga" | "Europe/Riga" | "Sofia" | "Europe/Sofia" | "Tallinn" | "Europe/Tallinn" | "Vilnius" | "Europe/Vilnius" | "Baghdad" | "Asia/Baghdad" | "Istanbul" | "Europe/Istanbul" | "Kuwait" | "Asia/Kuwait" | "Minsk" | "Europe/Minsk" | "Moscow" | "Europe/Moscow" | "Nairobi" | "Africa/Nairobi" | "Riyadh" | "Asia/Riyadh" | "St. Petersburg" | "Volgograd" | "Europe/Volgograd" | "Tehran" | "Asia/Tehran" | "Abu Dhabi" | "Asia/Muscat" | "Baku" | "Asia/Baku" | "Muscat" | "Samara" | "Europe/Samara" | "Tbilisi" | "Asia/Tbilisi" | "Yerevan" | "Asia/Yerevan" | "Kabul" | "Asia/Kabul" | "Almaty" | "Asia/Almaty" | "Astana" | "Ekaterinburg" | "Asia/Yekaterinburg" | "Islamabad" | "Asia/Karachi" | "Karachi" | "Tashkent" | "Asia/Tashkent" | "Chennai" | "Asia/Kolkata" | "Kolkata" | "Mumbai" | "New Delhi" | "Sri Jayawardenepura" | "Asia/Colombo" | "Kathmandu" | "Asia/Kathmandu" | "Dhaka" | "Asia/Dhaka" | "Urumqi" | "Asia/Urumqi" | "Rangoon" | "Asia/Yangon" | "Bangkok" | "Asia/Bangkok" | "Hanoi" | "Jakarta" | "Asia/Jakarta" | "Krasnoyarsk" | "Asia/Krasnoyarsk" | "Novosibirsk" | "Asia/Novosibirsk" | "Beijing" | "Asia/Shanghai" | "Chongqing" | "Asia/Chongqing" | "Hong Kong" | "Asia/Hong_Kong" | "Irkutsk" | "Asia/Irkutsk" | "Kuala Lumpur" | "Asia/Kuala_Lumpur" | "Perth" | "Australia/Perth" | "Singapore" | "Asia/Singapore" | "Taipei" | "Asia/Taipei" | "Ulaanbaatar" | "Asia/Ulaanbaatar" | "Osaka" | "Asia/Tokyo" | "Sapporo" | "Seoul" | "Asia/Seoul" | "Tokyo" | "Yakutsk" | "Asia/Yakutsk" | "Adelaide" | "Australia/Adelaide" | "Darwin" | "Australia/Darwin" | "Brisbane" | "Australia/Brisbane" | "Canberra" | "Australia/Canberra" | "Guam" | "Pacific/Guam" | "Hobart" | "Australia/Hobart" | "Melbourne" | "Australia/Melbourne" | "Port Moresby" | "Pacific/Port_Moresby" | "Sydney" | "Australia/Sydney" | "Vladivostok" | "Asia/Vladivostok" | "Magadan" | "Asia/Magadan" | "New Caledonia" | "Pacific/Noumea" | "Solomon Is." | "Pacific/Guadalcanal" | "Srednekolymsk" | "Asia/Srednekolymsk" | "Auckland" | "Pacific/Auckland" | "Fiji" | "Pacific/Fiji" | "Kamchatka" | "Asia/Kamchatka" | "Marshall Is." | "Pacific/Majuro" | "Wellington" | "Chatham Is." | "Pacific/Chatham" | "Nuku'alofa" | "Pacific/Tongatapu" | "Samoa" | "Pacific/Apia" | "Tokelau Is." | "Pacific/Fakaofo" | "America/Adak" | "America/Atka" | "US/Aleutian" | "America/Vancouver" | "Canada/Pacific" | "America/Miquelon" | "Australia/Eucla" | "Australia/LHI" | "Australia/Lord_Howe" | "Chile/EasterIsland" | "Pacific/Easter" | "Pacific/Gambier" | "Pacific/Pitcairn" | "Pacific/Marquesas" | "Pacific/Kiritimati" | "Pacific/Norfolk" | "Asia/Rangoon" | "Europe/Kiev";
+                            /** @description Time windows during which alerts are deferred */
+                            time_blocks: {
+                                /** @description Unique ID of the time block */
+                                readonly id?: string;
+                                /** @default false */
+                                monday: boolean;
+                                /** @default false */
+                                tuesday: boolean;
+                                /** @default false */
+                                wednesday: boolean;
+                                /** @default false */
+                                thursday: boolean;
+                                /** @default false */
+                                friday: boolean;
+                                /** @default false */
+                                saturday: boolean;
+                                /** @default false */
+                                sunday: boolean;
+                                /** @description Formatted as HH:MM */
+                                start_time?: string;
+                                /** @description Formatted as HH:MM */
+                                end_time?: string;
+                                /** @default false */
+                                all_day: boolean;
+                                /** @description Order of this time block, starting at 1. Defaults to the block's 1-based position in time_blocks when omitted. */
+                                position?: number | null;
+                                /** @description Whether the window crosses midnight. Derived from start_time and end_time; accepted and ignored on write. */
+                                readonly ends_next_day?: boolean;
+                            }[];
+                        } | {
+                            /**
+                             * @description The type of the escalation path rule
+                             * @enum {string}
+                             */
+                            rule_type: "source";
+                            /**
+                             * @description How the alert source should be matched
+                             * @enum {string}
+                             */
+                            operator: "is" | "is_not" | "is_one_of" | "is_not_one_of";
+                            /** @description Alert source values to match against (e.g., manual, datadog) */
+                            values: string[];
+                        } | {
+                            /**
+                             * @description The type of the escalation path rule
+                             * @enum {string}
+                             */
+                            rule_type: "related_incidents";
+                            /**
+                             * @description Whether the alert must (or must not) have related incidents
+                             * @enum {string}
+                             */
+                            operator: "is_set" | "is_not_set";
+                        })[];
+                    }[];
+                    /**
+                     * @description Paged when no notification type rule matches. Considered only when notification_type_rules are present — the path's notification_type is aligned to it; without rules it is aligned to notification_type instead. Only available when notification type conditions are enabled for the team.
+                     * @default audible
+                     * @enum {string}
+                     */
+                    notification_type_fallback: "audible" | "quiet";
                     /**
                      * @description Time zone used for time restrictions.
                      * @enum {string|null}
                      */
-                    time_restriction_time_zone?: "International Date Line West" | "Etc/GMT+12" | "American Samoa" | "Pacific/Pago_Pago" | "Midway Island" | "Pacific/Midway" | "Hawaii" | "Pacific/Honolulu" | "Alaska" | "America/Juneau" | "Pacific Time (US & Canada)" | "America/Los_Angeles" | "Tijuana" | "America/Tijuana" | "Arizona" | "America/Phoenix" | "Mazatlan" | "America/Mazatlan" | "Mountain Time (US & Canada)" | "America/Denver" | "Central America" | "America/Guatemala" | "Central Time (US & Canada)" | "America/Chicago" | "Chihuahua" | "America/Chihuahua" | "Guadalajara" | "America/Mexico_City" | "Mexico City" | "Monterrey" | "America/Monterrey" | "Saskatchewan" | "America/Regina" | "Bogota" | "America/Bogota" | "Eastern Time (US & Canada)" | "America/New_York" | "Indiana (East)" | "America/Indiana/Indianapolis" | "Lima" | "America/Lima" | "Quito" | "Atlantic Time (Canada)" | "America/Halifax" | "Caracas" | "America/Caracas" | "Georgetown" | "America/Guyana" | "La Paz" | "America/La_Paz" | "Puerto Rico" | "America/Puerto_Rico" | "Santiago" | "America/Santiago" | "Newfoundland" | "America/St_Johns" | "Asuncion" | "America/Asuncion" | "Brasilia" | "America/Sao_Paulo" | "Buenos Aires" | "America/Argentina/Buenos_Aires" | "Montevideo" | "America/Montevideo" | "Greenland" | "America/Nuuk" | "Mid-Atlantic" | "Atlantic/South_Georgia" | "Azores" | "Atlantic/Azores" | "Cape Verde Is." | "Atlantic/Cape_Verde" | "Edinburgh" | "Europe/London" | "Lisbon" | "Europe/Lisbon" | "London" | "Monrovia" | "Africa/Monrovia" | "UTC" | "Etc/UTC" | "Amsterdam" | "Europe/Amsterdam" | "Belgrade" | "Europe/Belgrade" | "Berlin" | "Europe/Berlin" | "Bern" | "Europe/Zurich" | "Bratislava" | "Europe/Bratislava" | "Brussels" | "Europe/Brussels" | "Budapest" | "Europe/Budapest" | "Casablanca" | "Africa/Casablanca" | "Copenhagen" | "Europe/Copenhagen" | "Dublin" | "Europe/Dublin" | "Ljubljana" | "Europe/Ljubljana" | "Madrid" | "Europe/Madrid" | "Paris" | "Europe/Paris" | "Prague" | "Europe/Prague" | "Rome" | "Europe/Rome" | "Sarajevo" | "Europe/Sarajevo" | "Skopje" | "Europe/Skopje" | "Stockholm" | "Europe/Stockholm" | "Vienna" | "Europe/Vienna" | "Warsaw" | "Europe/Warsaw" | "West Central Africa" | "Africa/Algiers" | "Zagreb" | "Europe/Zagreb" | "Zurich" | "Athens" | "Europe/Athens" | "Bucharest" | "Europe/Bucharest" | "Cairo" | "Africa/Cairo" | "Harare" | "Africa/Harare" | "Helsinki" | "Europe/Helsinki" | "Jerusalem" | "Asia/Jerusalem" | "Kaliningrad" | "Europe/Kaliningrad" | "Pretoria" | "Africa/Johannesburg" | "Riga" | "Europe/Riga" | "Sofia" | "Europe/Sofia" | "Tallinn" | "Europe/Tallinn" | "Vilnius" | "Europe/Vilnius" | "Baghdad" | "Asia/Baghdad" | "Istanbul" | "Europe/Istanbul" | "Kuwait" | "Asia/Kuwait" | "Minsk" | "Europe/Minsk" | "Moscow" | "Europe/Moscow" | "Nairobi" | "Africa/Nairobi" | "Riyadh" | "Asia/Riyadh" | "St. Petersburg" | "Volgograd" | "Europe/Volgograd" | "Tehran" | "Asia/Tehran" | "Abu Dhabi" | "Asia/Muscat" | "Baku" | "Asia/Baku" | "Muscat" | "Samara" | "Europe/Samara" | "Tbilisi" | "Asia/Tbilisi" | "Yerevan" | "Asia/Yerevan" | "Kabul" | "Asia/Kabul" | "Almaty" | "Asia/Almaty" | "Astana" | "Ekaterinburg" | "Asia/Yekaterinburg" | "Islamabad" | "Asia/Karachi" | "Karachi" | "Tashkent" | "Asia/Tashkent" | "Chennai" | "Asia/Kolkata" | "Kolkata" | "Mumbai" | "New Delhi" | "Sri Jayawardenepura" | "Asia/Colombo" | "Kathmandu" | "Asia/Kathmandu" | "Dhaka" | "Asia/Dhaka" | "Urumqi" | "Asia/Urumqi" | "Bangkok" | "Asia/Bangkok" | "Hanoi" | "Jakarta" | "Asia/Jakarta" | "Krasnoyarsk" | "Asia/Krasnoyarsk" | "Novosibirsk" | "Asia/Novosibirsk" | "Beijing" | "Asia/Shanghai" | "Chongqing" | "Asia/Chongqing" | "Hong Kong" | "Asia/Hong_Kong" | "Irkutsk" | "Asia/Irkutsk" | "Kuala Lumpur" | "Asia/Kuala_Lumpur" | "Perth" | "Australia/Perth" | "Singapore" | "Asia/Singapore" | "Taipei" | "Asia/Taipei" | "Ulaanbaatar" | "Asia/Ulaanbaatar" | "Osaka" | "Asia/Tokyo" | "Sapporo" | "Seoul" | "Asia/Seoul" | "Tokyo" | "Yakutsk" | "Asia/Yakutsk" | "Adelaide" | "Australia/Adelaide" | "Darwin" | "Australia/Darwin" | "Brisbane" | "Australia/Brisbane" | "Canberra" | "Australia/Canberra" | "Guam" | "Pacific/Guam" | "Hobart" | "Australia/Hobart" | "Melbourne" | "Australia/Melbourne" | "Port Moresby" | "Pacific/Port_Moresby" | "Sydney" | "Australia/Sydney" | "Vladivostok" | "Asia/Vladivostok" | "Magadan" | "Asia/Magadan" | "New Caledonia" | "Pacific/Noumea" | "Solomon Is." | "Pacific/Guadalcanal" | "Srednekolymsk" | "Asia/Srednekolymsk" | "Auckland" | "Pacific/Auckland" | "Fiji" | "Pacific/Fiji" | "Kamchatka" | "Asia/Kamchatka" | "Marshall Is." | "Pacific/Majuro" | "Wellington" | "Chatham Is." | "Pacific/Chatham" | "Nuku'alofa" | "Pacific/Tongatapu" | "Samoa" | "Pacific/Apia" | "Tokelau Is." | "Pacific/Fakaofo" | "America/Adak" | "America/Atka" | "US/Aleutian" | "America/Vancouver" | "Canada/Pacific" | "America/Miquelon" | "Australia/Eucla" | "Australia/LHI" | "Australia/Lord_Howe" | "Chile/EasterIsland" | "Pacific/Easter" | "Pacific/Gambier" | "Pacific/Pitcairn" | "Pacific/Marquesas" | "Pacific/Kiritimati" | "Pacific/Norfolk" | null;
+                    time_restriction_time_zone?: "International Date Line West" | "Etc/GMT+12" | "American Samoa" | "Pacific/Pago_Pago" | "Midway Island" | "Pacific/Midway" | "Hawaii" | "Pacific/Honolulu" | "Alaska" | "America/Juneau" | "Pacific Time (US & Canada)" | "America/Los_Angeles" | "Tijuana" | "America/Tijuana" | "Arizona" | "America/Phoenix" | "Mazatlan" | "America/Mazatlan" | "Mountain Time (US & Canada)" | "America/Denver" | "Central America" | "America/Guatemala" | "Central Time (US & Canada)" | "America/Chicago" | "Chihuahua" | "America/Chihuahua" | "Guadalajara" | "America/Mexico_City" | "Mexico City" | "Monterrey" | "America/Monterrey" | "Saskatchewan" | "America/Regina" | "Bogota" | "America/Bogota" | "Eastern Time (US & Canada)" | "America/New_York" | "Indiana (East)" | "America/Indiana/Indianapolis" | "Lima" | "America/Lima" | "Quito" | "Atlantic Time (Canada)" | "America/Halifax" | "Caracas" | "America/Caracas" | "Georgetown" | "America/Guyana" | "La Paz" | "America/La_Paz" | "Puerto Rico" | "America/Puerto_Rico" | "Santiago" | "America/Santiago" | "Newfoundland" | "America/St_Johns" | "Asuncion" | "America/Asuncion" | "Brasilia" | "America/Sao_Paulo" | "Buenos Aires" | "America/Argentina/Buenos_Aires" | "Montevideo" | "America/Montevideo" | "Greenland" | "America/Nuuk" | "Mid-Atlantic" | "Atlantic/South_Georgia" | "Azores" | "Atlantic/Azores" | "Cape Verde Is." | "Atlantic/Cape_Verde" | "Casablanca" | "Africa/Casablanca" | "Edinburgh" | "Europe/London" | "Lisbon" | "Europe/Lisbon" | "London" | "Monrovia" | "Africa/Monrovia" | "UTC" | "Etc/UTC" | "Amsterdam" | "Europe/Amsterdam" | "Belgrade" | "Europe/Belgrade" | "Berlin" | "Europe/Berlin" | "Bern" | "Europe/Zurich" | "Bratislava" | "Europe/Bratislava" | "Brussels" | "Europe/Brussels" | "Budapest" | "Europe/Budapest" | "Copenhagen" | "Europe/Copenhagen" | "Dublin" | "Europe/Dublin" | "Ljubljana" | "Europe/Ljubljana" | "Madrid" | "Europe/Madrid" | "Paris" | "Europe/Paris" | "Prague" | "Europe/Prague" | "Rome" | "Europe/Rome" | "Sarajevo" | "Europe/Sarajevo" | "Skopje" | "Europe/Skopje" | "Stockholm" | "Europe/Stockholm" | "Vienna" | "Europe/Vienna" | "Warsaw" | "Europe/Warsaw" | "West Central Africa" | "Africa/Algiers" | "Zagreb" | "Europe/Zagreb" | "Zurich" | "Athens" | "Europe/Athens" | "Bucharest" | "Europe/Bucharest" | "Cairo" | "Africa/Cairo" | "Harare" | "Africa/Harare" | "Helsinki" | "Europe/Helsinki" | "Jerusalem" | "Asia/Jerusalem" | "Kaliningrad" | "Europe/Kaliningrad" | "Kyiv" | "Europe/Kyiv" | "Pretoria" | "Africa/Johannesburg" | "Riga" | "Europe/Riga" | "Sofia" | "Europe/Sofia" | "Tallinn" | "Europe/Tallinn" | "Vilnius" | "Europe/Vilnius" | "Baghdad" | "Asia/Baghdad" | "Istanbul" | "Europe/Istanbul" | "Kuwait" | "Asia/Kuwait" | "Minsk" | "Europe/Minsk" | "Moscow" | "Europe/Moscow" | "Nairobi" | "Africa/Nairobi" | "Riyadh" | "Asia/Riyadh" | "St. Petersburg" | "Volgograd" | "Europe/Volgograd" | "Tehran" | "Asia/Tehran" | "Abu Dhabi" | "Asia/Muscat" | "Baku" | "Asia/Baku" | "Muscat" | "Samara" | "Europe/Samara" | "Tbilisi" | "Asia/Tbilisi" | "Yerevan" | "Asia/Yerevan" | "Kabul" | "Asia/Kabul" | "Almaty" | "Asia/Almaty" | "Astana" | "Ekaterinburg" | "Asia/Yekaterinburg" | "Islamabad" | "Asia/Karachi" | "Karachi" | "Tashkent" | "Asia/Tashkent" | "Chennai" | "Asia/Kolkata" | "Kolkata" | "Mumbai" | "New Delhi" | "Sri Jayawardenepura" | "Asia/Colombo" | "Kathmandu" | "Asia/Kathmandu" | "Dhaka" | "Asia/Dhaka" | "Urumqi" | "Asia/Urumqi" | "Rangoon" | "Asia/Yangon" | "Bangkok" | "Asia/Bangkok" | "Hanoi" | "Jakarta" | "Asia/Jakarta" | "Krasnoyarsk" | "Asia/Krasnoyarsk" | "Novosibirsk" | "Asia/Novosibirsk" | "Beijing" | "Asia/Shanghai" | "Chongqing" | "Asia/Chongqing" | "Hong Kong" | "Asia/Hong_Kong" | "Irkutsk" | "Asia/Irkutsk" | "Kuala Lumpur" | "Asia/Kuala_Lumpur" | "Perth" | "Australia/Perth" | "Singapore" | "Asia/Singapore" | "Taipei" | "Asia/Taipei" | "Ulaanbaatar" | "Asia/Ulaanbaatar" | "Osaka" | "Asia/Tokyo" | "Sapporo" | "Seoul" | "Asia/Seoul" | "Tokyo" | "Yakutsk" | "Asia/Yakutsk" | "Adelaide" | "Australia/Adelaide" | "Darwin" | "Australia/Darwin" | "Brisbane" | "Australia/Brisbane" | "Canberra" | "Australia/Canberra" | "Guam" | "Pacific/Guam" | "Hobart" | "Australia/Hobart" | "Melbourne" | "Australia/Melbourne" | "Port Moresby" | "Pacific/Port_Moresby" | "Sydney" | "Australia/Sydney" | "Vladivostok" | "Asia/Vladivostok" | "Magadan" | "Asia/Magadan" | "New Caledonia" | "Pacific/Noumea" | "Solomon Is." | "Pacific/Guadalcanal" | "Srednekolymsk" | "Asia/Srednekolymsk" | "Auckland" | "Pacific/Auckland" | "Fiji" | "Pacific/Fiji" | "Kamchatka" | "Asia/Kamchatka" | "Marshall Is." | "Pacific/Majuro" | "Wellington" | "Chatham Is." | "Pacific/Chatham" | "Nuku'alofa" | "Pacific/Tongatapu" | "Samoa" | "Pacific/Apia" | "Tokelau Is." | "Pacific/Fakaofo" | "America/Adak" | "America/Atka" | "US/Aleutian" | "America/Vancouver" | "Canada/Pacific" | "America/Miquelon" | "Australia/Eucla" | "Australia/LHI" | "Australia/Lord_Howe" | "Chile/EasterIsland" | "Pacific/Easter" | "Pacific/Gambier" | "Pacific/Pitcairn" | "Pacific/Marquesas" | "Pacific/Kiritimati" | "Pacific/Norfolk" | "Asia/Rangoon" | "Europe/Kiev" | null;
                     /** @description If time restrictions are set, alerts will follow this path when they arrive within the specified time ranges and meet the rules. */
                     time_restrictions?: {
                         /** @enum {string} */
@@ -12556,6 +13220,8 @@ export interface components {
         };
         update_escalation_policy_path: {
             data: {
+                /** @description Accepted for JSON:API client compatibility, but ignored. The resource to update is identified by the id in the path. */
+                id?: string;
                 /** @enum {string} */
                 type: "escalation_paths";
                 attributes: {
@@ -12595,8 +13261,11 @@ export interface components {
                     repeat_count?: number | null;
                     /** @description Initial delay for escalation path in minutes. Maximum 1 week (10080). */
                     initial_delay?: number;
-                    /** @description Re-trigger acknowledged alerts on this path after N minutes; null inherits the urgency/workspace default, negative = never. */
-                    retrigger_timeout_minutes?: number | null;
+                    /**
+                     * @description Re-trigger acknowledged alerts on this path after N minutes; null inherits the urgency/workspace default, -1 = never.
+                     * @enum {integer|null}
+                     */
+                    retrigger_timeout_minutes?: -1 | 10 | 20 | 30 | 40 | 50 | 60 | 90 | 120 | 180 | 240 | 300 | 360 | 720 | 1440 | null;
                     /** @description Escalation path conditions */
                     rules?: (({
                         /**
@@ -12606,6 +13275,12 @@ export interface components {
                         rule_type: "alert_urgency";
                         /** @description Alert urgency ids for which this escalation path should be used */
                         urgency_ids: string[];
+                        /**
+                         * @description How the alert's urgency should be matched. is and is_not take exactly one id
+                         * @default is_one_of
+                         * @enum {string}
+                         */
+                        operator: "is" | "is_not" | "is_one_of" | "is_not_one_of";
                     } | {
                         /**
                          * @description The type of the escalation path rule
@@ -12656,6 +13331,12 @@ export interface components {
                         rule_type: "service";
                         /** @description Service ids for which this escalation path should be used */
                         service_ids: string[];
+                        /**
+                         * @description How the alert's services should be matched. is and is_not take exactly one id
+                         * @default is_one_of
+                         * @enum {string}
+                         */
+                        operator: "is" | "is_not" | "is_one_of" | "is_not_one_of";
                     } | {
                         /**
                          * @description The type of the escalation path rule
@@ -12666,9 +13347,11 @@ export interface components {
                          * @description Time zone for the deferral window
                          * @enum {string}
                          */
-                        time_zone: "International Date Line West" | "Etc/GMT+12" | "American Samoa" | "Pacific/Pago_Pago" | "Midway Island" | "Pacific/Midway" | "Hawaii" | "Pacific/Honolulu" | "Alaska" | "America/Juneau" | "Pacific Time (US & Canada)" | "America/Los_Angeles" | "Tijuana" | "America/Tijuana" | "Arizona" | "America/Phoenix" | "Mazatlan" | "America/Mazatlan" | "Mountain Time (US & Canada)" | "America/Denver" | "Central America" | "America/Guatemala" | "Central Time (US & Canada)" | "America/Chicago" | "Chihuahua" | "America/Chihuahua" | "Guadalajara" | "America/Mexico_City" | "Mexico City" | "Monterrey" | "America/Monterrey" | "Saskatchewan" | "America/Regina" | "Bogota" | "America/Bogota" | "Eastern Time (US & Canada)" | "America/New_York" | "Indiana (East)" | "America/Indiana/Indianapolis" | "Lima" | "America/Lima" | "Quito" | "Atlantic Time (Canada)" | "America/Halifax" | "Caracas" | "America/Caracas" | "Georgetown" | "America/Guyana" | "La Paz" | "America/La_Paz" | "Puerto Rico" | "America/Puerto_Rico" | "Santiago" | "America/Santiago" | "Newfoundland" | "America/St_Johns" | "Asuncion" | "America/Asuncion" | "Brasilia" | "America/Sao_Paulo" | "Buenos Aires" | "America/Argentina/Buenos_Aires" | "Montevideo" | "America/Montevideo" | "Greenland" | "America/Nuuk" | "Mid-Atlantic" | "Atlantic/South_Georgia" | "Azores" | "Atlantic/Azores" | "Cape Verde Is." | "Atlantic/Cape_Verde" | "Edinburgh" | "Europe/London" | "Lisbon" | "Europe/Lisbon" | "London" | "Monrovia" | "Africa/Monrovia" | "UTC" | "Etc/UTC" | "Amsterdam" | "Europe/Amsterdam" | "Belgrade" | "Europe/Belgrade" | "Berlin" | "Europe/Berlin" | "Bern" | "Europe/Zurich" | "Bratislava" | "Europe/Bratislava" | "Brussels" | "Europe/Brussels" | "Budapest" | "Europe/Budapest" | "Casablanca" | "Africa/Casablanca" | "Copenhagen" | "Europe/Copenhagen" | "Dublin" | "Europe/Dublin" | "Ljubljana" | "Europe/Ljubljana" | "Madrid" | "Europe/Madrid" | "Paris" | "Europe/Paris" | "Prague" | "Europe/Prague" | "Rome" | "Europe/Rome" | "Sarajevo" | "Europe/Sarajevo" | "Skopje" | "Europe/Skopje" | "Stockholm" | "Europe/Stockholm" | "Vienna" | "Europe/Vienna" | "Warsaw" | "Europe/Warsaw" | "West Central Africa" | "Africa/Algiers" | "Zagreb" | "Europe/Zagreb" | "Zurich" | "Athens" | "Europe/Athens" | "Bucharest" | "Europe/Bucharest" | "Cairo" | "Africa/Cairo" | "Harare" | "Africa/Harare" | "Helsinki" | "Europe/Helsinki" | "Jerusalem" | "Asia/Jerusalem" | "Kaliningrad" | "Europe/Kaliningrad" | "Pretoria" | "Africa/Johannesburg" | "Riga" | "Europe/Riga" | "Sofia" | "Europe/Sofia" | "Tallinn" | "Europe/Tallinn" | "Vilnius" | "Europe/Vilnius" | "Baghdad" | "Asia/Baghdad" | "Istanbul" | "Europe/Istanbul" | "Kuwait" | "Asia/Kuwait" | "Minsk" | "Europe/Minsk" | "Moscow" | "Europe/Moscow" | "Nairobi" | "Africa/Nairobi" | "Riyadh" | "Asia/Riyadh" | "St. Petersburg" | "Volgograd" | "Europe/Volgograd" | "Tehran" | "Asia/Tehran" | "Abu Dhabi" | "Asia/Muscat" | "Baku" | "Asia/Baku" | "Muscat" | "Samara" | "Europe/Samara" | "Tbilisi" | "Asia/Tbilisi" | "Yerevan" | "Asia/Yerevan" | "Kabul" | "Asia/Kabul" | "Almaty" | "Asia/Almaty" | "Astana" | "Ekaterinburg" | "Asia/Yekaterinburg" | "Islamabad" | "Asia/Karachi" | "Karachi" | "Tashkent" | "Asia/Tashkent" | "Chennai" | "Asia/Kolkata" | "Kolkata" | "Mumbai" | "New Delhi" | "Sri Jayawardenepura" | "Asia/Colombo" | "Kathmandu" | "Asia/Kathmandu" | "Dhaka" | "Asia/Dhaka" | "Urumqi" | "Asia/Urumqi" | "Bangkok" | "Asia/Bangkok" | "Hanoi" | "Jakarta" | "Asia/Jakarta" | "Krasnoyarsk" | "Asia/Krasnoyarsk" | "Novosibirsk" | "Asia/Novosibirsk" | "Beijing" | "Asia/Shanghai" | "Chongqing" | "Asia/Chongqing" | "Hong Kong" | "Asia/Hong_Kong" | "Irkutsk" | "Asia/Irkutsk" | "Kuala Lumpur" | "Asia/Kuala_Lumpur" | "Perth" | "Australia/Perth" | "Singapore" | "Asia/Singapore" | "Taipei" | "Asia/Taipei" | "Ulaanbaatar" | "Asia/Ulaanbaatar" | "Osaka" | "Asia/Tokyo" | "Sapporo" | "Seoul" | "Asia/Seoul" | "Tokyo" | "Yakutsk" | "Asia/Yakutsk" | "Adelaide" | "Australia/Adelaide" | "Darwin" | "Australia/Darwin" | "Brisbane" | "Australia/Brisbane" | "Canberra" | "Australia/Canberra" | "Guam" | "Pacific/Guam" | "Hobart" | "Australia/Hobart" | "Melbourne" | "Australia/Melbourne" | "Port Moresby" | "Pacific/Port_Moresby" | "Sydney" | "Australia/Sydney" | "Vladivostok" | "Asia/Vladivostok" | "Magadan" | "Asia/Magadan" | "New Caledonia" | "Pacific/Noumea" | "Solomon Is." | "Pacific/Guadalcanal" | "Srednekolymsk" | "Asia/Srednekolymsk" | "Auckland" | "Pacific/Auckland" | "Fiji" | "Pacific/Fiji" | "Kamchatka" | "Asia/Kamchatka" | "Marshall Is." | "Pacific/Majuro" | "Wellington" | "Chatham Is." | "Pacific/Chatham" | "Nuku'alofa" | "Pacific/Tongatapu" | "Samoa" | "Pacific/Apia" | "Tokelau Is." | "Pacific/Fakaofo" | "America/Adak" | "America/Atka" | "US/Aleutian" | "America/Vancouver" | "Canada/Pacific" | "America/Miquelon" | "Australia/Eucla" | "Australia/LHI" | "Australia/Lord_Howe" | "Chile/EasterIsland" | "Pacific/Easter" | "Pacific/Gambier" | "Pacific/Pitcairn" | "Pacific/Marquesas" | "Pacific/Kiritimati" | "Pacific/Norfolk";
+                        time_zone: "International Date Line West" | "Etc/GMT+12" | "American Samoa" | "Pacific/Pago_Pago" | "Midway Island" | "Pacific/Midway" | "Hawaii" | "Pacific/Honolulu" | "Alaska" | "America/Juneau" | "Pacific Time (US & Canada)" | "America/Los_Angeles" | "Tijuana" | "America/Tijuana" | "Arizona" | "America/Phoenix" | "Mazatlan" | "America/Mazatlan" | "Mountain Time (US & Canada)" | "America/Denver" | "Central America" | "America/Guatemala" | "Central Time (US & Canada)" | "America/Chicago" | "Chihuahua" | "America/Chihuahua" | "Guadalajara" | "America/Mexico_City" | "Mexico City" | "Monterrey" | "America/Monterrey" | "Saskatchewan" | "America/Regina" | "Bogota" | "America/Bogota" | "Eastern Time (US & Canada)" | "America/New_York" | "Indiana (East)" | "America/Indiana/Indianapolis" | "Lima" | "America/Lima" | "Quito" | "Atlantic Time (Canada)" | "America/Halifax" | "Caracas" | "America/Caracas" | "Georgetown" | "America/Guyana" | "La Paz" | "America/La_Paz" | "Puerto Rico" | "America/Puerto_Rico" | "Santiago" | "America/Santiago" | "Newfoundland" | "America/St_Johns" | "Asuncion" | "America/Asuncion" | "Brasilia" | "America/Sao_Paulo" | "Buenos Aires" | "America/Argentina/Buenos_Aires" | "Montevideo" | "America/Montevideo" | "Greenland" | "America/Nuuk" | "Mid-Atlantic" | "Atlantic/South_Georgia" | "Azores" | "Atlantic/Azores" | "Cape Verde Is." | "Atlantic/Cape_Verde" | "Casablanca" | "Africa/Casablanca" | "Edinburgh" | "Europe/London" | "Lisbon" | "Europe/Lisbon" | "London" | "Monrovia" | "Africa/Monrovia" | "UTC" | "Etc/UTC" | "Amsterdam" | "Europe/Amsterdam" | "Belgrade" | "Europe/Belgrade" | "Berlin" | "Europe/Berlin" | "Bern" | "Europe/Zurich" | "Bratislava" | "Europe/Bratislava" | "Brussels" | "Europe/Brussels" | "Budapest" | "Europe/Budapest" | "Copenhagen" | "Europe/Copenhagen" | "Dublin" | "Europe/Dublin" | "Ljubljana" | "Europe/Ljubljana" | "Madrid" | "Europe/Madrid" | "Paris" | "Europe/Paris" | "Prague" | "Europe/Prague" | "Rome" | "Europe/Rome" | "Sarajevo" | "Europe/Sarajevo" | "Skopje" | "Europe/Skopje" | "Stockholm" | "Europe/Stockholm" | "Vienna" | "Europe/Vienna" | "Warsaw" | "Europe/Warsaw" | "West Central Africa" | "Africa/Algiers" | "Zagreb" | "Europe/Zagreb" | "Zurich" | "Athens" | "Europe/Athens" | "Bucharest" | "Europe/Bucharest" | "Cairo" | "Africa/Cairo" | "Harare" | "Africa/Harare" | "Helsinki" | "Europe/Helsinki" | "Jerusalem" | "Asia/Jerusalem" | "Kaliningrad" | "Europe/Kaliningrad" | "Kyiv" | "Europe/Kyiv" | "Pretoria" | "Africa/Johannesburg" | "Riga" | "Europe/Riga" | "Sofia" | "Europe/Sofia" | "Tallinn" | "Europe/Tallinn" | "Vilnius" | "Europe/Vilnius" | "Baghdad" | "Asia/Baghdad" | "Istanbul" | "Europe/Istanbul" | "Kuwait" | "Asia/Kuwait" | "Minsk" | "Europe/Minsk" | "Moscow" | "Europe/Moscow" | "Nairobi" | "Africa/Nairobi" | "Riyadh" | "Asia/Riyadh" | "St. Petersburg" | "Volgograd" | "Europe/Volgograd" | "Tehran" | "Asia/Tehran" | "Abu Dhabi" | "Asia/Muscat" | "Baku" | "Asia/Baku" | "Muscat" | "Samara" | "Europe/Samara" | "Tbilisi" | "Asia/Tbilisi" | "Yerevan" | "Asia/Yerevan" | "Kabul" | "Asia/Kabul" | "Almaty" | "Asia/Almaty" | "Astana" | "Ekaterinburg" | "Asia/Yekaterinburg" | "Islamabad" | "Asia/Karachi" | "Karachi" | "Tashkent" | "Asia/Tashkent" | "Chennai" | "Asia/Kolkata" | "Kolkata" | "Mumbai" | "New Delhi" | "Sri Jayawardenepura" | "Asia/Colombo" | "Kathmandu" | "Asia/Kathmandu" | "Dhaka" | "Asia/Dhaka" | "Urumqi" | "Asia/Urumqi" | "Rangoon" | "Asia/Yangon" | "Bangkok" | "Asia/Bangkok" | "Hanoi" | "Jakarta" | "Asia/Jakarta" | "Krasnoyarsk" | "Asia/Krasnoyarsk" | "Novosibirsk" | "Asia/Novosibirsk" | "Beijing" | "Asia/Shanghai" | "Chongqing" | "Asia/Chongqing" | "Hong Kong" | "Asia/Hong_Kong" | "Irkutsk" | "Asia/Irkutsk" | "Kuala Lumpur" | "Asia/Kuala_Lumpur" | "Perth" | "Australia/Perth" | "Singapore" | "Asia/Singapore" | "Taipei" | "Asia/Taipei" | "Ulaanbaatar" | "Asia/Ulaanbaatar" | "Osaka" | "Asia/Tokyo" | "Sapporo" | "Seoul" | "Asia/Seoul" | "Tokyo" | "Yakutsk" | "Asia/Yakutsk" | "Adelaide" | "Australia/Adelaide" | "Darwin" | "Australia/Darwin" | "Brisbane" | "Australia/Brisbane" | "Canberra" | "Australia/Canberra" | "Guam" | "Pacific/Guam" | "Hobart" | "Australia/Hobart" | "Melbourne" | "Australia/Melbourne" | "Port Moresby" | "Pacific/Port_Moresby" | "Sydney" | "Australia/Sydney" | "Vladivostok" | "Asia/Vladivostok" | "Magadan" | "Asia/Magadan" | "New Caledonia" | "Pacific/Noumea" | "Solomon Is." | "Pacific/Guadalcanal" | "Srednekolymsk" | "Asia/Srednekolymsk" | "Auckland" | "Pacific/Auckland" | "Fiji" | "Pacific/Fiji" | "Kamchatka" | "Asia/Kamchatka" | "Marshall Is." | "Pacific/Majuro" | "Wellington" | "Chatham Is." | "Pacific/Chatham" | "Nuku'alofa" | "Pacific/Tongatapu" | "Samoa" | "Pacific/Apia" | "Tokelau Is." | "Pacific/Fakaofo" | "America/Adak" | "America/Atka" | "US/Aleutian" | "America/Vancouver" | "Canada/Pacific" | "America/Miquelon" | "Australia/Eucla" | "Australia/LHI" | "Australia/Lord_Howe" | "Chile/EasterIsland" | "Pacific/Easter" | "Pacific/Gambier" | "Pacific/Pitcairn" | "Pacific/Marquesas" | "Pacific/Kiritimati" | "Pacific/Norfolk" | "Asia/Rangoon" | "Europe/Kiev";
                         /** @description Time windows during which alerts are deferred */
                         time_blocks: {
+                            /** @description Unique ID of the time block */
+                            readonly id?: string;
                             /** @default false */
                             monday: boolean;
                             /** @default false */
@@ -12689,7 +13372,10 @@ export interface components {
                             end_time?: string;
                             /** @default false */
                             all_day: boolean;
+                            /** @description Order of this time block, starting at 1. Defaults to the block's 1-based position in time_blocks when omitted. */
                             position?: number | null;
+                            /** @description Whether the window crosses midnight. Derived from start_time and end_time; accepted and ignored on write. */
+                            readonly ends_next_day?: boolean;
                         }[];
                     } | {
                         /**
@@ -12716,11 +13402,168 @@ export interface components {
                          */
                         operator: "is_set" | "is_not_set";
                     }) | null)[];
+                    /** @description Rules deciding whether an alert pages audible or quiet, evaluated in order — the first matching rule's notification_type wins, otherwise notification_type_fallback applies. When present, the path's notification_type is aligned to notification_type_fallback. Only available when notification type conditions are enabled for the team. */
+                    notification_type_rules?: {
+                        /**
+                         * @description Outcome when this rule matches
+                         * @default audible
+                         * @enum {string}
+                         */
+                        notification_type: "audible" | "quiet";
+                        /**
+                         * @description Whether all or any of the rule's conditions must match
+                         * @default match-all-rules
+                         * @enum {string}
+                         */
+                        match_mode: "match-all-rules" | "match-any-rule";
+                        /** @description Conditions combined per match_mode, at least one per rule. A deferral_window condition matches when the alert falls inside its time blocks. */
+                        conditions: ({
+                            /**
+                             * @description The type of the escalation path rule
+                             * @enum {string}
+                             */
+                            rule_type: "alert_urgency";
+                            /** @description Alert urgency ids for which this escalation path should be used */
+                            urgency_ids: string[];
+                            /**
+                             * @description How the alert's urgency should be matched. is and is_not take exactly one id
+                             * @default is_one_of
+                             * @enum {string}
+                             */
+                            operator: "is" | "is_not" | "is_one_of" | "is_not_one_of";
+                        } | {
+                            /**
+                             * @description The type of the escalation path rule
+                             * @enum {string}
+                             */
+                            rule_type: "working_hour";
+                            /** @description Whether the escalation path should be used within working hours */
+                            within_working_hour: boolean;
+                        } | {
+                            /**
+                             * @description The type of the escalation path rule
+                             * @enum {string}
+                             */
+                            rule_type: "json_path";
+                            /** @description JSON path to extract value from payload */
+                            json_path: string;
+                            /**
+                             * @description How JSON path value should be matched
+                             * @enum {string}
+                             */
+                            operator: "is" | "is_not" | "contains" | "does_not_contain" | "contains_key" | "does_not_contain_key" | "starts_with" | "does_not_start_with" | "matches" | "does_not_match" | "is_one_of" | "is_not_one_of" | "is_set" | "is_not_set";
+                            /** @description Value with which JSON path value should be matched */
+                            value?: string | null;
+                            /** @description Values to match against (for is_one_of / is_not_one_of operators) */
+                            values?: string[];
+                        } | {
+                            /**
+                             * @description The type of the escalation path rule
+                             * @enum {string}
+                             */
+                            rule_type: "field";
+                            /** @description The type of the fieldable (e.g., AlertField) */
+                            fieldable_type: string;
+                            /** @description The ID of the alert field */
+                            fieldable_id: string;
+                            /**
+                             * @description How the alert field value should be matched
+                             * @enum {string}
+                             */
+                            operator: "is" | "is_not" | "is_one_of" | "is_not_one_of" | "contains" | "does_not_contain" | "is_empty" | "is_not_empty" | "contains_key" | "does_not_contain_key" | "starts_with" | "does_not_start_with" | "matches" | "does_not_match";
+                            /** @description Values to match against */
+                            values?: string[];
+                        } | {
+                            /**
+                             * @description The type of the escalation path rule
+                             * @enum {string}
+                             */
+                            rule_type: "service";
+                            /** @description Service ids for which this escalation path should be used */
+                            service_ids: string[];
+                            /**
+                             * @description How the alert's services should be matched. is and is_not take exactly one id
+                             * @default is_one_of
+                             * @enum {string}
+                             */
+                            operator: "is" | "is_not" | "is_one_of" | "is_not_one_of";
+                        } | {
+                            /**
+                             * @description The type of the escalation path rule
+                             * @enum {string}
+                             */
+                            rule_type: "deferral_window";
+                            /**
+                             * @description Time zone for the deferral window
+                             * @enum {string}
+                             */
+                            time_zone: "International Date Line West" | "Etc/GMT+12" | "American Samoa" | "Pacific/Pago_Pago" | "Midway Island" | "Pacific/Midway" | "Hawaii" | "Pacific/Honolulu" | "Alaska" | "America/Juneau" | "Pacific Time (US & Canada)" | "America/Los_Angeles" | "Tijuana" | "America/Tijuana" | "Arizona" | "America/Phoenix" | "Mazatlan" | "America/Mazatlan" | "Mountain Time (US & Canada)" | "America/Denver" | "Central America" | "America/Guatemala" | "Central Time (US & Canada)" | "America/Chicago" | "Chihuahua" | "America/Chihuahua" | "Guadalajara" | "America/Mexico_City" | "Mexico City" | "Monterrey" | "America/Monterrey" | "Saskatchewan" | "America/Regina" | "Bogota" | "America/Bogota" | "Eastern Time (US & Canada)" | "America/New_York" | "Indiana (East)" | "America/Indiana/Indianapolis" | "Lima" | "America/Lima" | "Quito" | "Atlantic Time (Canada)" | "America/Halifax" | "Caracas" | "America/Caracas" | "Georgetown" | "America/Guyana" | "La Paz" | "America/La_Paz" | "Puerto Rico" | "America/Puerto_Rico" | "Santiago" | "America/Santiago" | "Newfoundland" | "America/St_Johns" | "Asuncion" | "America/Asuncion" | "Brasilia" | "America/Sao_Paulo" | "Buenos Aires" | "America/Argentina/Buenos_Aires" | "Montevideo" | "America/Montevideo" | "Greenland" | "America/Nuuk" | "Mid-Atlantic" | "Atlantic/South_Georgia" | "Azores" | "Atlantic/Azores" | "Cape Verde Is." | "Atlantic/Cape_Verde" | "Casablanca" | "Africa/Casablanca" | "Edinburgh" | "Europe/London" | "Lisbon" | "Europe/Lisbon" | "London" | "Monrovia" | "Africa/Monrovia" | "UTC" | "Etc/UTC" | "Amsterdam" | "Europe/Amsterdam" | "Belgrade" | "Europe/Belgrade" | "Berlin" | "Europe/Berlin" | "Bern" | "Europe/Zurich" | "Bratislava" | "Europe/Bratislava" | "Brussels" | "Europe/Brussels" | "Budapest" | "Europe/Budapest" | "Copenhagen" | "Europe/Copenhagen" | "Dublin" | "Europe/Dublin" | "Ljubljana" | "Europe/Ljubljana" | "Madrid" | "Europe/Madrid" | "Paris" | "Europe/Paris" | "Prague" | "Europe/Prague" | "Rome" | "Europe/Rome" | "Sarajevo" | "Europe/Sarajevo" | "Skopje" | "Europe/Skopje" | "Stockholm" | "Europe/Stockholm" | "Vienna" | "Europe/Vienna" | "Warsaw" | "Europe/Warsaw" | "West Central Africa" | "Africa/Algiers" | "Zagreb" | "Europe/Zagreb" | "Zurich" | "Athens" | "Europe/Athens" | "Bucharest" | "Europe/Bucharest" | "Cairo" | "Africa/Cairo" | "Harare" | "Africa/Harare" | "Helsinki" | "Europe/Helsinki" | "Jerusalem" | "Asia/Jerusalem" | "Kaliningrad" | "Europe/Kaliningrad" | "Kyiv" | "Europe/Kyiv" | "Pretoria" | "Africa/Johannesburg" | "Riga" | "Europe/Riga" | "Sofia" | "Europe/Sofia" | "Tallinn" | "Europe/Tallinn" | "Vilnius" | "Europe/Vilnius" | "Baghdad" | "Asia/Baghdad" | "Istanbul" | "Europe/Istanbul" | "Kuwait" | "Asia/Kuwait" | "Minsk" | "Europe/Minsk" | "Moscow" | "Europe/Moscow" | "Nairobi" | "Africa/Nairobi" | "Riyadh" | "Asia/Riyadh" | "St. Petersburg" | "Volgograd" | "Europe/Volgograd" | "Tehran" | "Asia/Tehran" | "Abu Dhabi" | "Asia/Muscat" | "Baku" | "Asia/Baku" | "Muscat" | "Samara" | "Europe/Samara" | "Tbilisi" | "Asia/Tbilisi" | "Yerevan" | "Asia/Yerevan" | "Kabul" | "Asia/Kabul" | "Almaty" | "Asia/Almaty" | "Astana" | "Ekaterinburg" | "Asia/Yekaterinburg" | "Islamabad" | "Asia/Karachi" | "Karachi" | "Tashkent" | "Asia/Tashkent" | "Chennai" | "Asia/Kolkata" | "Kolkata" | "Mumbai" | "New Delhi" | "Sri Jayawardenepura" | "Asia/Colombo" | "Kathmandu" | "Asia/Kathmandu" | "Dhaka" | "Asia/Dhaka" | "Urumqi" | "Asia/Urumqi" | "Rangoon" | "Asia/Yangon" | "Bangkok" | "Asia/Bangkok" | "Hanoi" | "Jakarta" | "Asia/Jakarta" | "Krasnoyarsk" | "Asia/Krasnoyarsk" | "Novosibirsk" | "Asia/Novosibirsk" | "Beijing" | "Asia/Shanghai" | "Chongqing" | "Asia/Chongqing" | "Hong Kong" | "Asia/Hong_Kong" | "Irkutsk" | "Asia/Irkutsk" | "Kuala Lumpur" | "Asia/Kuala_Lumpur" | "Perth" | "Australia/Perth" | "Singapore" | "Asia/Singapore" | "Taipei" | "Asia/Taipei" | "Ulaanbaatar" | "Asia/Ulaanbaatar" | "Osaka" | "Asia/Tokyo" | "Sapporo" | "Seoul" | "Asia/Seoul" | "Tokyo" | "Yakutsk" | "Asia/Yakutsk" | "Adelaide" | "Australia/Adelaide" | "Darwin" | "Australia/Darwin" | "Brisbane" | "Australia/Brisbane" | "Canberra" | "Australia/Canberra" | "Guam" | "Pacific/Guam" | "Hobart" | "Australia/Hobart" | "Melbourne" | "Australia/Melbourne" | "Port Moresby" | "Pacific/Port_Moresby" | "Sydney" | "Australia/Sydney" | "Vladivostok" | "Asia/Vladivostok" | "Magadan" | "Asia/Magadan" | "New Caledonia" | "Pacific/Noumea" | "Solomon Is." | "Pacific/Guadalcanal" | "Srednekolymsk" | "Asia/Srednekolymsk" | "Auckland" | "Pacific/Auckland" | "Fiji" | "Pacific/Fiji" | "Kamchatka" | "Asia/Kamchatka" | "Marshall Is." | "Pacific/Majuro" | "Wellington" | "Chatham Is." | "Pacific/Chatham" | "Nuku'alofa" | "Pacific/Tongatapu" | "Samoa" | "Pacific/Apia" | "Tokelau Is." | "Pacific/Fakaofo" | "America/Adak" | "America/Atka" | "US/Aleutian" | "America/Vancouver" | "Canada/Pacific" | "America/Miquelon" | "Australia/Eucla" | "Australia/LHI" | "Australia/Lord_Howe" | "Chile/EasterIsland" | "Pacific/Easter" | "Pacific/Gambier" | "Pacific/Pitcairn" | "Pacific/Marquesas" | "Pacific/Kiritimati" | "Pacific/Norfolk" | "Asia/Rangoon" | "Europe/Kiev";
+                            /** @description Time windows during which alerts are deferred */
+                            time_blocks: {
+                                /** @description Unique ID of the time block */
+                                readonly id?: string;
+                                /** @default false */
+                                monday: boolean;
+                                /** @default false */
+                                tuesday: boolean;
+                                /** @default false */
+                                wednesday: boolean;
+                                /** @default false */
+                                thursday: boolean;
+                                /** @default false */
+                                friday: boolean;
+                                /** @default false */
+                                saturday: boolean;
+                                /** @default false */
+                                sunday: boolean;
+                                /** @description Formatted as HH:MM */
+                                start_time?: string;
+                                /** @description Formatted as HH:MM */
+                                end_time?: string;
+                                /** @default false */
+                                all_day: boolean;
+                                /** @description Order of this time block, starting at 1. Defaults to the block's 1-based position in time_blocks when omitted. */
+                                position?: number | null;
+                                /** @description Whether the window crosses midnight. Derived from start_time and end_time; accepted and ignored on write. */
+                                readonly ends_next_day?: boolean;
+                            }[];
+                        } | {
+                            /**
+                             * @description The type of the escalation path rule
+                             * @enum {string}
+                             */
+                            rule_type: "source";
+                            /**
+                             * @description How the alert source should be matched
+                             * @enum {string}
+                             */
+                            operator: "is" | "is_not" | "is_one_of" | "is_not_one_of";
+                            /** @description Alert source values to match against (e.g., manual, datadog) */
+                            values: string[];
+                        } | {
+                            /**
+                             * @description The type of the escalation path rule
+                             * @enum {string}
+                             */
+                            rule_type: "related_incidents";
+                            /**
+                             * @description Whether the alert must (or must not) have related incidents
+                             * @enum {string}
+                             */
+                            operator: "is_set" | "is_not_set";
+                        })[];
+                    }[];
+                    /**
+                     * @description Paged when no notification type rule matches. Considered only when notification_type_rules are present — the path's notification_type is aligned to it; without rules it is aligned to notification_type instead. Only available when notification type conditions are enabled for the team.
+                     * @default audible
+                     * @enum {string}
+                     */
+                    notification_type_fallback: "audible" | "quiet";
                     /**
                      * @description Time zone used for time restrictions.
                      * @enum {string|null}
                      */
-                    time_restriction_time_zone?: "International Date Line West" | "Etc/GMT+12" | "American Samoa" | "Pacific/Pago_Pago" | "Midway Island" | "Pacific/Midway" | "Hawaii" | "Pacific/Honolulu" | "Alaska" | "America/Juneau" | "Pacific Time (US & Canada)" | "America/Los_Angeles" | "Tijuana" | "America/Tijuana" | "Arizona" | "America/Phoenix" | "Mazatlan" | "America/Mazatlan" | "Mountain Time (US & Canada)" | "America/Denver" | "Central America" | "America/Guatemala" | "Central Time (US & Canada)" | "America/Chicago" | "Chihuahua" | "America/Chihuahua" | "Guadalajara" | "America/Mexico_City" | "Mexico City" | "Monterrey" | "America/Monterrey" | "Saskatchewan" | "America/Regina" | "Bogota" | "America/Bogota" | "Eastern Time (US & Canada)" | "America/New_York" | "Indiana (East)" | "America/Indiana/Indianapolis" | "Lima" | "America/Lima" | "Quito" | "Atlantic Time (Canada)" | "America/Halifax" | "Caracas" | "America/Caracas" | "Georgetown" | "America/Guyana" | "La Paz" | "America/La_Paz" | "Puerto Rico" | "America/Puerto_Rico" | "Santiago" | "America/Santiago" | "Newfoundland" | "America/St_Johns" | "Asuncion" | "America/Asuncion" | "Brasilia" | "America/Sao_Paulo" | "Buenos Aires" | "America/Argentina/Buenos_Aires" | "Montevideo" | "America/Montevideo" | "Greenland" | "America/Nuuk" | "Mid-Atlantic" | "Atlantic/South_Georgia" | "Azores" | "Atlantic/Azores" | "Cape Verde Is." | "Atlantic/Cape_Verde" | "Edinburgh" | "Europe/London" | "Lisbon" | "Europe/Lisbon" | "London" | "Monrovia" | "Africa/Monrovia" | "UTC" | "Etc/UTC" | "Amsterdam" | "Europe/Amsterdam" | "Belgrade" | "Europe/Belgrade" | "Berlin" | "Europe/Berlin" | "Bern" | "Europe/Zurich" | "Bratislava" | "Europe/Bratislava" | "Brussels" | "Europe/Brussels" | "Budapest" | "Europe/Budapest" | "Casablanca" | "Africa/Casablanca" | "Copenhagen" | "Europe/Copenhagen" | "Dublin" | "Europe/Dublin" | "Ljubljana" | "Europe/Ljubljana" | "Madrid" | "Europe/Madrid" | "Paris" | "Europe/Paris" | "Prague" | "Europe/Prague" | "Rome" | "Europe/Rome" | "Sarajevo" | "Europe/Sarajevo" | "Skopje" | "Europe/Skopje" | "Stockholm" | "Europe/Stockholm" | "Vienna" | "Europe/Vienna" | "Warsaw" | "Europe/Warsaw" | "West Central Africa" | "Africa/Algiers" | "Zagreb" | "Europe/Zagreb" | "Zurich" | "Athens" | "Europe/Athens" | "Bucharest" | "Europe/Bucharest" | "Cairo" | "Africa/Cairo" | "Harare" | "Africa/Harare" | "Helsinki" | "Europe/Helsinki" | "Jerusalem" | "Asia/Jerusalem" | "Kaliningrad" | "Europe/Kaliningrad" | "Pretoria" | "Africa/Johannesburg" | "Riga" | "Europe/Riga" | "Sofia" | "Europe/Sofia" | "Tallinn" | "Europe/Tallinn" | "Vilnius" | "Europe/Vilnius" | "Baghdad" | "Asia/Baghdad" | "Istanbul" | "Europe/Istanbul" | "Kuwait" | "Asia/Kuwait" | "Minsk" | "Europe/Minsk" | "Moscow" | "Europe/Moscow" | "Nairobi" | "Africa/Nairobi" | "Riyadh" | "Asia/Riyadh" | "St. Petersburg" | "Volgograd" | "Europe/Volgograd" | "Tehran" | "Asia/Tehran" | "Abu Dhabi" | "Asia/Muscat" | "Baku" | "Asia/Baku" | "Muscat" | "Samara" | "Europe/Samara" | "Tbilisi" | "Asia/Tbilisi" | "Yerevan" | "Asia/Yerevan" | "Kabul" | "Asia/Kabul" | "Almaty" | "Asia/Almaty" | "Astana" | "Ekaterinburg" | "Asia/Yekaterinburg" | "Islamabad" | "Asia/Karachi" | "Karachi" | "Tashkent" | "Asia/Tashkent" | "Chennai" | "Asia/Kolkata" | "Kolkata" | "Mumbai" | "New Delhi" | "Sri Jayawardenepura" | "Asia/Colombo" | "Kathmandu" | "Asia/Kathmandu" | "Dhaka" | "Asia/Dhaka" | "Urumqi" | "Asia/Urumqi" | "Bangkok" | "Asia/Bangkok" | "Hanoi" | "Jakarta" | "Asia/Jakarta" | "Krasnoyarsk" | "Asia/Krasnoyarsk" | "Novosibirsk" | "Asia/Novosibirsk" | "Beijing" | "Asia/Shanghai" | "Chongqing" | "Asia/Chongqing" | "Hong Kong" | "Asia/Hong_Kong" | "Irkutsk" | "Asia/Irkutsk" | "Kuala Lumpur" | "Asia/Kuala_Lumpur" | "Perth" | "Australia/Perth" | "Singapore" | "Asia/Singapore" | "Taipei" | "Asia/Taipei" | "Ulaanbaatar" | "Asia/Ulaanbaatar" | "Osaka" | "Asia/Tokyo" | "Sapporo" | "Seoul" | "Asia/Seoul" | "Tokyo" | "Yakutsk" | "Asia/Yakutsk" | "Adelaide" | "Australia/Adelaide" | "Darwin" | "Australia/Darwin" | "Brisbane" | "Australia/Brisbane" | "Canberra" | "Australia/Canberra" | "Guam" | "Pacific/Guam" | "Hobart" | "Australia/Hobart" | "Melbourne" | "Australia/Melbourne" | "Port Moresby" | "Pacific/Port_Moresby" | "Sydney" | "Australia/Sydney" | "Vladivostok" | "Asia/Vladivostok" | "Magadan" | "Asia/Magadan" | "New Caledonia" | "Pacific/Noumea" | "Solomon Is." | "Pacific/Guadalcanal" | "Srednekolymsk" | "Asia/Srednekolymsk" | "Auckland" | "Pacific/Auckland" | "Fiji" | "Pacific/Fiji" | "Kamchatka" | "Asia/Kamchatka" | "Marshall Is." | "Pacific/Majuro" | "Wellington" | "Chatham Is." | "Pacific/Chatham" | "Nuku'alofa" | "Pacific/Tongatapu" | "Samoa" | "Pacific/Apia" | "Tokelau Is." | "Pacific/Fakaofo" | "America/Adak" | "America/Atka" | "US/Aleutian" | "America/Vancouver" | "Canada/Pacific" | "America/Miquelon" | "Australia/Eucla" | "Australia/LHI" | "Australia/Lord_Howe" | "Chile/EasterIsland" | "Pacific/Easter" | "Pacific/Gambier" | "Pacific/Pitcairn" | "Pacific/Marquesas" | "Pacific/Kiritimati" | "Pacific/Norfolk" | null;
+                    time_restriction_time_zone?: "International Date Line West" | "Etc/GMT+12" | "American Samoa" | "Pacific/Pago_Pago" | "Midway Island" | "Pacific/Midway" | "Hawaii" | "Pacific/Honolulu" | "Alaska" | "America/Juneau" | "Pacific Time (US & Canada)" | "America/Los_Angeles" | "Tijuana" | "America/Tijuana" | "Arizona" | "America/Phoenix" | "Mazatlan" | "America/Mazatlan" | "Mountain Time (US & Canada)" | "America/Denver" | "Central America" | "America/Guatemala" | "Central Time (US & Canada)" | "America/Chicago" | "Chihuahua" | "America/Chihuahua" | "Guadalajara" | "America/Mexico_City" | "Mexico City" | "Monterrey" | "America/Monterrey" | "Saskatchewan" | "America/Regina" | "Bogota" | "America/Bogota" | "Eastern Time (US & Canada)" | "America/New_York" | "Indiana (East)" | "America/Indiana/Indianapolis" | "Lima" | "America/Lima" | "Quito" | "Atlantic Time (Canada)" | "America/Halifax" | "Caracas" | "America/Caracas" | "Georgetown" | "America/Guyana" | "La Paz" | "America/La_Paz" | "Puerto Rico" | "America/Puerto_Rico" | "Santiago" | "America/Santiago" | "Newfoundland" | "America/St_Johns" | "Asuncion" | "America/Asuncion" | "Brasilia" | "America/Sao_Paulo" | "Buenos Aires" | "America/Argentina/Buenos_Aires" | "Montevideo" | "America/Montevideo" | "Greenland" | "America/Nuuk" | "Mid-Atlantic" | "Atlantic/South_Georgia" | "Azores" | "Atlantic/Azores" | "Cape Verde Is." | "Atlantic/Cape_Verde" | "Casablanca" | "Africa/Casablanca" | "Edinburgh" | "Europe/London" | "Lisbon" | "Europe/Lisbon" | "London" | "Monrovia" | "Africa/Monrovia" | "UTC" | "Etc/UTC" | "Amsterdam" | "Europe/Amsterdam" | "Belgrade" | "Europe/Belgrade" | "Berlin" | "Europe/Berlin" | "Bern" | "Europe/Zurich" | "Bratislava" | "Europe/Bratislava" | "Brussels" | "Europe/Brussels" | "Budapest" | "Europe/Budapest" | "Copenhagen" | "Europe/Copenhagen" | "Dublin" | "Europe/Dublin" | "Ljubljana" | "Europe/Ljubljana" | "Madrid" | "Europe/Madrid" | "Paris" | "Europe/Paris" | "Prague" | "Europe/Prague" | "Rome" | "Europe/Rome" | "Sarajevo" | "Europe/Sarajevo" | "Skopje" | "Europe/Skopje" | "Stockholm" | "Europe/Stockholm" | "Vienna" | "Europe/Vienna" | "Warsaw" | "Europe/Warsaw" | "West Central Africa" | "Africa/Algiers" | "Zagreb" | "Europe/Zagreb" | "Zurich" | "Athens" | "Europe/Athens" | "Bucharest" | "Europe/Bucharest" | "Cairo" | "Africa/Cairo" | "Harare" | "Africa/Harare" | "Helsinki" | "Europe/Helsinki" | "Jerusalem" | "Asia/Jerusalem" | "Kaliningrad" | "Europe/Kaliningrad" | "Kyiv" | "Europe/Kyiv" | "Pretoria" | "Africa/Johannesburg" | "Riga" | "Europe/Riga" | "Sofia" | "Europe/Sofia" | "Tallinn" | "Europe/Tallinn" | "Vilnius" | "Europe/Vilnius" | "Baghdad" | "Asia/Baghdad" | "Istanbul" | "Europe/Istanbul" | "Kuwait" | "Asia/Kuwait" | "Minsk" | "Europe/Minsk" | "Moscow" | "Europe/Moscow" | "Nairobi" | "Africa/Nairobi" | "Riyadh" | "Asia/Riyadh" | "St. Petersburg" | "Volgograd" | "Europe/Volgograd" | "Tehran" | "Asia/Tehran" | "Abu Dhabi" | "Asia/Muscat" | "Baku" | "Asia/Baku" | "Muscat" | "Samara" | "Europe/Samara" | "Tbilisi" | "Asia/Tbilisi" | "Yerevan" | "Asia/Yerevan" | "Kabul" | "Asia/Kabul" | "Almaty" | "Asia/Almaty" | "Astana" | "Ekaterinburg" | "Asia/Yekaterinburg" | "Islamabad" | "Asia/Karachi" | "Karachi" | "Tashkent" | "Asia/Tashkent" | "Chennai" | "Asia/Kolkata" | "Kolkata" | "Mumbai" | "New Delhi" | "Sri Jayawardenepura" | "Asia/Colombo" | "Kathmandu" | "Asia/Kathmandu" | "Dhaka" | "Asia/Dhaka" | "Urumqi" | "Asia/Urumqi" | "Rangoon" | "Asia/Yangon" | "Bangkok" | "Asia/Bangkok" | "Hanoi" | "Jakarta" | "Asia/Jakarta" | "Krasnoyarsk" | "Asia/Krasnoyarsk" | "Novosibirsk" | "Asia/Novosibirsk" | "Beijing" | "Asia/Shanghai" | "Chongqing" | "Asia/Chongqing" | "Hong Kong" | "Asia/Hong_Kong" | "Irkutsk" | "Asia/Irkutsk" | "Kuala Lumpur" | "Asia/Kuala_Lumpur" | "Perth" | "Australia/Perth" | "Singapore" | "Asia/Singapore" | "Taipei" | "Asia/Taipei" | "Ulaanbaatar" | "Asia/Ulaanbaatar" | "Osaka" | "Asia/Tokyo" | "Sapporo" | "Seoul" | "Asia/Seoul" | "Tokyo" | "Yakutsk" | "Asia/Yakutsk" | "Adelaide" | "Australia/Adelaide" | "Darwin" | "Australia/Darwin" | "Brisbane" | "Australia/Brisbane" | "Canberra" | "Australia/Canberra" | "Guam" | "Pacific/Guam" | "Hobart" | "Australia/Hobart" | "Melbourne" | "Australia/Melbourne" | "Port Moresby" | "Pacific/Port_Moresby" | "Sydney" | "Australia/Sydney" | "Vladivostok" | "Asia/Vladivostok" | "Magadan" | "Asia/Magadan" | "New Caledonia" | "Pacific/Noumea" | "Solomon Is." | "Pacific/Guadalcanal" | "Srednekolymsk" | "Asia/Srednekolymsk" | "Auckland" | "Pacific/Auckland" | "Fiji" | "Pacific/Fiji" | "Kamchatka" | "Asia/Kamchatka" | "Marshall Is." | "Pacific/Majuro" | "Wellington" | "Chatham Is." | "Pacific/Chatham" | "Nuku'alofa" | "Pacific/Tongatapu" | "Samoa" | "Pacific/Apia" | "Tokelau Is." | "Pacific/Fakaofo" | "America/Adak" | "America/Atka" | "US/Aleutian" | "America/Vancouver" | "Canada/Pacific" | "America/Miquelon" | "Australia/Eucla" | "Australia/LHI" | "Australia/Lord_Howe" | "Chile/EasterIsland" | "Pacific/Easter" | "Pacific/Gambier" | "Pacific/Pitcairn" | "Pacific/Marquesas" | "Pacific/Kiritimati" | "Pacific/Norfolk" | "Asia/Rangoon" | "Europe/Kiev" | null;
                     /** @description If time restrictions are set, alerts will follow this path when they arrive within the specified time ranges and meet the rules. */
                     time_restrictions?: {
                         /** @enum {string} */
@@ -12769,7 +13612,7 @@ export interface components {
             repeat_count: number | null;
             /** @description Initial delay for escalation path in minutes. Maximum 1 week (10080). */
             initial_delay?: number;
-            /** @description Re-trigger acknowledged alerts on this path after N minutes; null inherits the urgency/workspace default, negative = never. */
+            /** @description Re-trigger acknowledged alerts on this path after N minutes; null inherits the urgency/workspace default, -1 = never. */
             retrigger_timeout_minutes?: number | null;
             /** @description Date of creation */
             created_at?: string;
@@ -12784,6 +13627,12 @@ export interface components {
                 rule_type: "alert_urgency";
                 /** @description Alert urgency ids for which this escalation path should be used */
                 urgency_ids: string[];
+                /**
+                 * @description How the alert's urgency should be matched. is and is_not take exactly one id
+                 * @default is_one_of
+                 * @enum {string}
+                 */
+                operator: "is" | "is_not" | "is_one_of" | "is_not_one_of";
             } | {
                 /**
                  * @description The type of the escalation path rule
@@ -12834,6 +13683,12 @@ export interface components {
                 rule_type: "service";
                 /** @description Service ids for which this escalation path should be used */
                 service_ids: string[];
+                /**
+                 * @description How the alert's services should be matched. is and is_not take exactly one id
+                 * @default is_one_of
+                 * @enum {string}
+                 */
+                operator: "is" | "is_not" | "is_one_of" | "is_not_one_of";
             } | {
                 /**
                  * @description The type of the escalation path rule
@@ -12844,9 +13699,11 @@ export interface components {
                  * @description Time zone for the deferral window
                  * @enum {string}
                  */
-                time_zone: "International Date Line West" | "Etc/GMT+12" | "American Samoa" | "Pacific/Pago_Pago" | "Midway Island" | "Pacific/Midway" | "Hawaii" | "Pacific/Honolulu" | "Alaska" | "America/Juneau" | "Pacific Time (US & Canada)" | "America/Los_Angeles" | "Tijuana" | "America/Tijuana" | "Arizona" | "America/Phoenix" | "Mazatlan" | "America/Mazatlan" | "Mountain Time (US & Canada)" | "America/Denver" | "Central America" | "America/Guatemala" | "Central Time (US & Canada)" | "America/Chicago" | "Chihuahua" | "America/Chihuahua" | "Guadalajara" | "America/Mexico_City" | "Mexico City" | "Monterrey" | "America/Monterrey" | "Saskatchewan" | "America/Regina" | "Bogota" | "America/Bogota" | "Eastern Time (US & Canada)" | "America/New_York" | "Indiana (East)" | "America/Indiana/Indianapolis" | "Lima" | "America/Lima" | "Quito" | "Atlantic Time (Canada)" | "America/Halifax" | "Caracas" | "America/Caracas" | "Georgetown" | "America/Guyana" | "La Paz" | "America/La_Paz" | "Puerto Rico" | "America/Puerto_Rico" | "Santiago" | "America/Santiago" | "Newfoundland" | "America/St_Johns" | "Asuncion" | "America/Asuncion" | "Brasilia" | "America/Sao_Paulo" | "Buenos Aires" | "America/Argentina/Buenos_Aires" | "Montevideo" | "America/Montevideo" | "Greenland" | "America/Nuuk" | "Mid-Atlantic" | "Atlantic/South_Georgia" | "Azores" | "Atlantic/Azores" | "Cape Verde Is." | "Atlantic/Cape_Verde" | "Edinburgh" | "Europe/London" | "Lisbon" | "Europe/Lisbon" | "London" | "Monrovia" | "Africa/Monrovia" | "UTC" | "Etc/UTC" | "Amsterdam" | "Europe/Amsterdam" | "Belgrade" | "Europe/Belgrade" | "Berlin" | "Europe/Berlin" | "Bern" | "Europe/Zurich" | "Bratislava" | "Europe/Bratislava" | "Brussels" | "Europe/Brussels" | "Budapest" | "Europe/Budapest" | "Casablanca" | "Africa/Casablanca" | "Copenhagen" | "Europe/Copenhagen" | "Dublin" | "Europe/Dublin" | "Ljubljana" | "Europe/Ljubljana" | "Madrid" | "Europe/Madrid" | "Paris" | "Europe/Paris" | "Prague" | "Europe/Prague" | "Rome" | "Europe/Rome" | "Sarajevo" | "Europe/Sarajevo" | "Skopje" | "Europe/Skopje" | "Stockholm" | "Europe/Stockholm" | "Vienna" | "Europe/Vienna" | "Warsaw" | "Europe/Warsaw" | "West Central Africa" | "Africa/Algiers" | "Zagreb" | "Europe/Zagreb" | "Zurich" | "Athens" | "Europe/Athens" | "Bucharest" | "Europe/Bucharest" | "Cairo" | "Africa/Cairo" | "Harare" | "Africa/Harare" | "Helsinki" | "Europe/Helsinki" | "Jerusalem" | "Asia/Jerusalem" | "Kaliningrad" | "Europe/Kaliningrad" | "Pretoria" | "Africa/Johannesburg" | "Riga" | "Europe/Riga" | "Sofia" | "Europe/Sofia" | "Tallinn" | "Europe/Tallinn" | "Vilnius" | "Europe/Vilnius" | "Baghdad" | "Asia/Baghdad" | "Istanbul" | "Europe/Istanbul" | "Kuwait" | "Asia/Kuwait" | "Minsk" | "Europe/Minsk" | "Moscow" | "Europe/Moscow" | "Nairobi" | "Africa/Nairobi" | "Riyadh" | "Asia/Riyadh" | "St. Petersburg" | "Volgograd" | "Europe/Volgograd" | "Tehran" | "Asia/Tehran" | "Abu Dhabi" | "Asia/Muscat" | "Baku" | "Asia/Baku" | "Muscat" | "Samara" | "Europe/Samara" | "Tbilisi" | "Asia/Tbilisi" | "Yerevan" | "Asia/Yerevan" | "Kabul" | "Asia/Kabul" | "Almaty" | "Asia/Almaty" | "Astana" | "Ekaterinburg" | "Asia/Yekaterinburg" | "Islamabad" | "Asia/Karachi" | "Karachi" | "Tashkent" | "Asia/Tashkent" | "Chennai" | "Asia/Kolkata" | "Kolkata" | "Mumbai" | "New Delhi" | "Sri Jayawardenepura" | "Asia/Colombo" | "Kathmandu" | "Asia/Kathmandu" | "Dhaka" | "Asia/Dhaka" | "Urumqi" | "Asia/Urumqi" | "Bangkok" | "Asia/Bangkok" | "Hanoi" | "Jakarta" | "Asia/Jakarta" | "Krasnoyarsk" | "Asia/Krasnoyarsk" | "Novosibirsk" | "Asia/Novosibirsk" | "Beijing" | "Asia/Shanghai" | "Chongqing" | "Asia/Chongqing" | "Hong Kong" | "Asia/Hong_Kong" | "Irkutsk" | "Asia/Irkutsk" | "Kuala Lumpur" | "Asia/Kuala_Lumpur" | "Perth" | "Australia/Perth" | "Singapore" | "Asia/Singapore" | "Taipei" | "Asia/Taipei" | "Ulaanbaatar" | "Asia/Ulaanbaatar" | "Osaka" | "Asia/Tokyo" | "Sapporo" | "Seoul" | "Asia/Seoul" | "Tokyo" | "Yakutsk" | "Asia/Yakutsk" | "Adelaide" | "Australia/Adelaide" | "Darwin" | "Australia/Darwin" | "Brisbane" | "Australia/Brisbane" | "Canberra" | "Australia/Canberra" | "Guam" | "Pacific/Guam" | "Hobart" | "Australia/Hobart" | "Melbourne" | "Australia/Melbourne" | "Port Moresby" | "Pacific/Port_Moresby" | "Sydney" | "Australia/Sydney" | "Vladivostok" | "Asia/Vladivostok" | "Magadan" | "Asia/Magadan" | "New Caledonia" | "Pacific/Noumea" | "Solomon Is." | "Pacific/Guadalcanal" | "Srednekolymsk" | "Asia/Srednekolymsk" | "Auckland" | "Pacific/Auckland" | "Fiji" | "Pacific/Fiji" | "Kamchatka" | "Asia/Kamchatka" | "Marshall Is." | "Pacific/Majuro" | "Wellington" | "Chatham Is." | "Pacific/Chatham" | "Nuku'alofa" | "Pacific/Tongatapu" | "Samoa" | "Pacific/Apia" | "Tokelau Is." | "Pacific/Fakaofo" | "America/Adak" | "America/Atka" | "US/Aleutian" | "America/Vancouver" | "Canada/Pacific" | "America/Miquelon" | "Australia/Eucla" | "Australia/LHI" | "Australia/Lord_Howe" | "Chile/EasterIsland" | "Pacific/Easter" | "Pacific/Gambier" | "Pacific/Pitcairn" | "Pacific/Marquesas" | "Pacific/Kiritimati" | "Pacific/Norfolk";
+                time_zone: "International Date Line West" | "Etc/GMT+12" | "American Samoa" | "Pacific/Pago_Pago" | "Midway Island" | "Pacific/Midway" | "Hawaii" | "Pacific/Honolulu" | "Alaska" | "America/Juneau" | "Pacific Time (US & Canada)" | "America/Los_Angeles" | "Tijuana" | "America/Tijuana" | "Arizona" | "America/Phoenix" | "Mazatlan" | "America/Mazatlan" | "Mountain Time (US & Canada)" | "America/Denver" | "Central America" | "America/Guatemala" | "Central Time (US & Canada)" | "America/Chicago" | "Chihuahua" | "America/Chihuahua" | "Guadalajara" | "America/Mexico_City" | "Mexico City" | "Monterrey" | "America/Monterrey" | "Saskatchewan" | "America/Regina" | "Bogota" | "America/Bogota" | "Eastern Time (US & Canada)" | "America/New_York" | "Indiana (East)" | "America/Indiana/Indianapolis" | "Lima" | "America/Lima" | "Quito" | "Atlantic Time (Canada)" | "America/Halifax" | "Caracas" | "America/Caracas" | "Georgetown" | "America/Guyana" | "La Paz" | "America/La_Paz" | "Puerto Rico" | "America/Puerto_Rico" | "Santiago" | "America/Santiago" | "Newfoundland" | "America/St_Johns" | "Asuncion" | "America/Asuncion" | "Brasilia" | "America/Sao_Paulo" | "Buenos Aires" | "America/Argentina/Buenos_Aires" | "Montevideo" | "America/Montevideo" | "Greenland" | "America/Nuuk" | "Mid-Atlantic" | "Atlantic/South_Georgia" | "Azores" | "Atlantic/Azores" | "Cape Verde Is." | "Atlantic/Cape_Verde" | "Casablanca" | "Africa/Casablanca" | "Edinburgh" | "Europe/London" | "Lisbon" | "Europe/Lisbon" | "London" | "Monrovia" | "Africa/Monrovia" | "UTC" | "Etc/UTC" | "Amsterdam" | "Europe/Amsterdam" | "Belgrade" | "Europe/Belgrade" | "Berlin" | "Europe/Berlin" | "Bern" | "Europe/Zurich" | "Bratislava" | "Europe/Bratislava" | "Brussels" | "Europe/Brussels" | "Budapest" | "Europe/Budapest" | "Copenhagen" | "Europe/Copenhagen" | "Dublin" | "Europe/Dublin" | "Ljubljana" | "Europe/Ljubljana" | "Madrid" | "Europe/Madrid" | "Paris" | "Europe/Paris" | "Prague" | "Europe/Prague" | "Rome" | "Europe/Rome" | "Sarajevo" | "Europe/Sarajevo" | "Skopje" | "Europe/Skopje" | "Stockholm" | "Europe/Stockholm" | "Vienna" | "Europe/Vienna" | "Warsaw" | "Europe/Warsaw" | "West Central Africa" | "Africa/Algiers" | "Zagreb" | "Europe/Zagreb" | "Zurich" | "Athens" | "Europe/Athens" | "Bucharest" | "Europe/Bucharest" | "Cairo" | "Africa/Cairo" | "Harare" | "Africa/Harare" | "Helsinki" | "Europe/Helsinki" | "Jerusalem" | "Asia/Jerusalem" | "Kaliningrad" | "Europe/Kaliningrad" | "Kyiv" | "Europe/Kyiv" | "Pretoria" | "Africa/Johannesburg" | "Riga" | "Europe/Riga" | "Sofia" | "Europe/Sofia" | "Tallinn" | "Europe/Tallinn" | "Vilnius" | "Europe/Vilnius" | "Baghdad" | "Asia/Baghdad" | "Istanbul" | "Europe/Istanbul" | "Kuwait" | "Asia/Kuwait" | "Minsk" | "Europe/Minsk" | "Moscow" | "Europe/Moscow" | "Nairobi" | "Africa/Nairobi" | "Riyadh" | "Asia/Riyadh" | "St. Petersburg" | "Volgograd" | "Europe/Volgograd" | "Tehran" | "Asia/Tehran" | "Abu Dhabi" | "Asia/Muscat" | "Baku" | "Asia/Baku" | "Muscat" | "Samara" | "Europe/Samara" | "Tbilisi" | "Asia/Tbilisi" | "Yerevan" | "Asia/Yerevan" | "Kabul" | "Asia/Kabul" | "Almaty" | "Asia/Almaty" | "Astana" | "Ekaterinburg" | "Asia/Yekaterinburg" | "Islamabad" | "Asia/Karachi" | "Karachi" | "Tashkent" | "Asia/Tashkent" | "Chennai" | "Asia/Kolkata" | "Kolkata" | "Mumbai" | "New Delhi" | "Sri Jayawardenepura" | "Asia/Colombo" | "Kathmandu" | "Asia/Kathmandu" | "Dhaka" | "Asia/Dhaka" | "Urumqi" | "Asia/Urumqi" | "Rangoon" | "Asia/Yangon" | "Bangkok" | "Asia/Bangkok" | "Hanoi" | "Jakarta" | "Asia/Jakarta" | "Krasnoyarsk" | "Asia/Krasnoyarsk" | "Novosibirsk" | "Asia/Novosibirsk" | "Beijing" | "Asia/Shanghai" | "Chongqing" | "Asia/Chongqing" | "Hong Kong" | "Asia/Hong_Kong" | "Irkutsk" | "Asia/Irkutsk" | "Kuala Lumpur" | "Asia/Kuala_Lumpur" | "Perth" | "Australia/Perth" | "Singapore" | "Asia/Singapore" | "Taipei" | "Asia/Taipei" | "Ulaanbaatar" | "Asia/Ulaanbaatar" | "Osaka" | "Asia/Tokyo" | "Sapporo" | "Seoul" | "Asia/Seoul" | "Tokyo" | "Yakutsk" | "Asia/Yakutsk" | "Adelaide" | "Australia/Adelaide" | "Darwin" | "Australia/Darwin" | "Brisbane" | "Australia/Brisbane" | "Canberra" | "Australia/Canberra" | "Guam" | "Pacific/Guam" | "Hobart" | "Australia/Hobart" | "Melbourne" | "Australia/Melbourne" | "Port Moresby" | "Pacific/Port_Moresby" | "Sydney" | "Australia/Sydney" | "Vladivostok" | "Asia/Vladivostok" | "Magadan" | "Asia/Magadan" | "New Caledonia" | "Pacific/Noumea" | "Solomon Is." | "Pacific/Guadalcanal" | "Srednekolymsk" | "Asia/Srednekolymsk" | "Auckland" | "Pacific/Auckland" | "Fiji" | "Pacific/Fiji" | "Kamchatka" | "Asia/Kamchatka" | "Marshall Is." | "Pacific/Majuro" | "Wellington" | "Chatham Is." | "Pacific/Chatham" | "Nuku'alofa" | "Pacific/Tongatapu" | "Samoa" | "Pacific/Apia" | "Tokelau Is." | "Pacific/Fakaofo" | "America/Adak" | "America/Atka" | "US/Aleutian" | "America/Vancouver" | "Canada/Pacific" | "America/Miquelon" | "Australia/Eucla" | "Australia/LHI" | "Australia/Lord_Howe" | "Chile/EasterIsland" | "Pacific/Easter" | "Pacific/Gambier" | "Pacific/Pitcairn" | "Pacific/Marquesas" | "Pacific/Kiritimati" | "Pacific/Norfolk" | "Asia/Rangoon" | "Europe/Kiev";
                 /** @description Time windows during which alerts are deferred */
                 time_blocks: {
+                    /** @description Unique ID of the time block */
+                    readonly id?: string;
                     /** @default false */
                     monday: boolean;
                     /** @default false */
@@ -12867,7 +13724,10 @@ export interface components {
                     end_time?: string;
                     /** @default false */
                     all_day: boolean;
+                    /** @description Order of this time block, starting at 1. Defaults to the block's 1-based position in time_blocks when omitted. */
                     position?: number | null;
+                    /** @description Whether the window crosses midnight. Derived from start_time and end_time; accepted and ignored on write. */
+                    readonly ends_next_day?: boolean;
                 }[];
             } | {
                 /**
@@ -12894,11 +13754,168 @@ export interface components {
                  */
                 operator: "is_set" | "is_not_set";
             }) | null)[];
+            /** @description Rules deciding whether an alert pages audible or quiet, evaluated in order — the first matching rule's notification_type wins, otherwise notification_type_fallback applies. When present, the path's notification_type is aligned to notification_type_fallback. Only available when notification type conditions are enabled for the team. */
+            notification_type_rules?: {
+                /**
+                 * @description Outcome when this rule matches
+                 * @default audible
+                 * @enum {string}
+                 */
+                notification_type: "audible" | "quiet";
+                /**
+                 * @description Whether all or any of the rule's conditions must match
+                 * @default match-all-rules
+                 * @enum {string}
+                 */
+                match_mode: "match-all-rules" | "match-any-rule";
+                /** @description Conditions combined per match_mode, at least one per rule. A deferral_window condition matches when the alert falls inside its time blocks. */
+                conditions: ({
+                    /**
+                     * @description The type of the escalation path rule
+                     * @enum {string}
+                     */
+                    rule_type: "alert_urgency";
+                    /** @description Alert urgency ids for which this escalation path should be used */
+                    urgency_ids: string[];
+                    /**
+                     * @description How the alert's urgency should be matched. is and is_not take exactly one id
+                     * @default is_one_of
+                     * @enum {string}
+                     */
+                    operator: "is" | "is_not" | "is_one_of" | "is_not_one_of";
+                } | {
+                    /**
+                     * @description The type of the escalation path rule
+                     * @enum {string}
+                     */
+                    rule_type: "working_hour";
+                    /** @description Whether the escalation path should be used within working hours */
+                    within_working_hour: boolean;
+                } | {
+                    /**
+                     * @description The type of the escalation path rule
+                     * @enum {string}
+                     */
+                    rule_type: "json_path";
+                    /** @description JSON path to extract value from payload */
+                    json_path: string;
+                    /**
+                     * @description How JSON path value should be matched
+                     * @enum {string}
+                     */
+                    operator: "is" | "is_not" | "contains" | "does_not_contain" | "contains_key" | "does_not_contain_key" | "starts_with" | "does_not_start_with" | "matches" | "does_not_match" | "is_one_of" | "is_not_one_of" | "is_set" | "is_not_set";
+                    /** @description Value with which JSON path value should be matched */
+                    value?: string | null;
+                    /** @description Values to match against (for is_one_of / is_not_one_of operators) */
+                    values?: string[];
+                } | {
+                    /**
+                     * @description The type of the escalation path rule
+                     * @enum {string}
+                     */
+                    rule_type: "field";
+                    /** @description The type of the fieldable (e.g., AlertField) */
+                    fieldable_type: string;
+                    /** @description The ID of the alert field */
+                    fieldable_id: string;
+                    /**
+                     * @description How the alert field value should be matched
+                     * @enum {string}
+                     */
+                    operator: "is" | "is_not" | "is_one_of" | "is_not_one_of" | "contains" | "does_not_contain" | "is_empty" | "is_not_empty" | "contains_key" | "does_not_contain_key" | "starts_with" | "does_not_start_with" | "matches" | "does_not_match";
+                    /** @description Values to match against */
+                    values?: string[];
+                } | {
+                    /**
+                     * @description The type of the escalation path rule
+                     * @enum {string}
+                     */
+                    rule_type: "service";
+                    /** @description Service ids for which this escalation path should be used */
+                    service_ids: string[];
+                    /**
+                     * @description How the alert's services should be matched. is and is_not take exactly one id
+                     * @default is_one_of
+                     * @enum {string}
+                     */
+                    operator: "is" | "is_not" | "is_one_of" | "is_not_one_of";
+                } | {
+                    /**
+                     * @description The type of the escalation path rule
+                     * @enum {string}
+                     */
+                    rule_type: "deferral_window";
+                    /**
+                     * @description Time zone for the deferral window
+                     * @enum {string}
+                     */
+                    time_zone: "International Date Line West" | "Etc/GMT+12" | "American Samoa" | "Pacific/Pago_Pago" | "Midway Island" | "Pacific/Midway" | "Hawaii" | "Pacific/Honolulu" | "Alaska" | "America/Juneau" | "Pacific Time (US & Canada)" | "America/Los_Angeles" | "Tijuana" | "America/Tijuana" | "Arizona" | "America/Phoenix" | "Mazatlan" | "America/Mazatlan" | "Mountain Time (US & Canada)" | "America/Denver" | "Central America" | "America/Guatemala" | "Central Time (US & Canada)" | "America/Chicago" | "Chihuahua" | "America/Chihuahua" | "Guadalajara" | "America/Mexico_City" | "Mexico City" | "Monterrey" | "America/Monterrey" | "Saskatchewan" | "America/Regina" | "Bogota" | "America/Bogota" | "Eastern Time (US & Canada)" | "America/New_York" | "Indiana (East)" | "America/Indiana/Indianapolis" | "Lima" | "America/Lima" | "Quito" | "Atlantic Time (Canada)" | "America/Halifax" | "Caracas" | "America/Caracas" | "Georgetown" | "America/Guyana" | "La Paz" | "America/La_Paz" | "Puerto Rico" | "America/Puerto_Rico" | "Santiago" | "America/Santiago" | "Newfoundland" | "America/St_Johns" | "Asuncion" | "America/Asuncion" | "Brasilia" | "America/Sao_Paulo" | "Buenos Aires" | "America/Argentina/Buenos_Aires" | "Montevideo" | "America/Montevideo" | "Greenland" | "America/Nuuk" | "Mid-Atlantic" | "Atlantic/South_Georgia" | "Azores" | "Atlantic/Azores" | "Cape Verde Is." | "Atlantic/Cape_Verde" | "Casablanca" | "Africa/Casablanca" | "Edinburgh" | "Europe/London" | "Lisbon" | "Europe/Lisbon" | "London" | "Monrovia" | "Africa/Monrovia" | "UTC" | "Etc/UTC" | "Amsterdam" | "Europe/Amsterdam" | "Belgrade" | "Europe/Belgrade" | "Berlin" | "Europe/Berlin" | "Bern" | "Europe/Zurich" | "Bratislava" | "Europe/Bratislava" | "Brussels" | "Europe/Brussels" | "Budapest" | "Europe/Budapest" | "Copenhagen" | "Europe/Copenhagen" | "Dublin" | "Europe/Dublin" | "Ljubljana" | "Europe/Ljubljana" | "Madrid" | "Europe/Madrid" | "Paris" | "Europe/Paris" | "Prague" | "Europe/Prague" | "Rome" | "Europe/Rome" | "Sarajevo" | "Europe/Sarajevo" | "Skopje" | "Europe/Skopje" | "Stockholm" | "Europe/Stockholm" | "Vienna" | "Europe/Vienna" | "Warsaw" | "Europe/Warsaw" | "West Central Africa" | "Africa/Algiers" | "Zagreb" | "Europe/Zagreb" | "Zurich" | "Athens" | "Europe/Athens" | "Bucharest" | "Europe/Bucharest" | "Cairo" | "Africa/Cairo" | "Harare" | "Africa/Harare" | "Helsinki" | "Europe/Helsinki" | "Jerusalem" | "Asia/Jerusalem" | "Kaliningrad" | "Europe/Kaliningrad" | "Kyiv" | "Europe/Kyiv" | "Pretoria" | "Africa/Johannesburg" | "Riga" | "Europe/Riga" | "Sofia" | "Europe/Sofia" | "Tallinn" | "Europe/Tallinn" | "Vilnius" | "Europe/Vilnius" | "Baghdad" | "Asia/Baghdad" | "Istanbul" | "Europe/Istanbul" | "Kuwait" | "Asia/Kuwait" | "Minsk" | "Europe/Minsk" | "Moscow" | "Europe/Moscow" | "Nairobi" | "Africa/Nairobi" | "Riyadh" | "Asia/Riyadh" | "St. Petersburg" | "Volgograd" | "Europe/Volgograd" | "Tehran" | "Asia/Tehran" | "Abu Dhabi" | "Asia/Muscat" | "Baku" | "Asia/Baku" | "Muscat" | "Samara" | "Europe/Samara" | "Tbilisi" | "Asia/Tbilisi" | "Yerevan" | "Asia/Yerevan" | "Kabul" | "Asia/Kabul" | "Almaty" | "Asia/Almaty" | "Astana" | "Ekaterinburg" | "Asia/Yekaterinburg" | "Islamabad" | "Asia/Karachi" | "Karachi" | "Tashkent" | "Asia/Tashkent" | "Chennai" | "Asia/Kolkata" | "Kolkata" | "Mumbai" | "New Delhi" | "Sri Jayawardenepura" | "Asia/Colombo" | "Kathmandu" | "Asia/Kathmandu" | "Dhaka" | "Asia/Dhaka" | "Urumqi" | "Asia/Urumqi" | "Rangoon" | "Asia/Yangon" | "Bangkok" | "Asia/Bangkok" | "Hanoi" | "Jakarta" | "Asia/Jakarta" | "Krasnoyarsk" | "Asia/Krasnoyarsk" | "Novosibirsk" | "Asia/Novosibirsk" | "Beijing" | "Asia/Shanghai" | "Chongqing" | "Asia/Chongqing" | "Hong Kong" | "Asia/Hong_Kong" | "Irkutsk" | "Asia/Irkutsk" | "Kuala Lumpur" | "Asia/Kuala_Lumpur" | "Perth" | "Australia/Perth" | "Singapore" | "Asia/Singapore" | "Taipei" | "Asia/Taipei" | "Ulaanbaatar" | "Asia/Ulaanbaatar" | "Osaka" | "Asia/Tokyo" | "Sapporo" | "Seoul" | "Asia/Seoul" | "Tokyo" | "Yakutsk" | "Asia/Yakutsk" | "Adelaide" | "Australia/Adelaide" | "Darwin" | "Australia/Darwin" | "Brisbane" | "Australia/Brisbane" | "Canberra" | "Australia/Canberra" | "Guam" | "Pacific/Guam" | "Hobart" | "Australia/Hobart" | "Melbourne" | "Australia/Melbourne" | "Port Moresby" | "Pacific/Port_Moresby" | "Sydney" | "Australia/Sydney" | "Vladivostok" | "Asia/Vladivostok" | "Magadan" | "Asia/Magadan" | "New Caledonia" | "Pacific/Noumea" | "Solomon Is." | "Pacific/Guadalcanal" | "Srednekolymsk" | "Asia/Srednekolymsk" | "Auckland" | "Pacific/Auckland" | "Fiji" | "Pacific/Fiji" | "Kamchatka" | "Asia/Kamchatka" | "Marshall Is." | "Pacific/Majuro" | "Wellington" | "Chatham Is." | "Pacific/Chatham" | "Nuku'alofa" | "Pacific/Tongatapu" | "Samoa" | "Pacific/Apia" | "Tokelau Is." | "Pacific/Fakaofo" | "America/Adak" | "America/Atka" | "US/Aleutian" | "America/Vancouver" | "Canada/Pacific" | "America/Miquelon" | "Australia/Eucla" | "Australia/LHI" | "Australia/Lord_Howe" | "Chile/EasterIsland" | "Pacific/Easter" | "Pacific/Gambier" | "Pacific/Pitcairn" | "Pacific/Marquesas" | "Pacific/Kiritimati" | "Pacific/Norfolk" | "Asia/Rangoon" | "Europe/Kiev";
+                    /** @description Time windows during which alerts are deferred */
+                    time_blocks: {
+                        /** @description Unique ID of the time block */
+                        readonly id?: string;
+                        /** @default false */
+                        monday: boolean;
+                        /** @default false */
+                        tuesday: boolean;
+                        /** @default false */
+                        wednesday: boolean;
+                        /** @default false */
+                        thursday: boolean;
+                        /** @default false */
+                        friday: boolean;
+                        /** @default false */
+                        saturday: boolean;
+                        /** @default false */
+                        sunday: boolean;
+                        /** @description Formatted as HH:MM */
+                        start_time?: string;
+                        /** @description Formatted as HH:MM */
+                        end_time?: string;
+                        /** @default false */
+                        all_day: boolean;
+                        /** @description Order of this time block, starting at 1. Defaults to the block's 1-based position in time_blocks when omitted. */
+                        position?: number | null;
+                        /** @description Whether the window crosses midnight. Derived from start_time and end_time; accepted and ignored on write. */
+                        readonly ends_next_day?: boolean;
+                    }[];
+                } | {
+                    /**
+                     * @description The type of the escalation path rule
+                     * @enum {string}
+                     */
+                    rule_type: "source";
+                    /**
+                     * @description How the alert source should be matched
+                     * @enum {string}
+                     */
+                    operator: "is" | "is_not" | "is_one_of" | "is_not_one_of";
+                    /** @description Alert source values to match against (e.g., manual, datadog) */
+                    values: string[];
+                } | {
+                    /**
+                     * @description The type of the escalation path rule
+                     * @enum {string}
+                     */
+                    rule_type: "related_incidents";
+                    /**
+                     * @description Whether the alert must (or must not) have related incidents
+                     * @enum {string}
+                     */
+                    operator: "is_set" | "is_not_set";
+                })[];
+            }[];
+            /**
+             * @description Paged when no notification type rule matches. Considered only when notification_type_rules are present — the path's notification_type is aligned to it; without rules it is aligned to notification_type instead. Only available when notification type conditions are enabled for the team.
+             * @default audible
+             * @enum {string}
+             */
+            notification_type_fallback: "audible" | "quiet";
             /**
              * @description Time zone used for time restrictions.
              * @enum {string|null}
              */
-            time_restriction_time_zone?: "International Date Line West" | "Etc/GMT+12" | "American Samoa" | "Pacific/Pago_Pago" | "Midway Island" | "Pacific/Midway" | "Hawaii" | "Pacific/Honolulu" | "Alaska" | "America/Juneau" | "Pacific Time (US & Canada)" | "America/Los_Angeles" | "Tijuana" | "America/Tijuana" | "Arizona" | "America/Phoenix" | "Mazatlan" | "America/Mazatlan" | "Mountain Time (US & Canada)" | "America/Denver" | "Central America" | "America/Guatemala" | "Central Time (US & Canada)" | "America/Chicago" | "Chihuahua" | "America/Chihuahua" | "Guadalajara" | "America/Mexico_City" | "Mexico City" | "Monterrey" | "America/Monterrey" | "Saskatchewan" | "America/Regina" | "Bogota" | "America/Bogota" | "Eastern Time (US & Canada)" | "America/New_York" | "Indiana (East)" | "America/Indiana/Indianapolis" | "Lima" | "America/Lima" | "Quito" | "Atlantic Time (Canada)" | "America/Halifax" | "Caracas" | "America/Caracas" | "Georgetown" | "America/Guyana" | "La Paz" | "America/La_Paz" | "Puerto Rico" | "America/Puerto_Rico" | "Santiago" | "America/Santiago" | "Newfoundland" | "America/St_Johns" | "Asuncion" | "America/Asuncion" | "Brasilia" | "America/Sao_Paulo" | "Buenos Aires" | "America/Argentina/Buenos_Aires" | "Montevideo" | "America/Montevideo" | "Greenland" | "America/Nuuk" | "Mid-Atlantic" | "Atlantic/South_Georgia" | "Azores" | "Atlantic/Azores" | "Cape Verde Is." | "Atlantic/Cape_Verde" | "Edinburgh" | "Europe/London" | "Lisbon" | "Europe/Lisbon" | "London" | "Monrovia" | "Africa/Monrovia" | "UTC" | "Etc/UTC" | "Amsterdam" | "Europe/Amsterdam" | "Belgrade" | "Europe/Belgrade" | "Berlin" | "Europe/Berlin" | "Bern" | "Europe/Zurich" | "Bratislava" | "Europe/Bratislava" | "Brussels" | "Europe/Brussels" | "Budapest" | "Europe/Budapest" | "Casablanca" | "Africa/Casablanca" | "Copenhagen" | "Europe/Copenhagen" | "Dublin" | "Europe/Dublin" | "Ljubljana" | "Europe/Ljubljana" | "Madrid" | "Europe/Madrid" | "Paris" | "Europe/Paris" | "Prague" | "Europe/Prague" | "Rome" | "Europe/Rome" | "Sarajevo" | "Europe/Sarajevo" | "Skopje" | "Europe/Skopje" | "Stockholm" | "Europe/Stockholm" | "Vienna" | "Europe/Vienna" | "Warsaw" | "Europe/Warsaw" | "West Central Africa" | "Africa/Algiers" | "Zagreb" | "Europe/Zagreb" | "Zurich" | "Athens" | "Europe/Athens" | "Bucharest" | "Europe/Bucharest" | "Cairo" | "Africa/Cairo" | "Harare" | "Africa/Harare" | "Helsinki" | "Europe/Helsinki" | "Jerusalem" | "Asia/Jerusalem" | "Kaliningrad" | "Europe/Kaliningrad" | "Pretoria" | "Africa/Johannesburg" | "Riga" | "Europe/Riga" | "Sofia" | "Europe/Sofia" | "Tallinn" | "Europe/Tallinn" | "Vilnius" | "Europe/Vilnius" | "Baghdad" | "Asia/Baghdad" | "Istanbul" | "Europe/Istanbul" | "Kuwait" | "Asia/Kuwait" | "Minsk" | "Europe/Minsk" | "Moscow" | "Europe/Moscow" | "Nairobi" | "Africa/Nairobi" | "Riyadh" | "Asia/Riyadh" | "St. Petersburg" | "Volgograd" | "Europe/Volgograd" | "Tehran" | "Asia/Tehran" | "Abu Dhabi" | "Asia/Muscat" | "Baku" | "Asia/Baku" | "Muscat" | "Samara" | "Europe/Samara" | "Tbilisi" | "Asia/Tbilisi" | "Yerevan" | "Asia/Yerevan" | "Kabul" | "Asia/Kabul" | "Almaty" | "Asia/Almaty" | "Astana" | "Ekaterinburg" | "Asia/Yekaterinburg" | "Islamabad" | "Asia/Karachi" | "Karachi" | "Tashkent" | "Asia/Tashkent" | "Chennai" | "Asia/Kolkata" | "Kolkata" | "Mumbai" | "New Delhi" | "Sri Jayawardenepura" | "Asia/Colombo" | "Kathmandu" | "Asia/Kathmandu" | "Dhaka" | "Asia/Dhaka" | "Urumqi" | "Asia/Urumqi" | "Bangkok" | "Asia/Bangkok" | "Hanoi" | "Jakarta" | "Asia/Jakarta" | "Krasnoyarsk" | "Asia/Krasnoyarsk" | "Novosibirsk" | "Asia/Novosibirsk" | "Beijing" | "Asia/Shanghai" | "Chongqing" | "Asia/Chongqing" | "Hong Kong" | "Asia/Hong_Kong" | "Irkutsk" | "Asia/Irkutsk" | "Kuala Lumpur" | "Asia/Kuala_Lumpur" | "Perth" | "Australia/Perth" | "Singapore" | "Asia/Singapore" | "Taipei" | "Asia/Taipei" | "Ulaanbaatar" | "Asia/Ulaanbaatar" | "Osaka" | "Asia/Tokyo" | "Sapporo" | "Seoul" | "Asia/Seoul" | "Tokyo" | "Yakutsk" | "Asia/Yakutsk" | "Adelaide" | "Australia/Adelaide" | "Darwin" | "Australia/Darwin" | "Brisbane" | "Australia/Brisbane" | "Canberra" | "Australia/Canberra" | "Guam" | "Pacific/Guam" | "Hobart" | "Australia/Hobart" | "Melbourne" | "Australia/Melbourne" | "Port Moresby" | "Pacific/Port_Moresby" | "Sydney" | "Australia/Sydney" | "Vladivostok" | "Asia/Vladivostok" | "Magadan" | "Asia/Magadan" | "New Caledonia" | "Pacific/Noumea" | "Solomon Is." | "Pacific/Guadalcanal" | "Srednekolymsk" | "Asia/Srednekolymsk" | "Auckland" | "Pacific/Auckland" | "Fiji" | "Pacific/Fiji" | "Kamchatka" | "Asia/Kamchatka" | "Marshall Is." | "Pacific/Majuro" | "Wellington" | "Chatham Is." | "Pacific/Chatham" | "Nuku'alofa" | "Pacific/Tongatapu" | "Samoa" | "Pacific/Apia" | "Tokelau Is." | "Pacific/Fakaofo" | "America/Adak" | "America/Atka" | "US/Aleutian" | "America/Vancouver" | "Canada/Pacific" | "America/Miquelon" | "Australia/Eucla" | "Australia/LHI" | "Australia/Lord_Howe" | "Chile/EasterIsland" | "Pacific/Easter" | "Pacific/Gambier" | "Pacific/Pitcairn" | "Pacific/Marquesas" | "Pacific/Kiritimati" | "Pacific/Norfolk" | null;
+            time_restriction_time_zone?: "International Date Line West" | "Etc/GMT+12" | "American Samoa" | "Pacific/Pago_Pago" | "Midway Island" | "Pacific/Midway" | "Hawaii" | "Pacific/Honolulu" | "Alaska" | "America/Juneau" | "Pacific Time (US & Canada)" | "America/Los_Angeles" | "Tijuana" | "America/Tijuana" | "Arizona" | "America/Phoenix" | "Mazatlan" | "America/Mazatlan" | "Mountain Time (US & Canada)" | "America/Denver" | "Central America" | "America/Guatemala" | "Central Time (US & Canada)" | "America/Chicago" | "Chihuahua" | "America/Chihuahua" | "Guadalajara" | "America/Mexico_City" | "Mexico City" | "Monterrey" | "America/Monterrey" | "Saskatchewan" | "America/Regina" | "Bogota" | "America/Bogota" | "Eastern Time (US & Canada)" | "America/New_York" | "Indiana (East)" | "America/Indiana/Indianapolis" | "Lima" | "America/Lima" | "Quito" | "Atlantic Time (Canada)" | "America/Halifax" | "Caracas" | "America/Caracas" | "Georgetown" | "America/Guyana" | "La Paz" | "America/La_Paz" | "Puerto Rico" | "America/Puerto_Rico" | "Santiago" | "America/Santiago" | "Newfoundland" | "America/St_Johns" | "Asuncion" | "America/Asuncion" | "Brasilia" | "America/Sao_Paulo" | "Buenos Aires" | "America/Argentina/Buenos_Aires" | "Montevideo" | "America/Montevideo" | "Greenland" | "America/Nuuk" | "Mid-Atlantic" | "Atlantic/South_Georgia" | "Azores" | "Atlantic/Azores" | "Cape Verde Is." | "Atlantic/Cape_Verde" | "Casablanca" | "Africa/Casablanca" | "Edinburgh" | "Europe/London" | "Lisbon" | "Europe/Lisbon" | "London" | "Monrovia" | "Africa/Monrovia" | "UTC" | "Etc/UTC" | "Amsterdam" | "Europe/Amsterdam" | "Belgrade" | "Europe/Belgrade" | "Berlin" | "Europe/Berlin" | "Bern" | "Europe/Zurich" | "Bratislava" | "Europe/Bratislava" | "Brussels" | "Europe/Brussels" | "Budapest" | "Europe/Budapest" | "Copenhagen" | "Europe/Copenhagen" | "Dublin" | "Europe/Dublin" | "Ljubljana" | "Europe/Ljubljana" | "Madrid" | "Europe/Madrid" | "Paris" | "Europe/Paris" | "Prague" | "Europe/Prague" | "Rome" | "Europe/Rome" | "Sarajevo" | "Europe/Sarajevo" | "Skopje" | "Europe/Skopje" | "Stockholm" | "Europe/Stockholm" | "Vienna" | "Europe/Vienna" | "Warsaw" | "Europe/Warsaw" | "West Central Africa" | "Africa/Algiers" | "Zagreb" | "Europe/Zagreb" | "Zurich" | "Athens" | "Europe/Athens" | "Bucharest" | "Europe/Bucharest" | "Cairo" | "Africa/Cairo" | "Harare" | "Africa/Harare" | "Helsinki" | "Europe/Helsinki" | "Jerusalem" | "Asia/Jerusalem" | "Kaliningrad" | "Europe/Kaliningrad" | "Kyiv" | "Europe/Kyiv" | "Pretoria" | "Africa/Johannesburg" | "Riga" | "Europe/Riga" | "Sofia" | "Europe/Sofia" | "Tallinn" | "Europe/Tallinn" | "Vilnius" | "Europe/Vilnius" | "Baghdad" | "Asia/Baghdad" | "Istanbul" | "Europe/Istanbul" | "Kuwait" | "Asia/Kuwait" | "Minsk" | "Europe/Minsk" | "Moscow" | "Europe/Moscow" | "Nairobi" | "Africa/Nairobi" | "Riyadh" | "Asia/Riyadh" | "St. Petersburg" | "Volgograd" | "Europe/Volgograd" | "Tehran" | "Asia/Tehran" | "Abu Dhabi" | "Asia/Muscat" | "Baku" | "Asia/Baku" | "Muscat" | "Samara" | "Europe/Samara" | "Tbilisi" | "Asia/Tbilisi" | "Yerevan" | "Asia/Yerevan" | "Kabul" | "Asia/Kabul" | "Almaty" | "Asia/Almaty" | "Astana" | "Ekaterinburg" | "Asia/Yekaterinburg" | "Islamabad" | "Asia/Karachi" | "Karachi" | "Tashkent" | "Asia/Tashkent" | "Chennai" | "Asia/Kolkata" | "Kolkata" | "Mumbai" | "New Delhi" | "Sri Jayawardenepura" | "Asia/Colombo" | "Kathmandu" | "Asia/Kathmandu" | "Dhaka" | "Asia/Dhaka" | "Urumqi" | "Asia/Urumqi" | "Rangoon" | "Asia/Yangon" | "Bangkok" | "Asia/Bangkok" | "Hanoi" | "Jakarta" | "Asia/Jakarta" | "Krasnoyarsk" | "Asia/Krasnoyarsk" | "Novosibirsk" | "Asia/Novosibirsk" | "Beijing" | "Asia/Shanghai" | "Chongqing" | "Asia/Chongqing" | "Hong Kong" | "Asia/Hong_Kong" | "Irkutsk" | "Asia/Irkutsk" | "Kuala Lumpur" | "Asia/Kuala_Lumpur" | "Perth" | "Australia/Perth" | "Singapore" | "Asia/Singapore" | "Taipei" | "Asia/Taipei" | "Ulaanbaatar" | "Asia/Ulaanbaatar" | "Osaka" | "Asia/Tokyo" | "Sapporo" | "Seoul" | "Asia/Seoul" | "Tokyo" | "Yakutsk" | "Asia/Yakutsk" | "Adelaide" | "Australia/Adelaide" | "Darwin" | "Australia/Darwin" | "Brisbane" | "Australia/Brisbane" | "Canberra" | "Australia/Canberra" | "Guam" | "Pacific/Guam" | "Hobart" | "Australia/Hobart" | "Melbourne" | "Australia/Melbourne" | "Port Moresby" | "Pacific/Port_Moresby" | "Sydney" | "Australia/Sydney" | "Vladivostok" | "Asia/Vladivostok" | "Magadan" | "Asia/Magadan" | "New Caledonia" | "Pacific/Noumea" | "Solomon Is." | "Pacific/Guadalcanal" | "Srednekolymsk" | "Asia/Srednekolymsk" | "Auckland" | "Pacific/Auckland" | "Fiji" | "Pacific/Fiji" | "Kamchatka" | "Asia/Kamchatka" | "Marshall Is." | "Pacific/Majuro" | "Wellington" | "Chatham Is." | "Pacific/Chatham" | "Nuku'alofa" | "Pacific/Tongatapu" | "Samoa" | "Pacific/Apia" | "Tokelau Is." | "Pacific/Fakaofo" | "America/Adak" | "America/Atka" | "US/Aleutian" | "America/Vancouver" | "Canada/Pacific" | "America/Miquelon" | "Australia/Eucla" | "Australia/LHI" | "Australia/Lord_Howe" | "Chile/EasterIsland" | "Pacific/Easter" | "Pacific/Gambier" | "Pacific/Pitcairn" | "Pacific/Marquesas" | "Pacific/Kiritimati" | "Pacific/Norfolk" | "Asia/Rangoon" | "Europe/Kiev" | null;
             /** @description If time restrictions are set, alerts will follow this path when they arrive within the specified time ranges and meet the rules. */
             time_restrictions?: {
                 /** @enum {string} */
@@ -12986,6 +14003,8 @@ export interface components {
         };
         update_escalation_policy_level: {
             data: {
+                /** @description Accepted for JSON:API client compatibility, but ignored. The resource to update is identified by the id in the path. */
+                id?: string;
                 /** @enum {string} */
                 type: "escalation_levels";
                 attributes: {
@@ -13129,6 +14148,8 @@ export interface components {
         };
         update_form_field_option: {
             data: {
+                /** @description Accepted for JSON:API client compatibility, but ignored. The resource to update is identified by the id in the path. */
+                id?: string;
                 /** @enum {string} */
                 type: "form_field_options";
                 attributes: {
@@ -13207,6 +14228,8 @@ export interface components {
         };
         update_form_field_placement_condition: {
             data: {
+                /** @description Accepted for JSON:API client compatibility, but ignored. The resource to update is identified by the id in the path. */
+                id?: string;
                 /** @enum {string} */
                 type: "form_field_placement_conditions";
                 attributes: {
@@ -13301,6 +14324,8 @@ export interface components {
         };
         update_form_field_placement: {
             data: {
+                /** @description Accepted for JSON:API client compatibility, but ignored. The resource to update is identified by the id in the path. */
+                id?: string;
                 /** @enum {string} */
                 type: "form_field_placements";
                 attributes: {
@@ -13392,6 +14417,8 @@ export interface components {
         };
         update_form_field_position: {
             data: {
+                /** @description Accepted for JSON:API client compatibility, but ignored. The resource to update is identified by the id in the path. */
+                id?: string;
                 /** @enum {string} */
                 type: "form_field_positions";
                 attributes: {
@@ -13454,7 +14481,7 @@ export interface components {
                      * @description The kind of the form field
                      * @enum {string}
                      */
-                    kind: "custom" | "title" | "summary" | "mitigation_message" | "resolution_message" | "severity" | "environments" | "types" | "services" | "causes" | "functionalities" | "teams" | "status" | "visibility" | "mark_as_test" | "mark_as_backfilled" | "labels" | "notify_emails" | "trigger_manual_workflows" | "show_ongoing_incidents" | "attach_alerts" | "mark_as_in_triage" | "in_triage_at" | "started_at" | "detected_at" | "acknowledged_at" | "mitigated_at" | "resolved_at" | "closed_at" | "custom_sub_status" | "manual_starting_datetime_field";
+                    kind: "custom" | "title" | "summary" | "mitigation_message" | "resolution_message" | "cancellation_message" | "severity" | "environments" | "types" | "services" | "causes" | "functionalities" | "teams" | "status" | "visibility" | "mark_as_test" | "mark_as_backfilled" | "labels" | "notify_emails" | "trigger_manual_workflows" | "show_ongoing_incidents" | "attach_alerts" | "mark_as_in_triage" | "in_triage_at" | "started_at" | "detected_at" | "acknowledged_at" | "mitigated_at" | "resolved_at" | "closed_at" | "custom_sub_status" | "manual_starting_datetime_field";
                     /**
                      * @description The input kind of the form field
                      * @enum {string}
@@ -13485,6 +14512,8 @@ export interface components {
         };
         update_form_field: {
             data: {
+                /** @description Accepted for JSON:API client compatibility, but ignored. The resource to update is identified by the id in the path. */
+                id?: string;
                 /** @enum {string} */
                 type: "form_fields";
                 attributes: {
@@ -13497,7 +14526,7 @@ export interface components {
                      * @description The kind of the form field
                      * @enum {string}
                      */
-                    kind?: "custom" | "title" | "summary" | "mitigation_message" | "resolution_message" | "severity" | "environments" | "types" | "services" | "causes" | "functionalities" | "teams" | "status" | "visibility" | "mark_as_test" | "mark_as_backfilled" | "labels" | "notify_emails" | "trigger_manual_workflows" | "show_ongoing_incidents" | "attach_alerts" | "mark_as_in_triage" | "in_triage_at" | "started_at" | "detected_at" | "acknowledged_at" | "mitigated_at" | "resolved_at" | "closed_at" | "custom_sub_status" | "manual_starting_datetime_field";
+                    kind?: "custom" | "title" | "summary" | "mitigation_message" | "resolution_message" | "cancellation_message" | "severity" | "environments" | "types" | "services" | "causes" | "functionalities" | "teams" | "status" | "visibility" | "mark_as_test" | "mark_as_backfilled" | "labels" | "notify_emails" | "trigger_manual_workflows" | "show_ongoing_incidents" | "attach_alerts" | "mark_as_in_triage" | "in_triage_at" | "started_at" | "detected_at" | "acknowledged_at" | "mitigated_at" | "resolved_at" | "closed_at" | "custom_sub_status" | "manual_starting_datetime_field";
                     /**
                      * @description The input kind of the form field
                      * @enum {string}
@@ -13531,7 +14560,7 @@ export interface components {
              * @description The kind of the form field
              * @enum {string}
              */
-            kind: "custom" | "title" | "summary" | "mitigation_message" | "resolution_message" | "severity" | "environments" | "types" | "services" | "causes" | "functionalities" | "teams" | "status" | "visibility" | "mark_as_test" | "mark_as_backfilled" | "labels" | "notify_emails" | "trigger_manual_workflows" | "show_ongoing_incidents" | "attach_alerts" | "mark_as_in_triage" | "in_triage_at" | "started_at" | "detected_at" | "acknowledged_at" | "mitigated_at" | "resolved_at" | "closed_at" | "custom_sub_status" | "manual_starting_datetime_field";
+            kind: "custom" | "title" | "summary" | "mitigation_message" | "resolution_message" | "cancellation_message" | "severity" | "environments" | "types" | "services" | "causes" | "functionalities" | "teams" | "status" | "visibility" | "mark_as_test" | "mark_as_backfilled" | "labels" | "notify_emails" | "trigger_manual_workflows" | "show_ongoing_incidents" | "attach_alerts" | "mark_as_in_triage" | "in_triage_at" | "started_at" | "detected_at" | "acknowledged_at" | "mitigated_at" | "resolved_at" | "closed_at" | "custom_sub_status" | "manual_starting_datetime_field";
             /**
              * @description The input kind of the form field
              * @enum {string}
@@ -13610,6 +14639,8 @@ export interface components {
         };
         update_form_set_condition: {
             data: {
+                /** @description Accepted for JSON:API client compatibility, but ignored. The resource to update is identified by the id in the path. */
+                id?: string;
                 /** @enum {string} */
                 type: "form_set_conditions";
                 attributes: {
@@ -13679,6 +14710,8 @@ export interface components {
         };
         update_form_set: {
             data: {
+                /** @description Accepted for JSON:API client compatibility, but ignored. The resource to update is identified by the id in the path. */
+                id?: string;
                 /** @enum {string} */
                 type: "form_sets";
                 attributes: {
@@ -13810,6 +14843,8 @@ export interface components {
         };
         update_functionality: {
             data: {
+                /** @description Accepted for JSON:API client compatibility, but ignored. The resource to update is identified by the id in the path. */
+                id?: string;
                 /** @enum {string} */
                 type: "functionalities";
                 attributes: {
@@ -13848,9 +14883,9 @@ export interface components {
                     environment_ids?: string[] | null;
                     /** @description Services associated with this functionality */
                     service_ids?: string[] | null;
-                    /** @description Owner Teams associated with this functionality */
+                    /** @description Owner Teams associated with this functionality. Empty array removes all; omitting or null leaves unchanged. */
                     owner_group_ids?: string[] | null;
-                    /** @description Owner Users associated with this functionality */
+                    /** @description Owner Users associated with this functionality. Empty array removes all; omitting or null leaves unchanged. */
                     owner_user_ids?: number[] | null;
                     /** @description The escalation policy id of the functionality */
                     escalation_policy_id?: string | null;
@@ -14149,6 +15184,18 @@ export interface components {
             link?: string | null;
             /** @description The bookmark emoji */
             emoji?: string;
+            /**
+             * @description Number of times to retry on rate-limit (HTTP 429) responses (0-4). 0 disables retry.
+             * @default 0
+             * @example 3
+             */
+            retry_count: number;
+            /**
+             * @description Seconds to wait before each retry (1-15). Retry-After header is honored when present and <= 90s, taking the larger of retry_wait_time and the header value.
+             * @default 1
+             * @example 2
+             */
+            retry_wait_time: number;
         } | {
             title: string;
             link: string;
@@ -14180,6 +15227,18 @@ export interface components {
                 id?: string;
                 name?: string;
             }[];
+            /**
+             * @description Number of times to retry on rate-limit (HTTP 429) responses (0-4). 0 disables retry.
+             * @default 0
+             * @example 3
+             */
+            retry_count: number;
+            /**
+             * @description Seconds to wait before each retry (1-15). Retry-After header is honored when present and <= 90s, taking the larger of retry_wait_time and the header value.
+             * @default 1
+             * @example 2
+             */
+            retry_wait_time: number;
         };
         attach_datadog_dashboards_task_params: {
             /** @enum {string} */
@@ -14878,6 +15937,18 @@ export interface components {
                 id?: string;
                 name?: string;
             }[];
+            /**
+             * @description Number of times to retry on rate-limit (HTTP 429) responses (0-4). 0 disables retry.
+             * @default 0
+             * @example 3
+             */
+            retry_count: number;
+            /**
+             * @description Seconds to wait before each retry (1-15). Retry-After header is honored when present and <= 90s, taking the larger of retry_wait_time and the header value.
+             * @default 1
+             * @example 2
+             */
+            retry_wait_time: number;
         };
         create_go_to_meeting_task_params: {
             /** @enum {string} */
@@ -15753,6 +16824,18 @@ export interface components {
                 id?: string;
                 name?: string;
             }[];
+            /**
+             * @description Number of times to retry on rate-limit (HTTP 429) responses (0-4). 0 disables retry.
+             * @default 0
+             * @example 3
+             */
+            retry_count: number;
+            /**
+             * @description Seconds to wait before each retry (1-15). Retry-After header is honored when present and <= 90s, taking the larger of retry_wait_time and the header value.
+             * @default 1
+             * @example 2
+             */
+            retry_wait_time: number;
         };
         get_github_commits_task_params: {
             /** @enum {string} */
@@ -15895,6 +16978,18 @@ export interface components {
              * @example 2
              */
             retry_wait_time: number;
+            /**
+             * @description Map of valid HTTP header names to regexp patterns. Header names must use HTTP token characters. Task fails if any header value does not match its pattern (case-insensitive). Leave empty to skip validation.
+             * @default {}
+             */
+            expected_response_headers: {
+                [key: string]: string;
+            };
+            /**
+             * @description Whether to follow HTTP 3xx redirects. Defaults to true. Set to false to treat redirect responses as-is.
+             * @default true
+             */
+            follow_redirects: boolean;
         };
         invite_to_slack_channel_opsgenie_task_params: {
             /** @enum {string} */
@@ -16315,8 +17410,21 @@ export interface components {
                 name?: string;
             };
             status_page_id: string;
-            /** @description Publishes the update to every listed status page (requires the status-page-v3-limited-bulk-publish feature). When set, it takes precedence over status_page_id and the first entry becomes status_page_id. */
+            /** @description Publishes the update to every listed status page. This field is in limited Early Access; contact Rootly Support to request access. When set, it takes precedence over status_page_id and the first entry becomes status_page_id. */
             status_page_ids?: string[];
+            /** @description Composite "SourceType:<id>" keys of the status page components affected by the publish. This field is in Early Access and is not generally available; contact Rootly Support to request access. */
+            selected_component_keys?: string[];
+            /** @description Impact status to publish for each selected component key. Keys must match selected_component_keys entries. */
+            selected_component_statuses?: {
+                [key: string]: "operational" | "degraded_performance" | "partial_outage" | "major_outage";
+            };
+            /** @description When true, every run also publishes the incident's tagged services and functionalities that are components on the target page. Defaults to true when selected_component_keys is empty. This field is in Early Access and is not generally available; contact Rootly Support to request access. */
+            sync_incident_components?: boolean | null;
+            /**
+             * @description Impact status published for components synced from the incident. Defaults to degraded_performance. A component also listed in selected_component_keys keeps its selected_component_statuses entry.
+             * @enum {string|null}
+             */
+            synced_component_status?: "operational" | "degraded_performance" | "partial_outage" | "major_outage" | null;
             /** @description Additional API Payload you can pass to statuspage.io for example. Can contain liquid markup and need to be valid JSON */
             integration_payload?: string | null;
         };
@@ -16342,6 +17450,25 @@ export interface components {
                 name?: string;
             };
             title: string;
+            /**
+             * @description Number of times to retry on rate-limit (HTTP 429) responses (0-4). 0 disables retry.
+             * @default 0
+             * @example 3
+             */
+            retry_count: number;
+            /**
+             * @description Seconds to wait before each retry (1-15). Retry-After header is honored when present and <= 90s, taking the larger of retry_wait_time and the header value.
+             * @default 1
+             * @example 2
+             */
+            retry_wait_time: number;
+        };
+        remove_from_slack_channel_task_params: {
+            /** @enum {string} */
+            task_type?: "remove_from_slack_channel";
+            /** @enum {string} */
+            target_kind?: "users_without_private_incident_access";
+            dry_run?: boolean;
         };
         change_slack_channel_privacy_task_params: {
             /** @enum {string} */
@@ -16352,6 +17479,18 @@ export interface components {
             };
             /** @enum {string} */
             privacy: "private" | "public";
+            /**
+             * @description Number of times to retry on rate-limit (HTTP 429) responses (0-4). 0 disables retry.
+             * @default 0
+             * @example 3
+             */
+            retry_count: number;
+            /**
+             * @description Seconds to wait before each retry (1-15). Retry-After header is honored when present and <= 90s, taking the larger of retry_wait_time and the header value.
+             * @default 1
+             * @example 2
+             */
+            retry_wait_time: number;
         };
         run_command_heroku_task_params: {
             /** @enum {string} */
@@ -16419,6 +17558,52 @@ export interface components {
              * @enum {string}
              */
             private: "auto" | "true" | "false";
+            /**
+             * @description Number of times to retry on rate-limit (HTTP 429) responses (0-4). 0 disables retry.
+             * @default 0
+             * @example 3
+             */
+            retry_count: number;
+            /**
+             * @description Seconds to wait before each retry (1-15). Retry-After header is honored when present and <= 90s, taking the larger of retry_wait_time and the header value.
+             * @default 1
+             * @example 2
+             */
+            retry_wait_time: number;
+        };
+        /** @description Create a canvas in a Slack channel, preserving an existing canvas. The connected Slack app must have Canvas permissions. */
+        create_slack_canvas_task_params: {
+            /** @enum {string} */
+            task_type?: "create_slack_canvas";
+            /** @description Slack channel containing the canvas. Channel IDs support Liquid variables. */
+            channel: {
+                /**
+                 * @description Slack channel ID.
+                 * @example {{ incident.slack_channel_id }}
+                 */
+                id: string;
+                /**
+                 * @description Channel display name.
+                 * @example incident-channel
+                 */
+                name: string;
+            };
+            /** @description The canvas title. Supports Liquid variables. */
+            title: string;
+            /** @description The initial canvas content in Markdown. Supports Liquid variables. An existing channel canvas is preserved. */
+            content: string;
+            /**
+             * @description Number of times to retry on rate-limit (HTTP 429) responses (0-4). 0 disables retry.
+             * @default 0
+             * @example 3
+             */
+            retry_count: number;
+            /**
+             * @description Seconds to wait before each retry (1-15). Retry-After header is honored when present and <= 90s, taking the larger of retry_wait_time and the header value.
+             * @default 1
+             * @example 2
+             */
+            retry_wait_time: number;
         };
         send_slack_message_task_params: {
             /** @enum {string} */
@@ -16453,6 +17638,20 @@ export interface components {
             text: string;
             /** @description When set to true, if the parent for this threaded message cannot be found the message will be skipped. */
             send_only_as_threaded_message?: boolean;
+            /** @description When set to true, allows workflows from different sources (e.g. different incidents or alerts) to thread together on the same parent message. */
+            allow_cross_workflow_threading?: boolean;
+            /**
+             * @description Number of times to retry on rate-limit (HTTP 429) responses (0-4). 0 disables retry.
+             * @default 0
+             * @example 3
+             */
+            retry_count: number;
+            /**
+             * @description Seconds to wait before each retry (1-15). Retry-After header is honored when present and <= 90s, taking the larger of retry_wait_time and the header value.
+             * @default 1
+             * @example 2
+             */
+            retry_wait_time: number;
         } | {
             channels: {
                 id?: string;
@@ -16837,6 +18036,58 @@ export interface components {
                 name?: string;
             };
             topic: string;
+            /**
+             * @description Number of times to retry on rate-limit (HTTP 429) responses (0-4). 0 disables retry.
+             * @default 0
+             * @example 3
+             */
+            retry_count: number;
+            /**
+             * @description Seconds to wait before each retry (1-15). Retry-After header is honored when present and <= 90s, taking the larger of retry_wait_time and the header value.
+             * @default 1
+             * @example 2
+             */
+            retry_wait_time: number;
+        };
+        /** @description Update the selected channel canvas using Markdown. The connected Slack app must have Canvas permissions. */
+        update_slack_canvas_task_params: {
+            /** @enum {string} */
+            task_type?: "update_slack_canvas";
+            /** @description Slack channel containing the canvas. Channel IDs support Liquid variables. */
+            channel: {
+                /**
+                 * @description Slack channel ID.
+                 * @example {{ incident.slack_channel_id }}
+                 */
+                id: string;
+                /**
+                 * @description Channel display name.
+                 * @example incident-channel
+                 */
+                name: string;
+            };
+            /** @description The canvas content in Markdown. Supports Liquid variables. */
+            content: string;
+            /**
+             * @description Append content or replace the selected table or entire canvas.
+             * @default insert_at_end
+             * @enum {string}
+             */
+            operation: "insert_at_end" | "replace";
+            /** @description With replace, target the single table containing this label. Include the label in the replacement table. Blank replaces the entire canvas. Supports Liquid. */
+            section_name?: string | null;
+            /**
+             * @description Number of times to retry on rate-limit (HTTP 429) responses (0-4). 0 disables retry.
+             * @default 0
+             * @example 3
+             */
+            retry_count: number;
+            /**
+             * @description Seconds to wait before each retry (1-15). Retry-After header is honored when present and <= 90s, taking the larger of retry_wait_time and the header value.
+             * @default 1
+             * @example 2
+             */
+            retry_wait_time: number;
         };
         update_status_task_params: {
             /** @enum {string} */
@@ -16968,9 +18219,9 @@ export interface components {
              * @default incident
              * @enum {string}
              */
-            kind: "incident" | "action_item" | "post_mortem" | "pulse" | "alert";
+            kind: "incident" | "action_item" | "post_mortem" | "pulse" | "alert" | "problem";
             /**
-             * @description ["(incident) kind can only match [:id, :slug, :sequential_id, :pagerduty_incident_id, :opsgenie_incident_id, :victor_ops_incident_id, :jira_issue_id, :asana_task_id, :shortcut_task_id, :linear_issue_id, :zendesk_ticket_id, :motion_task_id, :trello_card_id, :airtable_record_id, :shortcut_story_id, :github_issue_id, :freshservice_ticket_id, :freshservice_task_id, :clickup_task_id]", "(action_item) kind can only match [:id, :jira_issue_id, :asana_task_id, :shortcut_task_id, :linear_issue_id, :zendesk_ticket_id, :motion_task_id, :trello_card_id, :airtable_record_id, :shortcut_story_id, :github_issue_id, :freshservice_ticket_id, :freshservice_task_id, :clickup_task_id]", "(post_mortem) kind can only match [:id]", "(pulse) kind can only match [:id]", "(alert) kind can only match [:id]"]
+             * @description ["(incident) kind can only match [:id, :slug, :sequential_id, :pagerduty_incident_id, :opsgenie_incident_id, :victor_ops_incident_id, :jira_issue_id, :asana_task_id, :shortcut_task_id, :linear_issue_id, :zendesk_ticket_id, :motion_task_id, :trello_card_id, :airtable_record_id, :shortcut_story_id, :github_issue_id, :freshservice_ticket_id, :freshservice_task_id, :clickup_task_id]", "(action_item) kind can only match [:id, :jira_issue_id, :asana_task_id, :shortcut_task_id, :linear_issue_id, :zendesk_ticket_id, :motion_task_id, :trello_card_id, :airtable_record_id, :shortcut_story_id, :github_issue_id, :freshservice_ticket_id, :freshservice_task_id, :clickup_task_id]", "(post_mortem) kind can only match [:id]", "(pulse) kind can only match [:id]", "(alert) kind can only match [:id]", "(problem) kind can only match [:id]"]
              * @default id
              * @enum {string}
              */
@@ -17018,6 +18269,20 @@ export interface components {
             };
             /** @description When set to true, if the parent for this threaded message cannot be found the message will be skipped. */
             send_only_as_threaded_message?: boolean;
+            /** @description When set to true, allows workflows from different sources (e.g. different incidents or alerts) to thread together on the same parent message. */
+            allow_cross_workflow_threading?: boolean;
+            /**
+             * @description Number of times to retry on rate-limit (HTTP 429) responses (0-4). 0 disables retry.
+             * @default 0
+             * @example 3
+             */
+            retry_count: number;
+            /**
+             * @description Seconds to wait before each retry (1-15). Retry-After header is honored when present and <= 90s, taking the larger of retry_wait_time and the header value.
+             * @default 1
+             * @example 2
+             */
+            retry_wait_time: number;
         } | {
             channels: {
                 id?: string;
@@ -17140,12 +18405,14 @@ export interface components {
                      * @default true
                      */
                     enabled: boolean;
-                    task_params: components["schemas"]["add_action_item_task_params"] | components["schemas"]["update_action_item_task_params"] | components["schemas"]["add_role_task_params"] | components["schemas"]["add_slack_bookmark_task_params"] | components["schemas"]["add_team_task_params"] | components["schemas"]["add_to_timeline_task_params"] | components["schemas"]["archive_slack_channels_task_params"] | components["schemas"]["attach_datadog_dashboards_task_params"] | components["schemas"]["auto_assign_role_opsgenie_task_params"] | components["schemas"]["auto_assign_role_rootly_task_params"] | components["schemas"]["auto_assign_role_pagerduty_task_params"] | components["schemas"]["update_pagerduty_incident_task_params"] | components["schemas"]["create_pagerduty_status_update_task_params"] | components["schemas"]["create_pagertree_alert_task_params"] | components["schemas"]["update_pagertree_alert_task_params"] | components["schemas"]["auto_assign_role_victor_ops_task_params"] | components["schemas"]["call_people_task_params"] | components["schemas"]["create_airtable_table_record_task_params"] | components["schemas"]["create_asana_subtask_task_params"] | components["schemas"]["create_asana_task_task_params"] | components["schemas"]["create_confluence_page_task_params"] | components["schemas"]["create_datadog_notebook_task_params"] | components["schemas"]["create_coda_page_task_params"] | components["schemas"]["create_dropbox_paper_page_task_params"] | components["schemas"]["create_github_issue_task_params"] | components["schemas"]["create_gitlab_issue_task_params"] | components["schemas"]["create_outlook_event_task_params"] | components["schemas"]["create_google_calendar_event_task_params"] | components["schemas"]["update_google_docs_page_task_params"] | components["schemas"]["update_coda_page_task_params"] | components["schemas"]["update_google_calendar_event_task_params"] | components["schemas"]["create_sharepoint_page_task_params"] | components["schemas"]["create_google_docs_page_task_params"] | components["schemas"]["create_google_docs_permissions_task_params"] | components["schemas"]["remove_google_docs_permissions_task_params"] | components["schemas"]["create_quip_page_task_params"] | components["schemas"]["create_google_meeting_task_params"] | components["schemas"]["create_go_to_meeting_task_params"] | components["schemas"]["create_incident_task_params"] | components["schemas"]["create_sub_incident_task_params"] | components["schemas"]["create_incident_postmortem_task_params"] | components["schemas"]["create_jira_issue_task_params"] | components["schemas"]["create_jira_subtask_task_params"] | components["schemas"]["attach_retrospective_pdf_to_jira_issue_task_params"] | components["schemas"]["attach_retrospective_pdf_to_freshservice_ticket_task_params"] | components["schemas"]["create_linear_issue_task_params"] | components["schemas"]["create_linear_subtask_issue_task_params"] | components["schemas"]["create_linear_issue_comment_task_params"] | components["schemas"]["create_microsoft_teams_meeting_task_params"] | components["schemas"]["create_microsoft_teams_channel_task_params"] | components["schemas"]["create_microsoft_teams_chat_task_params"] | components["schemas"]["add_microsoft_teams_tab_task_params"] | components["schemas"]["add_microsoft_teams_chat_tab_task_params"] | components["schemas"]["create_google_chat_space_task_params"] | components["schemas"]["send_google_chat_message_task_params"] | components["schemas"]["send_google_chat_attachments_task_params"] | components["schemas"]["invite_to_google_chat_space_task_params"] | components["schemas"]["archive_google_chat_spaces_task_params"] | components["schemas"]["rename_google_chat_space_task_params"] | components["schemas"]["update_google_chat_space_description_task_params"] | components["schemas"]["change_google_chat_space_privacy_task_params"] | components["schemas"]["archive_microsoft_teams_channels_task_params"] | components["schemas"]["rename_microsoft_teams_channel_task_params"] | components["schemas"]["invite_to_microsoft_teams_channel_task_params"] | components["schemas"]["create_notion_page_task_params"] | components["schemas"]["send_microsoft_teams_message_task_params"] | components["schemas"]["send_microsoft_teams_chat_message_task_params"] | components["schemas"]["send_microsoft_teams_blocks_task_params"] | components["schemas"]["update_notion_page_task_params"] | components["schemas"]["update_quip_page_task_params"] | components["schemas"]["update_confluence_page_task_params"] | components["schemas"]["update_sharepoint_page_task_params"] | components["schemas"]["update_dropbox_paper_page_task_params"] | components["schemas"]["update_datadog_notebook_task_params"] | components["schemas"]["create_service_now_incident_task_params"] | components["schemas"]["create_shortcut_story_task_params"] | components["schemas"]["create_shortcut_task_task_params"] | components["schemas"]["create_trello_card_task_params"] | components["schemas"]["create_webex_meeting_task_params"] | components["schemas"]["create_zendesk_ticket_task_params"] | components["schemas"]["create_zendesk_jira_link_task_params"] | components["schemas"]["create_clickup_task_task_params"] | components["schemas"]["create_motion_task_task_params"] | components["schemas"]["create_zoom_meeting_task_params"] | components["schemas"]["get_github_commits_task_params"] | components["schemas"]["get_gitlab_commits_task_params"] | components["schemas"]["get_pulses_task_params"] | components["schemas"]["get_alerts_task_params"] | components["schemas"]["http_client_task_params"] | components["schemas"]["invite_to_slack_channel_opsgenie_task_params"] | components["schemas"]["invite_to_slack_channel_rootly_task_params"] | components["schemas"]["invite_to_microsoft_teams_channel_rootly_task_params"] | components["schemas"]["invite_to_slack_channel_pagerduty_task_params"] | components["schemas"]["invite_to_slack_channel_task_params"] | components["schemas"]["invite_to_slack_channel_victor_ops_task_params"] | components["schemas"]["page_opsgenie_on_call_responders_task_params"] | components["schemas"]["create_opsgenie_alert_task_params"] | components["schemas"]["create_jsmops_alert_task_params"] | components["schemas"]["page_jsmops_on_call_responders_task_params"] | components["schemas"]["update_opsgenie_alert_task_params"] | components["schemas"]["update_opsgenie_incident_task_params"] | components["schemas"]["page_rootly_on_call_responders_task_params"] | components["schemas"]["page_pagerduty_on_call_responders_task_params"] | components["schemas"]["page_victor_ops_on_call_responders_task_params"] | components["schemas"]["update_victor_ops_incident_task_params"] | components["schemas"]["print_task_params"] | components["schemas"]["publish_incident_task_params"] | components["schemas"]["redis_client_task_params"] | components["schemas"]["rename_slack_channel_task_params"] | components["schemas"]["change_slack_channel_privacy_task_params"] | components["schemas"]["run_command_heroku_task_params"] | components["schemas"]["send_email_task_params"] | components["schemas"]["send_dashboard_report_task_params"] | components["schemas"]["create_slack_channel_task_params"] | components["schemas"]["send_slack_message_task_params"] | components["schemas"]["send_sms_task_params"] | components["schemas"]["send_whatsapp_message_task_params"] | components["schemas"]["snapshot_datadog_graph_task_params"] | components["schemas"]["snapshot_grafana_dashboard_task_params"] | components["schemas"]["snapshot_looker_look_task_params"] | components["schemas"]["snapshot_new_relic_graph_task_params"] | components["schemas"]["tweet_twitter_message_task_params"] | components["schemas"]["update_airtable_table_record_task_params"] | components["schemas"]["update_asana_task_task_params"] | components["schemas"]["update_github_issue_task_params"] | components["schemas"]["update_gitlab_issue_task_params"] | components["schemas"]["update_incident_task_params"] | components["schemas"]["update_incident_postmortem_task_params"] | components["schemas"]["update_jira_issue_task_params"] | components["schemas"]["update_linear_issue_task_params"] | components["schemas"]["update_service_now_incident_task_params"] | components["schemas"]["update_shortcut_story_task_params"] | components["schemas"]["update_shortcut_task_task_params"] | components["schemas"]["update_slack_channel_topic_task_params"] | components["schemas"]["update_status_task_params"] | components["schemas"]["update_incident_status_timestamp_task_params"] | components["schemas"]["update_trello_card_task_params"] | components["schemas"]["update_clickup_task_task_params"] | components["schemas"]["update_motion_task_task_params"] | components["schemas"]["update_zendesk_ticket_task_params"] | components["schemas"]["update_attached_alerts_task_params"] | components["schemas"]["trigger_workflow_task_params"] | components["schemas"]["send_slack_blocks_task_params"] | components["schemas"]["create_openai_chat_completion_task_params"] | components["schemas"]["create_watsonx_chat_completion_task_params"] | components["schemas"]["create_google_gemini_chat_completion_task_params"] | components["schemas"]["create_mistral_chat_completion_task_params"] | components["schemas"]["create_anthropic_chat_completion_task_params"];
+                    task_params: components["schemas"]["add_action_item_task_params"] | components["schemas"]["update_action_item_task_params"] | components["schemas"]["add_role_task_params"] | components["schemas"]["add_slack_bookmark_task_params"] | components["schemas"]["add_team_task_params"] | components["schemas"]["add_to_timeline_task_params"] | components["schemas"]["archive_slack_channels_task_params"] | components["schemas"]["attach_datadog_dashboards_task_params"] | components["schemas"]["auto_assign_role_opsgenie_task_params"] | components["schemas"]["auto_assign_role_rootly_task_params"] | components["schemas"]["auto_assign_role_pagerduty_task_params"] | components["schemas"]["update_pagerduty_incident_task_params"] | components["schemas"]["create_pagerduty_status_update_task_params"] | components["schemas"]["create_pagertree_alert_task_params"] | components["schemas"]["update_pagertree_alert_task_params"] | components["schemas"]["auto_assign_role_victor_ops_task_params"] | components["schemas"]["call_people_task_params"] | components["schemas"]["create_airtable_table_record_task_params"] | components["schemas"]["create_asana_subtask_task_params"] | components["schemas"]["create_asana_task_task_params"] | components["schemas"]["create_confluence_page_task_params"] | components["schemas"]["create_datadog_notebook_task_params"] | components["schemas"]["create_coda_page_task_params"] | components["schemas"]["create_dropbox_paper_page_task_params"] | components["schemas"]["create_github_issue_task_params"] | components["schemas"]["create_gitlab_issue_task_params"] | components["schemas"]["create_outlook_event_task_params"] | components["schemas"]["create_google_calendar_event_task_params"] | components["schemas"]["update_google_docs_page_task_params"] | components["schemas"]["update_coda_page_task_params"] | components["schemas"]["update_google_calendar_event_task_params"] | components["schemas"]["create_sharepoint_page_task_params"] | components["schemas"]["create_google_docs_page_task_params"] | components["schemas"]["create_google_docs_permissions_task_params"] | components["schemas"]["remove_google_docs_permissions_task_params"] | components["schemas"]["create_quip_page_task_params"] | components["schemas"]["create_google_meeting_task_params"] | components["schemas"]["create_go_to_meeting_task_params"] | components["schemas"]["create_incident_task_params"] | components["schemas"]["create_sub_incident_task_params"] | components["schemas"]["create_incident_postmortem_task_params"] | components["schemas"]["create_jira_issue_task_params"] | components["schemas"]["create_jira_subtask_task_params"] | components["schemas"]["attach_retrospective_pdf_to_jira_issue_task_params"] | components["schemas"]["attach_retrospective_pdf_to_freshservice_ticket_task_params"] | components["schemas"]["create_linear_issue_task_params"] | components["schemas"]["create_linear_subtask_issue_task_params"] | components["schemas"]["create_linear_issue_comment_task_params"] | components["schemas"]["create_microsoft_teams_meeting_task_params"] | components["schemas"]["create_microsoft_teams_channel_task_params"] | components["schemas"]["create_microsoft_teams_chat_task_params"] | components["schemas"]["add_microsoft_teams_tab_task_params"] | components["schemas"]["add_microsoft_teams_chat_tab_task_params"] | components["schemas"]["create_google_chat_space_task_params"] | components["schemas"]["send_google_chat_message_task_params"] | components["schemas"]["send_google_chat_attachments_task_params"] | components["schemas"]["invite_to_google_chat_space_task_params"] | components["schemas"]["archive_google_chat_spaces_task_params"] | components["schemas"]["rename_google_chat_space_task_params"] | components["schemas"]["update_google_chat_space_description_task_params"] | components["schemas"]["change_google_chat_space_privacy_task_params"] | components["schemas"]["archive_microsoft_teams_channels_task_params"] | components["schemas"]["rename_microsoft_teams_channel_task_params"] | components["schemas"]["invite_to_microsoft_teams_channel_task_params"] | components["schemas"]["create_notion_page_task_params"] | components["schemas"]["send_microsoft_teams_message_task_params"] | components["schemas"]["send_microsoft_teams_chat_message_task_params"] | components["schemas"]["send_microsoft_teams_blocks_task_params"] | components["schemas"]["update_notion_page_task_params"] | components["schemas"]["update_quip_page_task_params"] | components["schemas"]["update_confluence_page_task_params"] | components["schemas"]["update_sharepoint_page_task_params"] | components["schemas"]["update_dropbox_paper_page_task_params"] | components["schemas"]["update_datadog_notebook_task_params"] | components["schemas"]["create_service_now_incident_task_params"] | components["schemas"]["create_shortcut_story_task_params"] | components["schemas"]["create_shortcut_task_task_params"] | components["schemas"]["create_trello_card_task_params"] | components["schemas"]["create_webex_meeting_task_params"] | components["schemas"]["create_zendesk_ticket_task_params"] | components["schemas"]["create_zendesk_jira_link_task_params"] | components["schemas"]["create_clickup_task_task_params"] | components["schemas"]["create_motion_task_task_params"] | components["schemas"]["create_zoom_meeting_task_params"] | components["schemas"]["get_github_commits_task_params"] | components["schemas"]["get_gitlab_commits_task_params"] | components["schemas"]["get_pulses_task_params"] | components["schemas"]["get_alerts_task_params"] | components["schemas"]["http_client_task_params"] | components["schemas"]["invite_to_slack_channel_opsgenie_task_params"] | components["schemas"]["invite_to_slack_channel_rootly_task_params"] | components["schemas"]["invite_to_microsoft_teams_channel_rootly_task_params"] | components["schemas"]["invite_to_slack_channel_pagerduty_task_params"] | components["schemas"]["invite_to_slack_channel_task_params"] | components["schemas"]["invite_to_slack_channel_victor_ops_task_params"] | components["schemas"]["page_opsgenie_on_call_responders_task_params"] | components["schemas"]["create_opsgenie_alert_task_params"] | components["schemas"]["create_jsmops_alert_task_params"] | components["schemas"]["page_jsmops_on_call_responders_task_params"] | components["schemas"]["update_opsgenie_alert_task_params"] | components["schemas"]["update_opsgenie_incident_task_params"] | components["schemas"]["page_rootly_on_call_responders_task_params"] | components["schemas"]["page_pagerduty_on_call_responders_task_params"] | components["schemas"]["page_victor_ops_on_call_responders_task_params"] | components["schemas"]["update_victor_ops_incident_task_params"] | components["schemas"]["print_task_params"] | components["schemas"]["publish_incident_task_params"] | components["schemas"]["redis_client_task_params"] | components["schemas"]["rename_slack_channel_task_params"] | components["schemas"]["remove_from_slack_channel_task_params"] | components["schemas"]["change_slack_channel_privacy_task_params"] | components["schemas"]["run_command_heroku_task_params"] | components["schemas"]["send_email_task_params"] | components["schemas"]["send_dashboard_report_task_params"] | components["schemas"]["create_slack_channel_task_params"] | components["schemas"]["create_slack_canvas_task_params"] | components["schemas"]["send_slack_message_task_params"] | components["schemas"]["send_sms_task_params"] | components["schemas"]["send_whatsapp_message_task_params"] | components["schemas"]["snapshot_datadog_graph_task_params"] | components["schemas"]["snapshot_grafana_dashboard_task_params"] | components["schemas"]["snapshot_looker_look_task_params"] | components["schemas"]["snapshot_new_relic_graph_task_params"] | components["schemas"]["tweet_twitter_message_task_params"] | components["schemas"]["update_airtable_table_record_task_params"] | components["schemas"]["update_asana_task_task_params"] | components["schemas"]["update_github_issue_task_params"] | components["schemas"]["update_gitlab_issue_task_params"] | components["schemas"]["update_incident_task_params"] | components["schemas"]["update_incident_postmortem_task_params"] | components["schemas"]["update_jira_issue_task_params"] | components["schemas"]["update_linear_issue_task_params"] | components["schemas"]["update_service_now_incident_task_params"] | components["schemas"]["update_shortcut_story_task_params"] | components["schemas"]["update_shortcut_task_task_params"] | components["schemas"]["update_slack_channel_topic_task_params"] | components["schemas"]["update_slack_canvas_task_params"] | components["schemas"]["update_status_task_params"] | components["schemas"]["update_incident_status_timestamp_task_params"] | components["schemas"]["update_trello_card_task_params"] | components["schemas"]["update_clickup_task_task_params"] | components["schemas"]["update_motion_task_task_params"] | components["schemas"]["update_zendesk_ticket_task_params"] | components["schemas"]["update_attached_alerts_task_params"] | components["schemas"]["trigger_workflow_task_params"] | components["schemas"]["send_slack_blocks_task_params"] | components["schemas"]["create_openai_chat_completion_task_params"] | components["schemas"]["create_watsonx_chat_completion_task_params"] | components["schemas"]["create_google_gemini_chat_completion_task_params"] | components["schemas"]["create_mistral_chat_completion_task_params"] | components["schemas"]["create_anthropic_chat_completion_task_params"];
                 };
             };
         };
         update_workflow_task: {
             data: {
+                /** @description Accepted for JSON:API client compatibility, but ignored. The resource to update is identified by the id in the path. */
+                id?: string;
                 /** @enum {string} */
                 type: "workflow_tasks";
                 attributes: {
@@ -17160,14 +18427,14 @@ export interface components {
                      * @default true
                      */
                     enabled: boolean;
-                    task_params?: components["schemas"]["add_action_item_task_params"] | components["schemas"]["update_action_item_task_params"] | components["schemas"]["add_role_task_params"] | components["schemas"]["add_slack_bookmark_task_params"] | components["schemas"]["add_team_task_params"] | components["schemas"]["add_to_timeline_task_params"] | components["schemas"]["archive_slack_channels_task_params"] | components["schemas"]["attach_datadog_dashboards_task_params"] | components["schemas"]["auto_assign_role_opsgenie_task_params"] | components["schemas"]["auto_assign_role_rootly_task_params"] | components["schemas"]["auto_assign_role_pagerduty_task_params"] | components["schemas"]["update_pagerduty_incident_task_params"] | components["schemas"]["create_pagerduty_status_update_task_params"] | components["schemas"]["create_pagertree_alert_task_params"] | components["schemas"]["update_pagertree_alert_task_params"] | components["schemas"]["auto_assign_role_victor_ops_task_params"] | components["schemas"]["call_people_task_params"] | components["schemas"]["create_airtable_table_record_task_params"] | components["schemas"]["create_asana_subtask_task_params"] | components["schemas"]["create_asana_task_task_params"] | components["schemas"]["create_confluence_page_task_params"] | components["schemas"]["create_datadog_notebook_task_params"] | components["schemas"]["create_coda_page_task_params"] | components["schemas"]["create_dropbox_paper_page_task_params"] | components["schemas"]["create_github_issue_task_params"] | components["schemas"]["create_gitlab_issue_task_params"] | components["schemas"]["create_outlook_event_task_params"] | components["schemas"]["create_google_calendar_event_task_params"] | components["schemas"]["update_google_docs_page_task_params"] | components["schemas"]["update_coda_page_task_params"] | components["schemas"]["update_google_calendar_event_task_params"] | components["schemas"]["create_sharepoint_page_task_params"] | components["schemas"]["create_google_docs_page_task_params"] | components["schemas"]["create_google_docs_permissions_task_params"] | components["schemas"]["remove_google_docs_permissions_task_params"] | components["schemas"]["create_quip_page_task_params"] | components["schemas"]["create_google_meeting_task_params"] | components["schemas"]["create_go_to_meeting_task_params"] | components["schemas"]["create_incident_task_params"] | components["schemas"]["create_sub_incident_task_params"] | components["schemas"]["create_incident_postmortem_task_params"] | components["schemas"]["create_jira_issue_task_params"] | components["schemas"]["create_jira_subtask_task_params"] | components["schemas"]["attach_retrospective_pdf_to_jira_issue_task_params"] | components["schemas"]["attach_retrospective_pdf_to_freshservice_ticket_task_params"] | components["schemas"]["create_linear_issue_task_params"] | components["schemas"]["create_linear_subtask_issue_task_params"] | components["schemas"]["create_linear_issue_comment_task_params"] | components["schemas"]["create_microsoft_teams_meeting_task_params"] | components["schemas"]["create_microsoft_teams_channel_task_params"] | components["schemas"]["create_microsoft_teams_chat_task_params"] | components["schemas"]["add_microsoft_teams_tab_task_params"] | components["schemas"]["add_microsoft_teams_chat_tab_task_params"] | components["schemas"]["create_google_chat_space_task_params"] | components["schemas"]["send_google_chat_message_task_params"] | components["schemas"]["send_google_chat_attachments_task_params"] | components["schemas"]["invite_to_google_chat_space_task_params"] | components["schemas"]["archive_google_chat_spaces_task_params"] | components["schemas"]["rename_google_chat_space_task_params"] | components["schemas"]["update_google_chat_space_description_task_params"] | components["schemas"]["change_google_chat_space_privacy_task_params"] | components["schemas"]["archive_microsoft_teams_channels_task_params"] | components["schemas"]["rename_microsoft_teams_channel_task_params"] | components["schemas"]["invite_to_microsoft_teams_channel_task_params"] | components["schemas"]["create_notion_page_task_params"] | components["schemas"]["send_microsoft_teams_message_task_params"] | components["schemas"]["send_microsoft_teams_chat_message_task_params"] | components["schemas"]["send_microsoft_teams_blocks_task_params"] | components["schemas"]["update_notion_page_task_params"] | components["schemas"]["update_quip_page_task_params"] | components["schemas"]["update_confluence_page_task_params"] | components["schemas"]["update_sharepoint_page_task_params"] | components["schemas"]["update_dropbox_paper_page_task_params"] | components["schemas"]["update_datadog_notebook_task_params"] | components["schemas"]["create_service_now_incident_task_params"] | components["schemas"]["create_shortcut_story_task_params"] | components["schemas"]["create_shortcut_task_task_params"] | components["schemas"]["create_trello_card_task_params"] | components["schemas"]["create_webex_meeting_task_params"] | components["schemas"]["create_zendesk_ticket_task_params"] | components["schemas"]["create_zendesk_jira_link_task_params"] | components["schemas"]["create_clickup_task_task_params"] | components["schemas"]["create_motion_task_task_params"] | components["schemas"]["create_zoom_meeting_task_params"] | components["schemas"]["get_github_commits_task_params"] | components["schemas"]["get_gitlab_commits_task_params"] | components["schemas"]["get_pulses_task_params"] | components["schemas"]["get_alerts_task_params"] | components["schemas"]["http_client_task_params"] | components["schemas"]["invite_to_slack_channel_opsgenie_task_params"] | components["schemas"]["invite_to_slack_channel_rootly_task_params"] | components["schemas"]["invite_to_microsoft_teams_channel_rootly_task_params"] | components["schemas"]["invite_to_slack_channel_pagerduty_task_params"] | components["schemas"]["invite_to_slack_channel_task_params"] | components["schemas"]["invite_to_slack_channel_victor_ops_task_params"] | components["schemas"]["page_opsgenie_on_call_responders_task_params"] | components["schemas"]["create_opsgenie_alert_task_params"] | components["schemas"]["create_jsmops_alert_task_params"] | components["schemas"]["page_jsmops_on_call_responders_task_params"] | components["schemas"]["update_opsgenie_alert_task_params"] | components["schemas"]["update_opsgenie_incident_task_params"] | components["schemas"]["page_rootly_on_call_responders_task_params"] | components["schemas"]["page_pagerduty_on_call_responders_task_params"] | components["schemas"]["page_victor_ops_on_call_responders_task_params"] | components["schemas"]["update_victor_ops_incident_task_params"] | components["schemas"]["print_task_params"] | components["schemas"]["publish_incident_task_params"] | components["schemas"]["redis_client_task_params"] | components["schemas"]["rename_slack_channel_task_params"] | components["schemas"]["change_slack_channel_privacy_task_params"] | components["schemas"]["run_command_heroku_task_params"] | components["schemas"]["send_email_task_params"] | components["schemas"]["send_dashboard_report_task_params"] | components["schemas"]["create_slack_channel_task_params"] | components["schemas"]["send_slack_message_task_params"] | components["schemas"]["send_sms_task_params"] | components["schemas"]["send_whatsapp_message_task_params"] | components["schemas"]["snapshot_datadog_graph_task_params"] | components["schemas"]["snapshot_grafana_dashboard_task_params"] | components["schemas"]["snapshot_looker_look_task_params"] | components["schemas"]["snapshot_new_relic_graph_task_params"] | components["schemas"]["tweet_twitter_message_task_params"] | components["schemas"]["update_airtable_table_record_task_params"] | components["schemas"]["update_asana_task_task_params"] | components["schemas"]["update_github_issue_task_params"] | components["schemas"]["update_gitlab_issue_task_params"] | components["schemas"]["update_incident_task_params"] | components["schemas"]["update_incident_postmortem_task_params"] | components["schemas"]["update_jira_issue_task_params"] | components["schemas"]["update_linear_issue_task_params"] | components["schemas"]["update_service_now_incident_task_params"] | components["schemas"]["update_shortcut_story_task_params"] | components["schemas"]["update_shortcut_task_task_params"] | components["schemas"]["update_slack_channel_topic_task_params"] | components["schemas"]["update_status_task_params"] | components["schemas"]["update_incident_status_timestamp_task_params"] | components["schemas"]["update_trello_card_task_params"] | components["schemas"]["update_clickup_task_task_params"] | components["schemas"]["update_motion_task_task_params"] | components["schemas"]["update_zendesk_ticket_task_params"] | components["schemas"]["update_attached_alerts_task_params"] | components["schemas"]["trigger_workflow_task_params"] | components["schemas"]["send_slack_blocks_task_params"] | components["schemas"]["create_openai_chat_completion_task_params"] | components["schemas"]["create_watsonx_chat_completion_task_params"] | components["schemas"]["create_google_gemini_chat_completion_task_params"] | components["schemas"]["create_mistral_chat_completion_task_params"] | components["schemas"]["create_anthropic_chat_completion_task_params"];
+                    task_params?: components["schemas"]["add_action_item_task_params"] | components["schemas"]["update_action_item_task_params"] | components["schemas"]["add_role_task_params"] | components["schemas"]["add_slack_bookmark_task_params"] | components["schemas"]["add_team_task_params"] | components["schemas"]["add_to_timeline_task_params"] | components["schemas"]["archive_slack_channels_task_params"] | components["schemas"]["attach_datadog_dashboards_task_params"] | components["schemas"]["auto_assign_role_opsgenie_task_params"] | components["schemas"]["auto_assign_role_rootly_task_params"] | components["schemas"]["auto_assign_role_pagerduty_task_params"] | components["schemas"]["update_pagerduty_incident_task_params"] | components["schemas"]["create_pagerduty_status_update_task_params"] | components["schemas"]["create_pagertree_alert_task_params"] | components["schemas"]["update_pagertree_alert_task_params"] | components["schemas"]["auto_assign_role_victor_ops_task_params"] | components["schemas"]["call_people_task_params"] | components["schemas"]["create_airtable_table_record_task_params"] | components["schemas"]["create_asana_subtask_task_params"] | components["schemas"]["create_asana_task_task_params"] | components["schemas"]["create_confluence_page_task_params"] | components["schemas"]["create_datadog_notebook_task_params"] | components["schemas"]["create_coda_page_task_params"] | components["schemas"]["create_dropbox_paper_page_task_params"] | components["schemas"]["create_github_issue_task_params"] | components["schemas"]["create_gitlab_issue_task_params"] | components["schemas"]["create_outlook_event_task_params"] | components["schemas"]["create_google_calendar_event_task_params"] | components["schemas"]["update_google_docs_page_task_params"] | components["schemas"]["update_coda_page_task_params"] | components["schemas"]["update_google_calendar_event_task_params"] | components["schemas"]["create_sharepoint_page_task_params"] | components["schemas"]["create_google_docs_page_task_params"] | components["schemas"]["create_google_docs_permissions_task_params"] | components["schemas"]["remove_google_docs_permissions_task_params"] | components["schemas"]["create_quip_page_task_params"] | components["schemas"]["create_google_meeting_task_params"] | components["schemas"]["create_go_to_meeting_task_params"] | components["schemas"]["create_incident_task_params"] | components["schemas"]["create_sub_incident_task_params"] | components["schemas"]["create_incident_postmortem_task_params"] | components["schemas"]["create_jira_issue_task_params"] | components["schemas"]["create_jira_subtask_task_params"] | components["schemas"]["attach_retrospective_pdf_to_jira_issue_task_params"] | components["schemas"]["attach_retrospective_pdf_to_freshservice_ticket_task_params"] | components["schemas"]["create_linear_issue_task_params"] | components["schemas"]["create_linear_subtask_issue_task_params"] | components["schemas"]["create_linear_issue_comment_task_params"] | components["schemas"]["create_microsoft_teams_meeting_task_params"] | components["schemas"]["create_microsoft_teams_channel_task_params"] | components["schemas"]["create_microsoft_teams_chat_task_params"] | components["schemas"]["add_microsoft_teams_tab_task_params"] | components["schemas"]["add_microsoft_teams_chat_tab_task_params"] | components["schemas"]["create_google_chat_space_task_params"] | components["schemas"]["send_google_chat_message_task_params"] | components["schemas"]["send_google_chat_attachments_task_params"] | components["schemas"]["invite_to_google_chat_space_task_params"] | components["schemas"]["archive_google_chat_spaces_task_params"] | components["schemas"]["rename_google_chat_space_task_params"] | components["schemas"]["update_google_chat_space_description_task_params"] | components["schemas"]["change_google_chat_space_privacy_task_params"] | components["schemas"]["archive_microsoft_teams_channels_task_params"] | components["schemas"]["rename_microsoft_teams_channel_task_params"] | components["schemas"]["invite_to_microsoft_teams_channel_task_params"] | components["schemas"]["create_notion_page_task_params"] | components["schemas"]["send_microsoft_teams_message_task_params"] | components["schemas"]["send_microsoft_teams_chat_message_task_params"] | components["schemas"]["send_microsoft_teams_blocks_task_params"] | components["schemas"]["update_notion_page_task_params"] | components["schemas"]["update_quip_page_task_params"] | components["schemas"]["update_confluence_page_task_params"] | components["schemas"]["update_sharepoint_page_task_params"] | components["schemas"]["update_dropbox_paper_page_task_params"] | components["schemas"]["update_datadog_notebook_task_params"] | components["schemas"]["create_service_now_incident_task_params"] | components["schemas"]["create_shortcut_story_task_params"] | components["schemas"]["create_shortcut_task_task_params"] | components["schemas"]["create_trello_card_task_params"] | components["schemas"]["create_webex_meeting_task_params"] | components["schemas"]["create_zendesk_ticket_task_params"] | components["schemas"]["create_zendesk_jira_link_task_params"] | components["schemas"]["create_clickup_task_task_params"] | components["schemas"]["create_motion_task_task_params"] | components["schemas"]["create_zoom_meeting_task_params"] | components["schemas"]["get_github_commits_task_params"] | components["schemas"]["get_gitlab_commits_task_params"] | components["schemas"]["get_pulses_task_params"] | components["schemas"]["get_alerts_task_params"] | components["schemas"]["http_client_task_params"] | components["schemas"]["invite_to_slack_channel_opsgenie_task_params"] | components["schemas"]["invite_to_slack_channel_rootly_task_params"] | components["schemas"]["invite_to_microsoft_teams_channel_rootly_task_params"] | components["schemas"]["invite_to_slack_channel_pagerduty_task_params"] | components["schemas"]["invite_to_slack_channel_task_params"] | components["schemas"]["invite_to_slack_channel_victor_ops_task_params"] | components["schemas"]["page_opsgenie_on_call_responders_task_params"] | components["schemas"]["create_opsgenie_alert_task_params"] | components["schemas"]["create_jsmops_alert_task_params"] | components["schemas"]["page_jsmops_on_call_responders_task_params"] | components["schemas"]["update_opsgenie_alert_task_params"] | components["schemas"]["update_opsgenie_incident_task_params"] | components["schemas"]["page_rootly_on_call_responders_task_params"] | components["schemas"]["page_pagerduty_on_call_responders_task_params"] | components["schemas"]["page_victor_ops_on_call_responders_task_params"] | components["schemas"]["update_victor_ops_incident_task_params"] | components["schemas"]["print_task_params"] | components["schemas"]["publish_incident_task_params"] | components["schemas"]["redis_client_task_params"] | components["schemas"]["rename_slack_channel_task_params"] | components["schemas"]["remove_from_slack_channel_task_params"] | components["schemas"]["change_slack_channel_privacy_task_params"] | components["schemas"]["run_command_heroku_task_params"] | components["schemas"]["send_email_task_params"] | components["schemas"]["send_dashboard_report_task_params"] | components["schemas"]["create_slack_channel_task_params"] | components["schemas"]["create_slack_canvas_task_params"] | components["schemas"]["send_slack_message_task_params"] | components["schemas"]["send_sms_task_params"] | components["schemas"]["send_whatsapp_message_task_params"] | components["schemas"]["snapshot_datadog_graph_task_params"] | components["schemas"]["snapshot_grafana_dashboard_task_params"] | components["schemas"]["snapshot_looker_look_task_params"] | components["schemas"]["snapshot_new_relic_graph_task_params"] | components["schemas"]["tweet_twitter_message_task_params"] | components["schemas"]["update_airtable_table_record_task_params"] | components["schemas"]["update_asana_task_task_params"] | components["schemas"]["update_github_issue_task_params"] | components["schemas"]["update_gitlab_issue_task_params"] | components["schemas"]["update_incident_task_params"] | components["schemas"]["update_incident_postmortem_task_params"] | components["schemas"]["update_jira_issue_task_params"] | components["schemas"]["update_linear_issue_task_params"] | components["schemas"]["update_service_now_incident_task_params"] | components["schemas"]["update_shortcut_story_task_params"] | components["schemas"]["update_shortcut_task_task_params"] | components["schemas"]["update_slack_channel_topic_task_params"] | components["schemas"]["update_slack_canvas_task_params"] | components["schemas"]["update_status_task_params"] | components["schemas"]["update_incident_status_timestamp_task_params"] | components["schemas"]["update_trello_card_task_params"] | components["schemas"]["update_clickup_task_task_params"] | components["schemas"]["update_motion_task_task_params"] | components["schemas"]["update_zendesk_ticket_task_params"] | components["schemas"]["update_attached_alerts_task_params"] | components["schemas"]["trigger_workflow_task_params"] | components["schemas"]["send_slack_blocks_task_params"] | components["schemas"]["create_openai_chat_completion_task_params"] | components["schemas"]["create_watsonx_chat_completion_task_params"] | components["schemas"]["create_google_gemini_chat_completion_task_params"] | components["schemas"]["create_mistral_chat_completion_task_params"] | components["schemas"]["create_anthropic_chat_completion_task_params"];
                 };
             };
         };
         workflow_task: {
             /** @description The ID of the parent workflow */
             workflow_id: string;
-            task_params: components["schemas"]["add_action_item_task_params"] | components["schemas"]["update_action_item_task_params"] | components["schemas"]["add_role_task_params"] | components["schemas"]["add_slack_bookmark_task_params"] | components["schemas"]["add_team_task_params"] | components["schemas"]["add_to_timeline_task_params"] | components["schemas"]["archive_slack_channels_task_params"] | components["schemas"]["attach_datadog_dashboards_task_params"] | components["schemas"]["auto_assign_role_opsgenie_task_params"] | components["schemas"]["auto_assign_role_rootly_task_params"] | components["schemas"]["auto_assign_role_pagerduty_task_params"] | components["schemas"]["update_pagerduty_incident_task_params"] | components["schemas"]["create_pagerduty_status_update_task_params"] | components["schemas"]["create_pagertree_alert_task_params"] | components["schemas"]["update_pagertree_alert_task_params"] | components["schemas"]["auto_assign_role_victor_ops_task_params"] | components["schemas"]["call_people_task_params"] | components["schemas"]["create_airtable_table_record_task_params"] | components["schemas"]["create_asana_subtask_task_params"] | components["schemas"]["create_asana_task_task_params"] | components["schemas"]["create_confluence_page_task_params"] | components["schemas"]["create_datadog_notebook_task_params"] | components["schemas"]["create_coda_page_task_params"] | components["schemas"]["create_dropbox_paper_page_task_params"] | components["schemas"]["create_github_issue_task_params"] | components["schemas"]["create_gitlab_issue_task_params"] | components["schemas"]["create_outlook_event_task_params"] | components["schemas"]["create_google_calendar_event_task_params"] | components["schemas"]["update_google_docs_page_task_params"] | components["schemas"]["update_coda_page_task_params"] | components["schemas"]["update_google_calendar_event_task_params"] | components["schemas"]["create_sharepoint_page_task_params"] | components["schemas"]["create_google_docs_page_task_params"] | components["schemas"]["create_google_docs_permissions_task_params"] | components["schemas"]["remove_google_docs_permissions_task_params"] | components["schemas"]["create_quip_page_task_params"] | components["schemas"]["create_google_meeting_task_params"] | components["schemas"]["create_go_to_meeting_task_params"] | components["schemas"]["create_incident_task_params"] | components["schemas"]["create_sub_incident_task_params"] | components["schemas"]["create_incident_postmortem_task_params"] | components["schemas"]["create_jira_issue_task_params"] | components["schemas"]["create_jira_subtask_task_params"] | components["schemas"]["attach_retrospective_pdf_to_jira_issue_task_params"] | components["schemas"]["attach_retrospective_pdf_to_freshservice_ticket_task_params"] | components["schemas"]["create_linear_issue_task_params"] | components["schemas"]["create_linear_subtask_issue_task_params"] | components["schemas"]["create_linear_issue_comment_task_params"] | components["schemas"]["create_microsoft_teams_meeting_task_params"] | components["schemas"]["create_microsoft_teams_channel_task_params"] | components["schemas"]["create_microsoft_teams_chat_task_params"] | components["schemas"]["add_microsoft_teams_tab_task_params"] | components["schemas"]["add_microsoft_teams_chat_tab_task_params"] | components["schemas"]["create_google_chat_space_task_params"] | components["schemas"]["send_google_chat_message_task_params"] | components["schemas"]["send_google_chat_attachments_task_params"] | components["schemas"]["invite_to_google_chat_space_task_params"] | components["schemas"]["archive_google_chat_spaces_task_params"] | components["schemas"]["rename_google_chat_space_task_params"] | components["schemas"]["update_google_chat_space_description_task_params"] | components["schemas"]["change_google_chat_space_privacy_task_params"] | components["schemas"]["archive_microsoft_teams_channels_task_params"] | components["schemas"]["rename_microsoft_teams_channel_task_params"] | components["schemas"]["invite_to_microsoft_teams_channel_task_params"] | components["schemas"]["create_notion_page_task_params"] | components["schemas"]["send_microsoft_teams_message_task_params"] | components["schemas"]["send_microsoft_teams_chat_message_task_params"] | components["schemas"]["send_microsoft_teams_blocks_task_params"] | components["schemas"]["update_notion_page_task_params"] | components["schemas"]["update_quip_page_task_params"] | components["schemas"]["update_confluence_page_task_params"] | components["schemas"]["update_sharepoint_page_task_params"] | components["schemas"]["update_dropbox_paper_page_task_params"] | components["schemas"]["update_datadog_notebook_task_params"] | components["schemas"]["create_service_now_incident_task_params"] | components["schemas"]["create_shortcut_story_task_params"] | components["schemas"]["create_shortcut_task_task_params"] | components["schemas"]["create_trello_card_task_params"] | components["schemas"]["create_webex_meeting_task_params"] | components["schemas"]["create_zendesk_ticket_task_params"] | components["schemas"]["create_zendesk_jira_link_task_params"] | components["schemas"]["create_clickup_task_task_params"] | components["schemas"]["create_motion_task_task_params"] | components["schemas"]["create_zoom_meeting_task_params"] | components["schemas"]["get_github_commits_task_params"] | components["schemas"]["get_gitlab_commits_task_params"] | components["schemas"]["get_pulses_task_params"] | components["schemas"]["get_alerts_task_params"] | components["schemas"]["http_client_task_params"] | components["schemas"]["invite_to_slack_channel_opsgenie_task_params"] | components["schemas"]["invite_to_slack_channel_rootly_task_params"] | components["schemas"]["invite_to_microsoft_teams_channel_rootly_task_params"] | components["schemas"]["invite_to_slack_channel_pagerduty_task_params"] | components["schemas"]["invite_to_slack_channel_task_params"] | components["schemas"]["invite_to_slack_channel_victor_ops_task_params"] | components["schemas"]["page_opsgenie_on_call_responders_task_params"] | components["schemas"]["create_opsgenie_alert_task_params"] | components["schemas"]["create_jsmops_alert_task_params"] | components["schemas"]["page_jsmops_on_call_responders_task_params"] | components["schemas"]["update_opsgenie_alert_task_params"] | components["schemas"]["update_opsgenie_incident_task_params"] | components["schemas"]["page_rootly_on_call_responders_task_params"] | components["schemas"]["page_pagerduty_on_call_responders_task_params"] | components["schemas"]["page_victor_ops_on_call_responders_task_params"] | components["schemas"]["update_victor_ops_incident_task_params"] | components["schemas"]["print_task_params"] | components["schemas"]["publish_incident_task_params"] | components["schemas"]["redis_client_task_params"] | components["schemas"]["rename_slack_channel_task_params"] | components["schemas"]["change_slack_channel_privacy_task_params"] | components["schemas"]["run_command_heroku_task_params"] | components["schemas"]["send_email_task_params"] | components["schemas"]["send_dashboard_report_task_params"] | components["schemas"]["create_slack_channel_task_params"] | components["schemas"]["send_slack_message_task_params"] | components["schemas"]["send_sms_task_params"] | components["schemas"]["send_whatsapp_message_task_params"] | components["schemas"]["snapshot_datadog_graph_task_params"] | components["schemas"]["snapshot_grafana_dashboard_task_params"] | components["schemas"]["snapshot_looker_look_task_params"] | components["schemas"]["snapshot_new_relic_graph_task_params"] | components["schemas"]["tweet_twitter_message_task_params"] | components["schemas"]["update_airtable_table_record_task_params"] | components["schemas"]["update_asana_task_task_params"] | components["schemas"]["update_github_issue_task_params"] | components["schemas"]["update_gitlab_issue_task_params"] | components["schemas"]["update_incident_task_params"] | components["schemas"]["update_incident_postmortem_task_params"] | components["schemas"]["update_jira_issue_task_params"] | components["schemas"]["update_linear_issue_task_params"] | components["schemas"]["update_service_now_incident_task_params"] | components["schemas"]["update_shortcut_story_task_params"] | components["schemas"]["update_shortcut_task_task_params"] | components["schemas"]["update_slack_channel_topic_task_params"] | components["schemas"]["update_status_task_params"] | components["schemas"]["update_incident_status_timestamp_task_params"] | components["schemas"]["update_trello_card_task_params"] | components["schemas"]["update_clickup_task_task_params"] | components["schemas"]["update_motion_task_task_params"] | components["schemas"]["update_zendesk_ticket_task_params"] | components["schemas"]["update_attached_alerts_task_params"] | components["schemas"]["trigger_workflow_task_params"] | components["schemas"]["send_slack_blocks_task_params"] | components["schemas"]["create_openai_chat_completion_task_params"] | components["schemas"]["create_watsonx_chat_completion_task_params"] | components["schemas"]["create_google_gemini_chat_completion_task_params"] | components["schemas"]["create_mistral_chat_completion_task_params"] | components["schemas"]["create_anthropic_chat_completion_task_params"];
+            task_params: components["schemas"]["add_action_item_task_params"] | components["schemas"]["update_action_item_task_params"] | components["schemas"]["add_role_task_params"] | components["schemas"]["add_slack_bookmark_task_params"] | components["schemas"]["add_team_task_params"] | components["schemas"]["add_to_timeline_task_params"] | components["schemas"]["archive_slack_channels_task_params"] | components["schemas"]["attach_datadog_dashboards_task_params"] | components["schemas"]["auto_assign_role_opsgenie_task_params"] | components["schemas"]["auto_assign_role_rootly_task_params"] | components["schemas"]["auto_assign_role_pagerduty_task_params"] | components["schemas"]["update_pagerduty_incident_task_params"] | components["schemas"]["create_pagerduty_status_update_task_params"] | components["schemas"]["create_pagertree_alert_task_params"] | components["schemas"]["update_pagertree_alert_task_params"] | components["schemas"]["auto_assign_role_victor_ops_task_params"] | components["schemas"]["call_people_task_params"] | components["schemas"]["create_airtable_table_record_task_params"] | components["schemas"]["create_asana_subtask_task_params"] | components["schemas"]["create_asana_task_task_params"] | components["schemas"]["create_confluence_page_task_params"] | components["schemas"]["create_datadog_notebook_task_params"] | components["schemas"]["create_coda_page_task_params"] | components["schemas"]["create_dropbox_paper_page_task_params"] | components["schemas"]["create_github_issue_task_params"] | components["schemas"]["create_gitlab_issue_task_params"] | components["schemas"]["create_outlook_event_task_params"] | components["schemas"]["create_google_calendar_event_task_params"] | components["schemas"]["update_google_docs_page_task_params"] | components["schemas"]["update_coda_page_task_params"] | components["schemas"]["update_google_calendar_event_task_params"] | components["schemas"]["create_sharepoint_page_task_params"] | components["schemas"]["create_google_docs_page_task_params"] | components["schemas"]["create_google_docs_permissions_task_params"] | components["schemas"]["remove_google_docs_permissions_task_params"] | components["schemas"]["create_quip_page_task_params"] | components["schemas"]["create_google_meeting_task_params"] | components["schemas"]["create_go_to_meeting_task_params"] | components["schemas"]["create_incident_task_params"] | components["schemas"]["create_sub_incident_task_params"] | components["schemas"]["create_incident_postmortem_task_params"] | components["schemas"]["create_jira_issue_task_params"] | components["schemas"]["create_jira_subtask_task_params"] | components["schemas"]["attach_retrospective_pdf_to_jira_issue_task_params"] | components["schemas"]["attach_retrospective_pdf_to_freshservice_ticket_task_params"] | components["schemas"]["create_linear_issue_task_params"] | components["schemas"]["create_linear_subtask_issue_task_params"] | components["schemas"]["create_linear_issue_comment_task_params"] | components["schemas"]["create_microsoft_teams_meeting_task_params"] | components["schemas"]["create_microsoft_teams_channel_task_params"] | components["schemas"]["create_microsoft_teams_chat_task_params"] | components["schemas"]["add_microsoft_teams_tab_task_params"] | components["schemas"]["add_microsoft_teams_chat_tab_task_params"] | components["schemas"]["create_google_chat_space_task_params"] | components["schemas"]["send_google_chat_message_task_params"] | components["schemas"]["send_google_chat_attachments_task_params"] | components["schemas"]["invite_to_google_chat_space_task_params"] | components["schemas"]["archive_google_chat_spaces_task_params"] | components["schemas"]["rename_google_chat_space_task_params"] | components["schemas"]["update_google_chat_space_description_task_params"] | components["schemas"]["change_google_chat_space_privacy_task_params"] | components["schemas"]["archive_microsoft_teams_channels_task_params"] | components["schemas"]["rename_microsoft_teams_channel_task_params"] | components["schemas"]["invite_to_microsoft_teams_channel_task_params"] | components["schemas"]["create_notion_page_task_params"] | components["schemas"]["send_microsoft_teams_message_task_params"] | components["schemas"]["send_microsoft_teams_chat_message_task_params"] | components["schemas"]["send_microsoft_teams_blocks_task_params"] | components["schemas"]["update_notion_page_task_params"] | components["schemas"]["update_quip_page_task_params"] | components["schemas"]["update_confluence_page_task_params"] | components["schemas"]["update_sharepoint_page_task_params"] | components["schemas"]["update_dropbox_paper_page_task_params"] | components["schemas"]["update_datadog_notebook_task_params"] | components["schemas"]["create_service_now_incident_task_params"] | components["schemas"]["create_shortcut_story_task_params"] | components["schemas"]["create_shortcut_task_task_params"] | components["schemas"]["create_trello_card_task_params"] | components["schemas"]["create_webex_meeting_task_params"] | components["schemas"]["create_zendesk_ticket_task_params"] | components["schemas"]["create_zendesk_jira_link_task_params"] | components["schemas"]["create_clickup_task_task_params"] | components["schemas"]["create_motion_task_task_params"] | components["schemas"]["create_zoom_meeting_task_params"] | components["schemas"]["get_github_commits_task_params"] | components["schemas"]["get_gitlab_commits_task_params"] | components["schemas"]["get_pulses_task_params"] | components["schemas"]["get_alerts_task_params"] | components["schemas"]["http_client_task_params"] | components["schemas"]["invite_to_slack_channel_opsgenie_task_params"] | components["schemas"]["invite_to_slack_channel_rootly_task_params"] | components["schemas"]["invite_to_microsoft_teams_channel_rootly_task_params"] | components["schemas"]["invite_to_slack_channel_pagerduty_task_params"] | components["schemas"]["invite_to_slack_channel_task_params"] | components["schemas"]["invite_to_slack_channel_victor_ops_task_params"] | components["schemas"]["page_opsgenie_on_call_responders_task_params"] | components["schemas"]["create_opsgenie_alert_task_params"] | components["schemas"]["create_jsmops_alert_task_params"] | components["schemas"]["page_jsmops_on_call_responders_task_params"] | components["schemas"]["update_opsgenie_alert_task_params"] | components["schemas"]["update_opsgenie_incident_task_params"] | components["schemas"]["page_rootly_on_call_responders_task_params"] | components["schemas"]["page_pagerduty_on_call_responders_task_params"] | components["schemas"]["page_victor_ops_on_call_responders_task_params"] | components["schemas"]["update_victor_ops_incident_task_params"] | components["schemas"]["print_task_params"] | components["schemas"]["publish_incident_task_params"] | components["schemas"]["redis_client_task_params"] | components["schemas"]["rename_slack_channel_task_params"] | components["schemas"]["remove_from_slack_channel_task_params"] | components["schemas"]["change_slack_channel_privacy_task_params"] | components["schemas"]["run_command_heroku_task_params"] | components["schemas"]["send_email_task_params"] | components["schemas"]["send_dashboard_report_task_params"] | components["schemas"]["create_slack_channel_task_params"] | components["schemas"]["create_slack_canvas_task_params"] | components["schemas"]["send_slack_message_task_params"] | components["schemas"]["send_sms_task_params"] | components["schemas"]["send_whatsapp_message_task_params"] | components["schemas"]["snapshot_datadog_graph_task_params"] | components["schemas"]["snapshot_grafana_dashboard_task_params"] | components["schemas"]["snapshot_looker_look_task_params"] | components["schemas"]["snapshot_new_relic_graph_task_params"] | components["schemas"]["tweet_twitter_message_task_params"] | components["schemas"]["update_airtable_table_record_task_params"] | components["schemas"]["update_asana_task_task_params"] | components["schemas"]["update_github_issue_task_params"] | components["schemas"]["update_gitlab_issue_task_params"] | components["schemas"]["update_incident_task_params"] | components["schemas"]["update_incident_postmortem_task_params"] | components["schemas"]["update_jira_issue_task_params"] | components["schemas"]["update_linear_issue_task_params"] | components["schemas"]["update_service_now_incident_task_params"] | components["schemas"]["update_shortcut_story_task_params"] | components["schemas"]["update_shortcut_task_task_params"] | components["schemas"]["update_slack_channel_topic_task_params"] | components["schemas"]["update_slack_canvas_task_params"] | components["schemas"]["update_status_task_params"] | components["schemas"]["update_incident_status_timestamp_task_params"] | components["schemas"]["update_trello_card_task_params"] | components["schemas"]["update_clickup_task_task_params"] | components["schemas"]["update_motion_task_task_params"] | components["schemas"]["update_zendesk_ticket_task_params"] | components["schemas"]["update_attached_alerts_task_params"] | components["schemas"]["trigger_workflow_task_params"] | components["schemas"]["send_slack_blocks_task_params"] | components["schemas"]["create_openai_chat_completion_task_params"] | components["schemas"]["create_watsonx_chat_completion_task_params"] | components["schemas"]["create_google_gemini_chat_completion_task_params"] | components["schemas"]["create_mistral_chat_completion_task_params"] | components["schemas"]["create_anthropic_chat_completion_task_params"];
             /** @description Name of the workflow task */
             name?: string;
             /** @description The position of the workflow task */
@@ -17234,6 +18501,8 @@ export interface components {
         };
         update_workflow_action_item_form_field_condition: {
             data: {
+                /** @description Accepted for JSON:API client compatibility, but ignored. The resource to update is identified by the id in the path. */
+                id?: string;
                 /** @enum {string} */
                 type: "workflow_action_item_form_field_conditions";
                 attributes: {
@@ -17322,6 +18591,8 @@ export interface components {
         };
         update_workflow_custom_field_selection: {
             data: {
+                /** @description Accepted for JSON:API client compatibility, but ignored. The resource to update is identified by the id in the path. */
+                id?: string;
                 /** @enum {string} */
                 type: "workflow_custom_field_selections";
                 attributes: {
@@ -17402,6 +18673,8 @@ export interface components {
         };
         update_workflow_form_field_condition: {
             data: {
+                /** @description Accepted for JSON:API client compatibility, but ignored. The resource to update is identified by the id in the path. */
+                id?: string;
                 /** @enum {string} */
                 type: "workflow_form_field_conditions";
                 attributes: {
@@ -17482,7 +18755,7 @@ export interface components {
                      * @description The kind of the workflow group
                      * @enum {string|null}
                      */
-                    kind?: "simple" | "incident" | "post_mortem" | "action_item" | "pulse" | "alert" | null;
+                    kind?: "simple" | "incident" | "post_mortem" | "action_item" | "pulse" | "problem" | "alert" | null;
                     /** @description The name of the workflow group. */
                     name: string;
                     /** @description A description of the workflow group. */
@@ -17498,6 +18771,8 @@ export interface components {
         };
         update_workflow_group: {
             data: {
+                /** @description Accepted for JSON:API client compatibility, but ignored. The resource to update is identified by the id in the path. */
+                id?: string;
                 /** @enum {string} */
                 type: "workflow_groups";
                 attributes: {
@@ -17510,7 +18785,7 @@ export interface components {
                      * @description The kind of the workflow group
                      * @enum {string|null}
                      */
-                    kind?: "simple" | "incident" | "post_mortem" | "action_item" | "pulse" | "alert" | null;
+                    kind?: "simple" | "incident" | "post_mortem" | "action_item" | "pulse" | "problem" | "alert" | null;
                     /** @description The name of the workflow group. */
                     name?: string;
                     /** @description A description of the workflow group. */
@@ -17529,7 +18804,7 @@ export interface components {
              * @description The kind of the workflow group
              * @enum {string|null}
              */
-            kind?: "simple" | "incident" | "post_mortem" | "action_item" | "pulse" | "alert" | null;
+            kind?: "simple" | "incident" | "post_mortem" | "action_item" | "pulse" | "problem" | "alert" | null;
             /** @description The name of the workflow group. */
             name: string;
             /** @description The slug of the workflow group. */
@@ -17736,6 +19011,8 @@ export interface components {
                     repeat_condition_number_of_repeats?: number;
                     /** @description When continuously repeat is true, repeat workflows aren't automatically stopped when conditions aren't met. This setting won't override your conditions set by repeat_condition_duration_since_first_run and repeat_condition_number_of_repeats parameters. */
                     continuously_repeat?: boolean;
+                    /** @description When true, the workflow runs at most once per incident. Later triggers on the same incident create a canceled run instead. Manual runs and repeats are not affected. Only applies to incident workflows. */
+                    run_once_per_resource?: boolean;
                     repeat_on?: ("S" | "M" | "T" | "W" | "R" | "F" | "U")[];
                     enabled?: boolean;
                     /** @description Restricts workflow edits to admins when turned on. Only admins can set this field. */
@@ -17752,13 +19029,30 @@ export interface components {
                     service_ids?: string[];
                     functionality_ids?: string[];
                     group_ids?: string[];
+                    /** @description Owning team IDs. Requires team-scoped workflows. */
+                    group_assignment_ids?: string[];
                     cause_ids?: string[];
                     sub_status_ids?: string[];
+                    /**
+                     * @description Where failure notifications for this workflow are sent. `inherit` uses the account default channel, `custom` uses `failure_notification_channels`, `off` suppresses them.
+                     * @enum {string}
+                     */
+                    failure_notification_mode?: "inherit" | "custom" | "off";
+                    /** @description Slack channels notified when a run of this workflow fails. Used when `failure_notification_mode` is `custom`. */
+                    failure_notification_channels?: {
+                        /** @description Slack channel ID. Liquid is allowed, for example `{{ incident.slack_channel_id }}` for the incident channel. */
+                        id: string;
+                        /** @description Slack channel name */
+                        name: string;
+                    }[];
                 };
             };
         };
         incident_trigger_params: {
-            /** @enum {string} */
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
             trigger_type: "incident";
             triggers?: string[];
             incident_visibilities?: boolean[];
@@ -17857,6 +19151,10 @@ export interface components {
             incident_condition_mitigated_at?: "SET" | "UNSET" | null;
             /** @enum {string|null} */
             incident_condition_resolved_at?: "SET" | "UNSET" | null;
+            /** @enum {string|null} */
+            incident_condition_scheduled_for?: "SET" | "UNSET" | null;
+            /** @enum {string|null} */
+            incident_condition_scheduled_until?: "SET" | "UNSET" | null;
             /** @enum {string|null} */
             incident_conditional_inactivity?: "IS" | null;
         };
@@ -17961,6 +19259,10 @@ export interface components {
             /** @enum {string|null} */
             incident_condition_resolved_at?: "SET" | "UNSET" | null;
             /** @enum {string|null} */
+            incident_condition_scheduled_for?: "SET" | "UNSET" | null;
+            /** @enum {string|null} */
+            incident_condition_scheduled_until?: "SET" | "UNSET" | null;
+            /** @enum {string|null} */
             incident_conditional_inactivity?: "IS" | null;
             /** @enum {string} */
             incident_post_mortem_condition?: "ALL" | "ANY" | "NONE";
@@ -17972,7 +19274,10 @@ export interface components {
             incident_post_mortem_statuses?: ("draft" | "published")[];
         };
         action_item_trigger_params: {
-            /** @enum {string} */
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
             trigger_type: "action_item";
             triggers?: string[];
             incident_visibilities?: boolean[];
@@ -18061,6 +19366,10 @@ export interface components {
             /** @enum {string|null} */
             incident_condition_resolved_at?: "SET" | "UNSET" | null;
             /** @enum {string|null} */
+            incident_condition_scheduled_for?: "SET" | "UNSET" | null;
+            /** @enum {string|null} */
+            incident_condition_scheduled_until?: "SET" | "UNSET" | null;
+            /** @enum {string|null} */
             incident_conditional_inactivity?: "IS" | null;
             /** @enum {string} */
             incident_action_item_condition?: "ALL" | "ANY" | "NONE";
@@ -18090,7 +19399,10 @@ export interface components {
             incident_action_item_group_ids?: string[];
         };
         alert_trigger_params: {
-            /** @enum {string} */
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
             trigger_type: "alert";
             triggers?: ("alert_created" | "alert_status_updated")[];
             /** @enum {string} */
@@ -18154,7 +19466,10 @@ export interface components {
             };
         };
         pulse_trigger_params: {
-            /** @enum {string} */
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
             trigger_type: "pulse";
             triggers?: "pulse_created"[];
             /** @enum {string} */
@@ -18187,7 +19502,10 @@ export interface components {
             pulse_query_payload?: string | null;
         };
         simple_trigger_params: {
-            /** @enum {string} */
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
             trigger_type: "simple";
             triggers?: "slack_command"[];
         };
@@ -18221,6 +19539,8 @@ export interface components {
                     repeat_condition_number_of_repeats?: number;
                     /** @description When continuously repeat is true, repeat workflows aren't automatically stopped when conditions aren't met. This setting won't override your conditions set by repeat_condition_duration_since_first_run and repeat_condition_number_of_repeats parameters. */
                     continuously_repeat?: boolean;
+                    /** @description When true, the workflow runs at most once per incident. Later triggers on the same incident create a canceled run instead. Manual runs and repeats are not affected. Only applies to incident workflows. */
+                    run_once_per_resource?: boolean;
                     enabled?: boolean;
                     /** @description Restricts workflow edits to admins when turned on. Only admins can set this field. */
                     locked?: boolean;
@@ -18236,8 +19556,22 @@ export interface components {
                     service_ids?: string[];
                     functionality_ids?: string[];
                     group_ids?: string[];
+                    /** @description Owning team IDs. Requires team-scoped workflows. */
+                    group_assignment_ids?: string[];
                     cause_ids?: string[];
                     sub_status_ids?: string[];
+                    /**
+                     * @description Where failure notifications for this workflow are sent. `inherit` uses the account default channel, `custom` uses `failure_notification_channels`, `off` suppresses them.
+                     * @enum {string}
+                     */
+                    failure_notification_mode?: "inherit" | "custom" | "off";
+                    /** @description Slack channels notified when a run of this workflow fails. Used when `failure_notification_mode` is `custom`. */
+                    failure_notification_channels?: {
+                        /** @description Slack channel ID. Liquid is allowed, for example `{{ incident.slack_channel_id }}` for the incident channel. */
+                        id: string;
+                        /** @description Slack channel name */
+                        name: string;
+                    }[];
                 };
             };
         };
@@ -18262,6 +19596,8 @@ export interface components {
             repeat_condition_number_of_repeats?: number;
             /** @description When continuously repeat is true, repeat workflows aren't automatically stopped when conditions aren't met. This setting won't override your conditions set by repeat_condition_duration_since_first_run and repeat_condition_number_of_repeats parameters. */
             continuously_repeat?: boolean;
+            /** @description When true, the workflow runs at most once per incident. Later triggers on the same incident create a canceled run instead. Manual runs and repeats are not affected. Only applies to incident workflows. */
+            run_once_per_resource?: boolean;
             repeat_on?: ("S" | "M" | "T" | "W" | "R" | "F" | "U")[] | null;
             enabled?: boolean;
             /** @description Restricts workflow edits to admins when turned on. Only admins can set this field. */
@@ -18278,8 +19614,22 @@ export interface components {
             service_ids?: string[];
             functionality_ids?: string[];
             group_ids?: string[];
+            /** @description Owning team IDs. Requires team-scoped workflows. */
+            group_assignment_ids?: string[];
             cause_ids?: string[];
             sub_status_ids?: string[];
+            /**
+             * @description Where failure notifications for this workflow are sent. `inherit` uses the account default channel, `custom` uses `failure_notification_channels`, `off` suppresses them.
+             * @enum {string}
+             */
+            failure_notification_mode?: "inherit" | "custom" | "off";
+            /** @description Slack channels notified when a run of this workflow fails. Used when `failure_notification_mode` is `custom`. */
+            failure_notification_channels?: {
+                /** @description Slack channel ID. Liquid is allowed, for example `{{ incident.slack_channel_id }}` for the incident channel. */
+                id: string;
+                /** @description Slack channel name */
+                name: string;
+            }[];
             /** @description Date of creation */
             created_at: string;
             /** @description Date of last update */
@@ -18390,6 +19740,8 @@ export interface components {
         };
         update_live_call_router: {
             data: {
+                /** @description Accepted for JSON:API client compatibility, but ignored. The resource to update is identified by the id in the path. */
+                id?: string;
                 /** @enum {string} */
                 type: "live_call_routers";
                 attributes: {
@@ -18599,6 +19951,8 @@ export interface components {
         };
         update_heartbeat: {
             data: {
+                /** @description Accepted for JSON:API client compatibility, but ignored. The resource to update is identified by the id in the path. */
+                id?: string;
                 /** @enum {string} */
                 type: "heartbeats";
                 attributes: {
@@ -18761,6 +20115,8 @@ export interface components {
         };
         update_incident_action_item: {
             data: {
+                /** @description Accepted for JSON:API client compatibility, but ignored. The resource to update is identified by the id in the path. */
+                id?: string;
                 /** @enum {string} */
                 type: "incident_action_items";
                 attributes: {
@@ -18903,6 +20259,8 @@ export interface components {
         };
         update_incident_custom_field_selection: {
             data: {
+                /** @description Accepted for JSON:API client compatibility, but ignored. The resource to update is identified by the id in the path. */
+                id?: string;
                 /** @enum {string} */
                 type: "incident_custom_field_selections";
                 attributes: {
@@ -18960,6 +20318,8 @@ export interface components {
         };
         update_incident_event_functionality: {
             data: {
+                /** @description Accepted for JSON:API client compatibility, but ignored. The resource to update is identified by the id in the path. */
+                id?: string;
                 /** @enum {string} */
                 type: "incident_event_functionalities";
                 attributes: {
@@ -19023,6 +20383,8 @@ export interface components {
         };
         update_incident_event_service: {
             data: {
+                /** @description Accepted for JSON:API client compatibility, but ignored. The resource to update is identified by the id in the path. */
+                id?: string;
                 /** @enum {string} */
                 type: "incident_event_services";
                 attributes: {
@@ -19084,6 +20446,8 @@ export interface components {
         };
         update_incident_event: {
             data: {
+                /** @description Accepted for JSON:API client compatibility, but ignored. The resource to update is identified by the id in the path. */
+                id?: string;
                 /** @enum {string} */
                 type: "incident_events";
                 attributes: {
@@ -19153,6 +20517,8 @@ export interface components {
         };
         update_incident_feedback: {
             data: {
+                /** @description Accepted for JSON:API client compatibility, but ignored. The resource to update is identified by the id in the path. */
+                id?: string;
                 /** @enum {string} */
                 type: "incident_feedbacks";
                 attributes: {
@@ -19229,6 +20595,8 @@ export interface components {
         };
         update_incident_form_field_selection: {
             data: {
+                /** @description Accepted for JSON:API client compatibility, but ignored. The resource to update is identified by the id in the path. */
+                id?: string;
                 /** @enum {string} */
                 type: "incident_form_field_selections";
                 attributes: {
@@ -19318,6 +20686,8 @@ export interface components {
         };
         update_incident_permission_set_boolean: {
             data: {
+                /** @description Accepted for JSON:API client compatibility, but ignored. The resource to update is identified by the id in the path. */
+                id?: string;
                 /** @enum {string} */
                 type: "incident_permission_set_booleans";
                 attributes: {
@@ -19413,6 +20783,8 @@ export interface components {
         };
         update_incident_permission_set_resource: {
             data: {
+                /** @description Accepted for JSON:API client compatibility, but ignored. The resource to update is identified by the id in the path. */
+                id?: string;
                 /** @enum {string} */
                 type: "incident_permission_set_resources";
                 attributes: {
@@ -19496,6 +20868,8 @@ export interface components {
         };
         update_incident_permission_set: {
             data: {
+                /** @description Accepted for JSON:API client compatibility, but ignored. The resource to update is identified by the id in the path. */
+                id?: string;
                 /** @enum {string} */
                 type: "incident_permission_sets";
                 attributes: {
@@ -19549,11 +20923,15 @@ export interface components {
         };
         update_incident_post_mortem: {
             data: {
+                /** @description Accepted for JSON:API client compatibility, but ignored. The resource to update is identified by the id in the path. */
+                id?: string;
                 /** @enum {string} */
                 type: "incident_post_mortems";
                 attributes: {
                     /** @description The title of the incident retrospective */
                     title?: string;
+                    /** @description The content (body) of the incident retrospective, as HTML. Rejected with a 409 once the retrospective has been opened in the collaborative editor. */
+                    content?: string | null;
                     /**
                      * @description The status of the incident retrospective
                      * @enum {string}
@@ -19661,6 +21039,8 @@ export interface components {
         };
         update_incident_retrospective_step: {
             data: {
+                /** @description Accepted for JSON:API client compatibility, but ignored. The resource to update is identified by the id in the path. */
+                id?: string;
                 /** @enum {string} */
                 type: "incident_retrospective_steps";
                 attributes: {
@@ -19737,6 +21117,8 @@ export interface components {
         };
         update_incident_role_task: {
             data: {
+                /** @description Accepted for JSON:API client compatibility, but ignored. The resource to update is identified by the id in the path. */
+                id?: string;
                 /** @enum {string} */
                 type: "incident_role_tasks";
                 attributes: {
@@ -19816,6 +21198,8 @@ export interface components {
         };
         update_incident_role: {
             data: {
+                /** @description Accepted for JSON:API client compatibility, but ignored. The resource to update is identified by the id in the path. */
+                id?: string;
                 /** @enum {string} */
                 type: "incident_roles";
                 attributes: {
@@ -19908,7 +21292,7 @@ export interface components {
                      * @description When the event started. Defaults to the time of creation.
                      */
                     started_at?: string | null;
-                    /** @description Affected status page components and their statuses. Requires the status-page-v3-phase-1 feature. Ignored for terminal event statuses (resolved, completed), which clear component impact. A status is required per component except for scheduled maintenance incidents. */
+                    /** @description Affected status page components and their statuses. This field is in Early Access and is not generally available; contact Rootly Support to request access. Ignored for terminal event statuses (resolved, completed), which clear component impact. A status is required per component except for scheduled maintenance incidents. */
                     status_page_components?: {
                         /** @description Unique ID of a component on the event's status page */
                         status_page_component_id: string;
@@ -19923,6 +21307,8 @@ export interface components {
         };
         update_incident_status_page_event: {
             data: {
+                /** @description Accepted for JSON:API client compatibility, but ignored. The resource to update is identified by the id in the path. */
+                id?: string;
                 /** @enum {string} */
                 type: "incident_status_page_events";
                 attributes: {
@@ -20054,6 +21440,8 @@ export interface components {
         };
         update_incident_type: {
             data: {
+                /** @description Accepted for JSON:API client compatibility, but ignored. The resource to update is identified by the id in the path. */
+                id?: string;
                 /** @enum {string} */
                 type: "incident_types";
                 attributes: {
@@ -20227,6 +21615,12 @@ export interface components {
                     jira_issue_id?: string | null;
                     /** @description Jira issue URL */
                     jira_issue_url?: string | null;
+                    /** @description Linear issue key */
+                    linear_issue_key?: string | null;
+                    /** @description Linear issue ID */
+                    linear_issue_id?: string | null;
+                    /** @description Linear issue URL */
+                    linear_issue_url?: string | null;
                     /** @description Emails you want to notify */
                     notify_emails?: string[] | null;
                     /**
@@ -20261,6 +21655,8 @@ export interface components {
         };
         update_incident: {
             data: {
+                /** @description Accepted for JSON:API client compatibility, but ignored. The resource to update is identified by the id in the path. */
+                id?: string;
                 /** @enum {string} */
                 type: "incidents";
                 attributes: {
@@ -20328,6 +21724,12 @@ export interface components {
                     jira_issue_id?: string | null;
                     /** @description Jira issue URL */
                     jira_issue_url?: string | null;
+                    /** @description Linear issue key */
+                    linear_issue_key?: string | null;
+                    /** @description Linear issue ID */
+                    linear_issue_id?: string | null;
+                    /** @description Linear issue URL */
+                    linear_issue_url?: string | null;
                     /** @description Date of when the maintenance begins */
                     scheduled_for?: string | null;
                     /** @description Date of when the maintenance ends */
@@ -20359,12 +21761,16 @@ export interface components {
         };
         in_triage_incident: {
             data: {
+                /** @description Accepted for JSON:API client compatibility, but ignored. The resource to update is identified by the id in the path. */
+                id?: string;
                 /** @enum {string} */
                 type: "incidents";
             };
         };
         restart_incident: {
             data: {
+                /** @description Accepted for JSON:API client compatibility, but ignored. The resource to update is identified by the id in the path. */
+                id?: string;
                 /** @enum {string} */
                 type: "incidents";
                 attributes?: Record<string, never>;
@@ -20372,6 +21778,8 @@ export interface components {
         };
         mitigate_incident: {
             data: {
+                /** @description Accepted for JSON:API client compatibility, but ignored. The resource to update is identified by the id in the path. */
+                id?: string;
                 /** @enum {string} */
                 type: "incidents";
                 attributes: {
@@ -20382,6 +21790,8 @@ export interface components {
         };
         resolve_incident: {
             data: {
+                /** @description Accepted for JSON:API client compatibility, but ignored. The resource to update is identified by the id in the path. */
+                id?: string;
                 /** @enum {string} */
                 type: "incidents";
                 attributes: {
@@ -20392,6 +21802,8 @@ export interface components {
         };
         cancel_incident: {
             data: {
+                /** @description Accepted for JSON:API client compatibility, but ignored. The resource to update is identified by the id in the path. */
+                id?: string;
                 /** @enum {string} */
                 type: "incidents";
                 attributes: {
@@ -20501,8 +21913,7 @@ export interface components {
             public_title?: string | null;
             /** @description The user who created the incident */
             user?: Record<string, never> | null;
-            /** @description The Severity of the incident */
-            severity?: components["schemas"]["severity_response"] | null;
+            severity?: components["schemas"]["nullable_severity_response"];
             /** @description The Environments of the incident */
             environments?: components["schemas"]["environment_response"][] | null;
             /** @description The Incident Types of the incident */
@@ -20611,6 +22022,8 @@ export interface components {
             asana_task_id?: string | null;
             /** @description Asana task URL */
             asana_task_url?: string | null;
+            /** @description Linear issue key */
+            linear_issue_key?: string | null;
             /** @description Linear issue ID */
             linear_issue_id?: string | null;
             /** @description Linear issue URL */
@@ -21058,6 +22471,8 @@ export interface components {
         };
         update_on_call_pay_report: {
             data: {
+                /** @description Accepted for JSON:API client compatibility, but ignored. The resource to update is identified by the id in the path. */
+                id?: string;
                 /** @enum {string} */
                 type: "on_call_pay_reports";
                 attributes: {
@@ -21132,12 +22547,12 @@ export interface components {
             use_responders_time_zone?: boolean;
             /**
              * Format: uri
-             * @description Download URL for the generated CSV report. Null until the report is generated.
+             * @description Short-lived, presigned download URL for the generated CSV report. Fetch the report again if the URL expires. Null until the report is generated.
              */
             csv_file_url?: string | null;
             /**
              * Format: uri
-             * @description Download URL for the generated XLSX report. Null until the report is generated.
+             * @description Short-lived, presigned download URL for the generated XLSX report. Fetch the report again if the URL expires. Null until the report is generated.
              */
             xlsx_file_url?: string | null;
             /** Format: date-time */
@@ -21193,6 +22608,8 @@ export interface components {
         };
         update_on_call_shadow: {
             data: {
+                /** @description Accepted for JSON:API client compatibility, but ignored. The resource to update is identified by the id in the path. */
+                id?: string;
                 /** @enum {string} */
                 type: "on_call_shadows";
                 attributes: {
@@ -21297,6 +22714,7 @@ export interface components {
                     integrations_permissions?: ("create" | "read" | "update" | "delete")[];
                     invitations_permissions?: ("create" | "read" | "update" | "delete")[];
                     live_call_routing_permissions?: ("create" | "read" | "update" | "delete")[];
+                    members_permissions?: ("read" | "update" | "delete")[];
                     schedule_override_permissions?: ("create" | "update")[];
                     schedules_permissions?: ("create" | "read" | "update" | "delete")[];
                     services_permissions?: ("create" | "read" | "update" | "delete")[];
@@ -21309,6 +22727,8 @@ export interface components {
         };
         update_on_call_role: {
             data: {
+                /** @description Accepted for JSON:API client compatibility, but ignored. The resource to update is identified by the id in the path. */
+                id?: string;
                 /** @enum {string} */
                 type: "on_call_roles";
                 attributes: {
@@ -21341,6 +22761,7 @@ export interface components {
                     integrations_permissions?: ("create" | "read" | "update" | "delete")[];
                     invitations_permissions?: ("create" | "read" | "update" | "delete")[];
                     live_call_routing_permissions?: ("create" | "read" | "update" | "delete")[];
+                    members_permissions?: ("read" | "update" | "delete")[];
                     schedule_override_permissions?: ("create" | "update")[];
                     schedules_permissions?: ("create" | "read" | "update" | "delete")[];
                     services_permissions?: ("create" | "read" | "update" | "delete")[];
@@ -21378,6 +22799,7 @@ export interface components {
             integrations_permissions?: ("create" | "read" | "update" | "delete")[];
             invitations_permissions?: ("create" | "read" | "update" | "delete")[];
             live_call_routing_permissions?: ("create" | "read" | "update" | "delete")[];
+            members_permissions?: ("read" | "update" | "delete")[];
             schedule_override_permissions?: ("create" | "update")[];
             schedules_permissions?: ("create" | "read" | "update" | "delete")[];
             services_permissions?: ("create" | "read" | "update" | "delete")[];
@@ -21432,6 +22854,8 @@ export interface components {
         };
         update_override_shift: {
             data: {
+                /** @description Accepted for JSON:API client compatibility, but ignored. The resource to update is identified by the id in the path. */
+                id?: string;
                 /** @enum {string} */
                 type: "shifts";
                 attributes: {
@@ -21520,6 +22944,8 @@ export interface components {
         };
         update_playbook_task: {
             data: {
+                /** @description Accepted for JSON:API client compatibility, but ignored. The resource to update is identified by the id in the path. */
+                id?: string;
                 /** @enum {string} */
                 type: "playbook_tasks";
                 attributes: {
@@ -21576,6 +23002,13 @@ export interface components {
                     title: string;
                     /** @description The summary of the playbook */
                     summary?: string | null;
+                    /**
+                     * @description Whether the playbook body lives in Rootly (`internal_document`) or at an external link (`external_url`).
+                     * @enum {string|null}
+                     */
+                    kind?: "internal_document" | "external_url" | null;
+                    /** @description Sanitized HTML instructions. Still returned when `kind` is `external_url`, where the body may be stale — branch on `kind`, not on `content` being present. */
+                    content?: string | null;
                     /** @description The external url of the playbook */
                     external_url?: string | null;
                     /** @description The Severity IDs to attach to the incident */
@@ -21590,11 +23023,15 @@ export interface components {
                     group_ids?: string[] | null;
                     /** @description The Incident Type IDs to attach to the incident */
                     incident_type_ids?: string[] | null;
+                    /** @description The Cause IDs to attach to the incident */
+                    cause_ids?: string[] | null;
                 };
             };
         };
         update_playbook: {
             data: {
+                /** @description Accepted for JSON:API client compatibility, but ignored. The resource to update is identified by the id in the path. */
+                id?: string;
                 /** @enum {string} */
                 type: "playbooks";
                 attributes: {
@@ -21602,6 +23039,13 @@ export interface components {
                     title?: string;
                     /** @description The summary of the playbook */
                     summary?: string | null;
+                    /**
+                     * @description Whether the playbook body lives in Rootly (`internal_document`) or at an external link (`external_url`).
+                     * @enum {string|null}
+                     */
+                    kind?: "internal_document" | "external_url" | null;
+                    /** @description Sanitized HTML instructions. Still returned when `kind` is `external_url`, where the body may be stale — branch on `kind`, not on `content` being present. */
+                    content?: string | null;
                     /** @description The external url of the playbook */
                     external_url?: string | null;
                     /** @description The Severity IDs to attach to the incident */
@@ -21616,6 +23060,8 @@ export interface components {
                     group_ids?: string[] | null;
                     /** @description The Incident Type IDs to attach to the incident */
                     incident_type_ids?: string[] | null;
+                    /** @description The Cause IDs to attach to the incident */
+                    cause_ids?: string[] | null;
                 };
             };
         };
@@ -21624,6 +23070,13 @@ export interface components {
             title: string;
             /** @description The summary of the playbook */
             summary?: string | null;
+            /**
+             * @description Whether the playbook body lives in Rootly (`internal_document`) or at an external link (`external_url`).
+             * @enum {string|null}
+             */
+            kind?: "internal_document" | "external_url" | null;
+            /** @description Sanitized HTML instructions. Still returned when `kind` is `external_url`, where the body may be stale — branch on `kind`, not on `content` being present. */
+            content?: string | null;
             /** @description The external url of the playbook */
             external_url?: string | null;
             /** @description The Severity IDs to attach to the incident */
@@ -21638,6 +23091,8 @@ export interface components {
             group_ids?: string[] | null;
             /** @description The Incident Type IDs to attach to the incident */
             incident_type_ids?: string[] | null;
+            /** @description The Cause IDs to attach to the incident */
+            cause_ids?: string[] | null;
             /** @description Date of creation */
             created_at: string;
             /** @description Date of last update */
@@ -21692,6 +23147,8 @@ export interface components {
         };
         update_post_mortem_template: {
             data: {
+                /** @description Accepted for JSON:API client compatibility, but ignored. The resource to update is identified by the id in the path. */
+                id?: string;
                 /** @enum {string} */
                 type: "post_mortem_templates";
                 attributes: {
@@ -21785,6 +23242,339 @@ export interface components {
             meta: components["schemas"]["meta"];
             included?: components["schemas"]["jsonapi_included_resource"][];
         };
+        new_problem: {
+            data: {
+                /** @enum {string} */
+                type: "problems";
+                attributes: {
+                    /** @description The title of the problem */
+                    title: string;
+                    /** @description The description of the problem */
+                    description?: string | null;
+                    /** @description ID of the user who owns the problem */
+                    owner_user_id?: number | null;
+                    /** @description ID of the group (team) that owns the problem */
+                    owner_group_id?: string | null;
+                    /**
+                     * @description The priority of the problem
+                     * @enum {string|null}
+                     */
+                    priority?: "P0" | "P1" | "P2" | "P3" | null;
+                    /**
+                     * Format: date
+                     * @description The due date of the problem
+                     */
+                    due_date?: string | null;
+                    /** @description The scope of the problem */
+                    scope?: string | null;
+                    /** @description The exit criteria of the problem */
+                    exit_criteria?: string | null;
+                    /** @description The impact observed so far */
+                    impact_so_far?: string | null;
+                    /** @description The root cause of the problem */
+                    root_cause?: string | null;
+                    /** @description The resolution of the problem */
+                    resolution?: string | null;
+                    /** @description The reason and accepted risk for deferring the problem */
+                    deferral_reason?: string | null;
+                    /** @description The reason for cancelling the problem */
+                    cancellation_reason?: string | null;
+                    /** @description The next review date for a deferred problem */
+                    next_review_at?: string | null;
+                    /** @description Days between reviews for a deferred problem */
+                    re_review_cadence?: number | null;
+                    /** @description IDs of incidents to link to the problem */
+                    incident_ids?: string[];
+                    /** @description Custom (form) field selections for the problem */
+                    form_field_selections?: Record<string, never>[];
+                };
+            };
+        };
+        update_problem: {
+            data: {
+                /** @description Accepted for JSON:API client compatibility, but ignored. The resource to update is identified by the id in the path. */
+                id?: string;
+                /** @enum {string} */
+                type: "problems";
+                attributes: {
+                    /** @description The title of the problem */
+                    title?: string;
+                    /** @description The description of the problem */
+                    description?: string | null;
+                    /** @description ID of the user who owns the problem */
+                    owner_user_id?: number | null;
+                    /** @description ID of the group (team) that owns the problem */
+                    owner_group_id?: string | null;
+                    /**
+                     * @description The priority of the problem
+                     * @enum {string|null}
+                     */
+                    priority?: "P0" | "P1" | "P2" | "P3" | null;
+                    /**
+                     * Format: date
+                     * @description The due date of the problem
+                     */
+                    due_date?: string | null;
+                    /** @description The scope of the problem */
+                    scope?: string | null;
+                    /** @description The exit criteria of the problem */
+                    exit_criteria?: string | null;
+                    /** @description The impact observed so far */
+                    impact_so_far?: string | null;
+                    /** @description The root cause of the problem */
+                    root_cause?: string | null;
+                    /** @description The resolution of the problem */
+                    resolution?: string | null;
+                    /** @description The reason and accepted risk for deferring the problem */
+                    deferral_reason?: string | null;
+                    /** @description The reason for cancelling the problem */
+                    cancellation_reason?: string | null;
+                    /** @description The next review date for a deferred problem */
+                    next_review_at?: string | null;
+                    /** @description Days between reviews for a deferred problem */
+                    re_review_cadence?: number | null;
+                    /** @description Custom (form) field selections for the problem */
+                    form_field_selections?: Record<string, never>[];
+                    /**
+                     * @description Target status. Transitions run through the problem status workflow: gate fields required by the target status must be supplied in the same request. Other updatable attributes may accompany a status change and are applied atomically with it.
+                     * @enum {string}
+                     */
+                    status?: "created" | "in_progress" | "completed" | "deferred" | "cancelled";
+                    /**
+                     * @description Optional optimistic-concurrency guard: the transition is rejected unless the problem is currently in this status.
+                     * @enum {string|null}
+                     */
+                    expected_status?: "created" | "in_progress" | "completed" | "deferred" | "cancelled" | null;
+                };
+            };
+        };
+        link_incidents: {
+            data: {
+                /** @enum {string} */
+                type: "problems";
+                attributes: {
+                    /** @description ID of a single incident to link */
+                    incident_id?: string;
+                    /** @description IDs of incidents to link */
+                    incident_ids?: string[];
+                };
+            };
+        };
+        problem: {
+            /** @description Team-scoped sequential number of the problem */
+            sequential_id?: number;
+            /** @description Human-readable identifier of the problem (e.g. PROB-12) */
+            readonly display_id?: string;
+            /** @description The title of the problem */
+            title: string;
+            /** @description The description of the problem */
+            description?: string | null;
+            /** @description ID of the user who owns the problem */
+            owner_user_id?: number | null;
+            /** @description ID of the group (team) that owns the problem */
+            owner_group_id?: string | null;
+            /**
+             * @description The priority of the problem
+             * @enum {string|null}
+             */
+            priority?: "P0" | "P1" | "P2" | "P3" | null;
+            /**
+             * Format: date
+             * @description The due date of the problem
+             */
+            due_date?: string | null;
+            /** @description The scope of the problem */
+            scope?: string | null;
+            /** @description The exit criteria of the problem */
+            exit_criteria?: string | null;
+            /** @description The impact observed so far */
+            impact_so_far?: string | null;
+            /** @description The root cause of the problem */
+            root_cause?: string | null;
+            /** @description The resolution of the problem */
+            resolution?: string | null;
+            /** @description The reason and accepted risk for deferring the problem */
+            deferral_reason?: string | null;
+            /** @description The reason for cancelling the problem */
+            cancellation_reason?: string | null;
+            /** @description The next review date for a deferred problem */
+            next_review_at?: string | null;
+            /** @description Days between reviews for a deferred problem */
+            re_review_cadence?: number | null;
+            /**
+             * @description The status of the problem
+             * @enum {string}
+             */
+            readonly status: "created" | "in_progress" | "completed" | "deferred" | "cancelled";
+            /** @description ID of the user who created the problem */
+            readonly created_by_user_id?: number;
+            /** @description ID of the user who moved the problem to in progress */
+            readonly in_progress_by_user_id?: number | null;
+            /** @description ID of the user who completed the problem */
+            readonly completed_by_user_id?: number | null;
+            /** @description ID of the user who approved deferring the problem */
+            readonly deferred_by_user_id?: number | null;
+            /** @description ID of the user who cancelled the problem */
+            readonly cancelled_by_user_id?: number | null;
+            /** @description When the problem moved to in progress */
+            readonly in_progress_at?: string | null;
+            /** @description When the problem was completed */
+            readonly completed_at?: string | null;
+            /** @description When the problem was deferred */
+            readonly deferred_at?: string | null;
+            /** @description When the problem was cancelled */
+            readonly cancelled_at?: string | null;
+            /** @description IDs of incidents linked to the problem */
+            readonly incident_ids?: string[];
+            /** @description Number of incidents linked to the problem */
+            readonly incidents_count?: number;
+            /** @description Number of action items on the problem */
+            readonly action_items_count?: number;
+            /** @description Number of users following the problem */
+            readonly subscribers_count?: number;
+            /** @description Number of problem role assignees */
+            readonly users_assigned_count?: number;
+            /** @description URL of the problem in the Rootly web app */
+            readonly url?: string;
+            /** @description Date of creation */
+            created_at: string;
+            /** @description Date of last update */
+            updated_at: string;
+        };
+        problem_response: {
+            data: {
+                /** @description Unique ID of the problem */
+                id: string;
+                /** @enum {string} */
+                type: "problems";
+                attributes: components["schemas"]["problem"];
+            };
+            included?: components["schemas"]["jsonapi_included_resource"][];
+        };
+        problem_list: {
+            data: {
+                /** @description Unique ID of the problem */
+                id: string;
+                /** @enum {string} */
+                type: "problems";
+                attributes: components["schemas"]["problem"];
+            }[];
+            links: components["schemas"]["links"];
+            meta: components["schemas"]["meta"];
+            included?: components["schemas"]["jsonapi_included_resource"][];
+        };
+        new_problem_action_item: {
+            data: {
+                /** @enum {string} */
+                type: "problem_action_items";
+                attributes: {
+                    /** @description The summary of the action item */
+                    summary: string;
+                    /** @description The description of the action item */
+                    description?: string | null;
+                    /** @description ID of user you wish to assign this action item */
+                    assigned_to_user_id?: number | null;
+                    /**
+                     * @description The priority of the action item
+                     * @enum {string}
+                     */
+                    priority?: "high" | "medium" | "low";
+                    /**
+                     * @description The status of the action item
+                     * @enum {string}
+                     */
+                    status?: "open" | "in_progress" | "cancelled" | "done";
+                    /** @description The due date of the action item */
+                    due_date?: string | null;
+                    /** @description The Jira issue URL. */
+                    jira_issue_url?: string | null;
+                };
+            };
+        };
+        update_problem_action_item: {
+            data: {
+                /** @description Accepted for JSON:API client compatibility, but ignored. The resource to update is identified by the id in the path. */
+                id?: string;
+                /** @enum {string} */
+                type: "problem_action_items";
+                attributes: {
+                    /** @description The summary of the action item */
+                    summary?: string;
+                    /** @description The description of the action item */
+                    description?: string | null;
+                    /** @description ID of user you wish to assign this action item */
+                    assigned_to_user_id?: number | null;
+                    /**
+                     * @description The priority of the action item
+                     * @enum {string}
+                     */
+                    priority?: "high" | "medium" | "low";
+                    /**
+                     * @description The status of the action item
+                     * @enum {string}
+                     */
+                    status?: "open" | "in_progress" | "cancelled" | "done";
+                    /** @description The due date of the action item */
+                    due_date?: string | null;
+                    /** @description The Jira issue URL. */
+                    jira_issue_url?: string | null;
+                };
+            };
+        };
+        problem_action_item: {
+            /** @description ID of the problem this action item belongs to */
+            problem_id?: string;
+            /** @description The summary of the action item */
+            summary: string;
+            /** @description The description of the action item */
+            description?: string | null;
+            /** @description ID of user you wish to assign this action item */
+            assigned_to_user_id?: number | null;
+            /**
+             * @description The priority of the action item
+             * @enum {string}
+             */
+            priority?: "high" | "medium" | "low";
+            /**
+             * @description The status of the action item
+             * @enum {string}
+             */
+            status?: "open" | "in_progress" | "cancelled" | "done";
+            /** @description The due date of the action item */
+            due_date?: string | null;
+            /** @description The Jira issue URL. */
+            jira_issue_url?: string | null;
+            /** @description User assigned to this action item */
+            assigned_to?: components["schemas"]["user_flat_response"] | null;
+            /** @description User who created this action item */
+            created_by?: components["schemas"]["user_flat_response"] | null;
+            /** @description Date of creation */
+            created_at: string;
+            /** @description Date of last update */
+            updated_at: string;
+        };
+        problem_action_item_response: {
+            data: {
+                /** @description Unique ID of the action item */
+                id: string;
+                /** @enum {string} */
+                type: "problem_action_items";
+                attributes: components["schemas"]["problem_action_item"];
+            };
+            included?: components["schemas"]["jsonapi_included_resource"][];
+        };
+        problem_action_item_list: {
+            data: {
+                /** @description Unique ID of the action item */
+                id: string;
+                /** @enum {string} */
+                type: "problem_action_items";
+                attributes: components["schemas"]["problem_action_item"];
+            }[];
+            links: components["schemas"]["links"];
+            meta: components["schemas"]["meta"];
+            included?: components["schemas"]["jsonapi_included_resource"][];
+        };
         new_pulse: {
             data: {
                 /** @enum {string} */
@@ -21829,6 +23619,8 @@ export interface components {
         };
         update_pulse: {
             data: {
+                /** @description Accepted for JSON:API client compatibility, but ignored. The resource to update is identified by the id in the path. */
+                id?: string;
                 /** @enum {string} */
                 type: "pulses";
                 attributes: {
@@ -21939,6 +23731,8 @@ export interface components {
         };
         update_retrospective_configuration: {
             data: {
+                /** @description Accepted for JSON:API client compatibility, but ignored. The resource to update is identified by the id in the path. */
+                id?: string;
                 /** @enum {string} */
                 type: "retrospective_configurations";
                 attributes: {
@@ -22014,6 +23808,8 @@ export interface components {
         };
         update_retrospective_process: {
             data: {
+                /** @description Accepted for JSON:API client compatibility, but ignored. The resource to update is identified by the id in the path. */
+                id?: string;
                 /** @enum {string} */
                 type: "retrospective_processes";
                 attributes: {
@@ -22105,6 +23901,8 @@ export interface components {
         };
         update_retrospective_step: {
             data: {
+                /** @description Accepted for JSON:API client compatibility, but ignored. The resource to update is identified by the id in the path. */
+                id?: string;
                 /** @enum {string} */
                 type: "retrospective_steps";
                 attributes: {
@@ -22209,11 +24007,14 @@ export interface components {
                     services_permissions?: ("create" | "read" | "update" | "delete")[];
                     severities_permissions?: ("create" | "read" | "update" | "delete")[];
                     status_pages_permissions?: ("create" | "read" | "update" | "delete")[];
+                    status_page_updates_permissions?: ("create" | "read" | "update" | "delete")[] | null;
                     webhooks_permissions?: ("create" | "read" | "update" | "delete")[];
                     workflows_permissions?: ("create" | "read" | "update" | "delete")[];
                     catalogs_permissions?: ("create" | "read" | "update" | "delete")[];
                     sub_statuses_permissions?: ("create" | "read" | "update" | "delete")[];
                     edge_connector_permissions?: ("create" | "read" | "update" | "delete")[];
+                    /** @description Private Agent management permissions: create issues enrollment tokens, read views agent inventory and details, and delete revokes agent credentials. Create and delete can be used independently through the API; browser inventory requires read. */
+                    private_agent_permissions?: ("create" | "read" | "update" | "delete")[];
                     slas_permissions?: ("create" | "read" | "update" | "delete")[];
                     paging_permissions?: ("create" | "read" | "update" | "delete")[];
                     incident_communication_permissions?: ("create" | "read" | "update" | "delete" | "send")[];
@@ -22223,6 +24024,8 @@ export interface components {
         };
         update_role: {
             data: {
+                /** @description Accepted for JSON:API client compatibility, but ignored. The resource to update is identified by the id in the path. */
+                id?: string;
                 /** @enum {string} */
                 type: "roles";
                 attributes: {
@@ -22261,11 +24064,14 @@ export interface components {
                     services_permissions?: ("create" | "read" | "update" | "delete")[];
                     severities_permissions?: ("create" | "read" | "update" | "delete")[];
                     status_pages_permissions?: ("create" | "read" | "update" | "delete")[];
+                    status_page_updates_permissions?: ("create" | "read" | "update" | "delete")[] | null;
                     webhooks_permissions?: ("create" | "read" | "update" | "delete")[];
                     workflows_permissions?: ("create" | "read" | "update" | "delete")[];
                     catalogs_permissions?: ("create" | "read" | "update" | "delete")[];
                     sub_statuses_permissions?: ("create" | "read" | "update" | "delete")[];
                     edge_connector_permissions?: ("create" | "read" | "update" | "delete")[];
+                    /** @description Private Agent management permissions: create issues enrollment tokens, read views agent inventory and details, and delete revokes agent credentials. Create and delete can be used independently through the API; browser inventory requires read. */
+                    private_agent_permissions?: ("create" | "read" | "update" | "delete")[];
                     slas_permissions?: ("create" | "read" | "update" | "delete")[];
                     paging_permissions?: ("create" | "read" | "update" | "delete")[];
                     incident_communication_permissions?: ("create" | "read" | "update" | "delete" | "send")[];
@@ -22308,11 +24114,14 @@ export interface components {
             services_permissions?: ("create" | "read" | "update" | "delete")[];
             severities_permissions?: ("create" | "read" | "update" | "delete")[];
             status_pages_permissions?: ("create" | "read" | "update" | "delete")[];
+            status_page_updates_permissions?: ("create" | "read" | "update" | "delete")[] | null;
             webhooks_permissions?: ("create" | "read" | "update" | "delete")[];
             workflows_permissions?: ("create" | "read" | "update" | "delete")[];
             catalogs_permissions?: ("create" | "read" | "update" | "delete")[];
             sub_statuses_permissions?: ("create" | "read" | "update" | "delete")[];
             edge_connector_permissions?: ("create" | "read" | "update" | "delete")[];
+            /** @description Private Agent management permissions: create issues enrollment tokens, read views agent inventory and details, and delete revokes agent credentials. Create and delete can be used independently through the API; browser inventory requires read. */
+            private_agent_permissions?: ("create" | "read" | "update" | "delete")[];
             slas_permissions?: ("create" | "read" | "update" | "delete")[];
             paging_permissions?: ("create" | "read" | "update" | "delete")[];
             incident_communication_permissions?: ("create" | "read" | "update" | "delete" | "send")[];
@@ -22370,6 +24179,8 @@ export interface components {
         };
         update_schedule_rotation_active_day: {
             data: {
+                /** @description Accepted for JSON:API client compatibility, but ignored. The resource to update is identified by the id in the path. */
+                id?: string;
                 /** @enum {string} */
                 type: "schedule_rotation_active_days";
                 attributes: {
@@ -22455,6 +24266,8 @@ export interface components {
         };
         update_schedule_rotation_user: {
             data: {
+                /** @description Accepted for JSON:API client compatibility, but ignored. The resource to update is identified by the id in the path. */
+                id?: string;
                 /** @enum {string} */
                 type: "schedule_rotation_users";
                 attributes: {
@@ -22533,7 +24346,7 @@ export interface components {
                         end_time: string;
                     }[];
                     /**
-                     * @description A valid IANA time zone name.
+                     * @description A valid IANA time zone name. Organizations with one timezone per schedule manage this on the schedule; a value differing from the schedule's is rejected.
                      * @default Etc/UTC
                      */
                     time_zone: string;
@@ -22606,6 +24419,8 @@ export interface components {
         };
         update_schedule_rotation: {
             data: {
+                /** @description Accepted for JSON:API client compatibility, but ignored. The resource to update is identified by the id in the path. */
+                id?: string;
                 /** @enum {string} */
                 type: "schedule_rotations";
                 attributes: {
@@ -22639,7 +24454,7 @@ export interface components {
                         end_time: string;
                     }[];
                     /**
-                     * @description A valid IANA time zone name.
+                     * @description A valid IANA time zone name. Organizations with one timezone per schedule manage this on the schedule; a value differing from the schedule's is rejected.
                      * @default Etc/UTC
                      */
                     time_zone: string;
@@ -22743,7 +24558,7 @@ export interface components {
                 end_time: string;
             }[];
             /**
-             * @description A valid IANA time zone name.
+             * @description A valid IANA time zone name. Organizations with one timezone per schedule manage this on the schedule; a value differing from the schedule's is rejected.
              * @default Etc/UTC
              */
             time_zone: string;
@@ -22833,6 +24648,8 @@ export interface components {
                     description?: string | null;
                     /** @description 24/7 coverage of the schedule */
                     all_time_coverage?: boolean | null;
+                    /** @description IANA time zone the schedule's rotations are rendered in. Only writable for organizations configured with one timezone per schedule; otherwise it is derived from the rotations. */
+                    time_zone?: string | null;
                     slack_user_group?: {
                         /** @description Slack user group ID */
                         id?: string;
@@ -22868,11 +24685,19 @@ export interface components {
                     shift_report_time_of_day?: string | null;
                     /** @description IANA time zone used for the weekly shift summary */
                     shift_report_time_zone?: string | null;
+                    /** @description Controls shadow paging on the schedule. Null disables shadow paging. start_time and end_time are HH:MM 24-hour format strings. */
+                    business_hours?: {
+                        start_time: string;
+                        end_time: string;
+                        include_weekends: boolean;
+                    } | null;
                 };
             };
         };
         update_schedule: {
             data: {
+                /** @description Accepted for JSON:API client compatibility, but ignored. The resource to update is identified by the id in the path. */
+                id?: string;
                 /** @enum {string} */
                 type: "schedules";
                 attributes: {
@@ -22882,6 +24707,8 @@ export interface components {
                     description?: string | null;
                     /** @description 24/7 coverage of the schedule */
                     all_time_coverage?: boolean | null;
+                    /** @description IANA time zone the schedule's rotations are rendered in. Only writable for organizations configured with one timezone per schedule; otherwise it is derived from the rotations. */
+                    time_zone?: string | null;
                     slack_user_group?: {
                         /** @description Slack user group ID */
                         id?: string;
@@ -22917,6 +24744,12 @@ export interface components {
                     shift_report_time_of_day?: string | null;
                     /** @description IANA time zone used for the weekly shift summary */
                     shift_report_time_zone?: string | null;
+                    /** @description Controls shadow paging on the schedule. Null disables shadow paging. start_time and end_time are HH:MM 24-hour format strings. */
+                    business_hours?: {
+                        start_time: string;
+                        end_time: string;
+                        include_weekends: boolean;
+                    } | null;
                 };
             };
         };
@@ -22927,6 +24760,8 @@ export interface components {
             description?: string | null;
             /** @description 24/7 coverage of the schedule */
             all_time_coverage?: boolean | null;
+            /** @description IANA time zone the schedule's rotations are rendered in */
+            time_zone?: string | null;
             /** @description Synced slack group of the schedule */
             slack_user_group?: {
                 /** @description Slack user group ID */
@@ -22964,6 +24799,12 @@ export interface components {
             shift_report_time_of_day?: string;
             /** @description IANA time zone used for the weekly shift summary */
             shift_report_time_zone?: string;
+            /** @description Controls shadow paging on the schedule. Null disables shadow paging. start_time and end_time are HH:MM 24-hour format strings. */
+            business_hours?: {
+                start_time: string;
+                end_time: string;
+                include_weekends: boolean;
+            } | null;
             /** @description Date of creation */
             created_at: string;
             /** @description Date of last update */
@@ -23017,11 +24858,15 @@ export interface components {
                      * @default 0
                      */
                     hashicorp_vault_version: string | null;
+                    /** @description IDs of the teams whose members can see and pick this secret; their team admins can manage it. Empty means only users with the org Secrets permission can. Ignored unless team scoping is enabled for the organization. */
+                    owner_group_ids?: string[] | null;
                 };
             };
         };
         update_secret: {
             data: {
+                /** @description Accepted for JSON:API client compatibility, but ignored. The resource to update is identified by the id in the path. */
+                id?: string;
                 /** @enum {string} */
                 type: "secrets";
                 attributes: {
@@ -23041,6 +24886,8 @@ export interface components {
                      * @default 0
                      */
                     hashicorp_vault_version: number | null;
+                    /** @description IDs of the teams whose members can see and pick this secret; their team admins can manage it. Empty means only users with the org Secrets permission can. Ignored unless team scoping is enabled for the organization. */
+                    owner_group_ids?: string[] | null;
                 };
             };
         };
@@ -23055,6 +24902,8 @@ export interface components {
             hashicorp_vault_path?: string | null;
             /** @description The HashiCorp Vault secret version */
             hashicorp_vault_version?: number;
+            /** @description IDs of the teams whose members can see and pick this secret; their team admins can manage it. Empty means only users with the org Secrets permission can. Ignored unless team scoping is enabled for the organization. */
+            owner_group_ids?: string[];
             /** @description Date of creation */
             created_at: string;
             /** @description Date of last update */
@@ -23192,6 +25041,8 @@ export interface components {
         };
         update_service: {
             data: {
+                /** @description Accepted for JSON:API client compatibility, but ignored. The resource to update is identified by the id in the path. */
+                id?: string;
                 /** @enum {string} */
                 type: "services";
                 attributes: {
@@ -23236,9 +25087,9 @@ export interface components {
                     environment_ids?: string[] | null;
                     /** @description Services dependent on this service */
                     service_ids?: string[] | null;
-                    /** @description Owner Teams associated with this service */
+                    /** @description Owner Teams associated with this service. Empty array removes all; omitting or null leaves unchanged. */
                     owner_group_ids?: string[] | null;
-                    /** @description Owner Users associated with this service */
+                    /** @description Owner Users associated with this service. Empty array removes all; omitting or null leaves unchanged. */
                     owner_user_ids?: number[] | null;
                     /** @description Enable alerts through email */
                     alerts_email_enabled?: boolean | null;
@@ -23535,6 +25386,8 @@ export interface components {
         };
         update_severity: {
             data: {
+                /** @description Accepted for JSON:API client compatibility, but ignored. The resource to update is identified by the id in the path. */
+                id?: string;
                 /** @enum {string} */
                 type: "severities";
                 attributes: {
@@ -23622,6 +25475,17 @@ export interface components {
             };
             included?: components["schemas"]["jsonapi_included_resource"][];
         };
+        /** @description The severity assigned to an incident, or null when no severity is assigned */
+        nullable_severity_response: {
+            data: {
+                /** @description Unique ID of the severity */
+                id: string;
+                /** @enum {string} */
+                type: "severities";
+                attributes: components["schemas"]["severity"];
+            };
+            included?: components["schemas"]["jsonapi_included_resource"][];
+        } | null;
         severity_list: {
             data: {
                 /** @description Unique ID of the severity */
@@ -23649,6 +25513,22 @@ export interface components {
             is_shadow: boolean;
             /** @description ID of user on shift */
             user_id?: number | null;
+            /** @description For override shifts, the portions of the regular shifts this override replaces, clipped to the override window. Null for non-override shifts. Available when overridden shifts are enabled for the organization. */
+            overridden_shifts?: components["schemas"]["overridden_shift"][] | null;
+        };
+        overridden_shift: {
+            /** @description Start datetime of the overridden portion */
+            starts_at: string;
+            /** @description End datetime of the overridden portion */
+            ends_at: string;
+            /** @description ID of the user whose shift was overridden */
+            user_id?: number | null;
+            /** @description ID of the rotation the overridden shift belongs to */
+            rotation_id?: string | null;
+            /** @description Type of the overridden assignee (User or Schedule) */
+            assignee_type?: string | null;
+            /** @description ID of the overridden assignee */
+            assignee_id?: string | null;
         };
         shift_list: {
             data: {
@@ -23702,6 +25582,8 @@ export interface components {
                     ends_at: string;
                     /** @description Optional. Restrict coverage to shifts assigned to this user. When omitted, every shift overlapping the time range is covered. */
                     user_id?: number;
+                    /** @description Optional. Notify selected active schedule members for every covered shift when targeted-shift-coverage is enabled. Recipients must be eligible for each shift. Omitted, empty, or flag-disabled selections broadcast. */
+                    recipient_user_ids?: number[];
                 };
             };
         };
@@ -23777,6 +25659,8 @@ export interface components {
         };
         update_status_page_announcement: {
             data: {
+                /** @description Accepted for JSON:API client compatibility, but ignored. The resource to update is identified by the id in the path. */
+                id?: string;
                 /** @enum {string} */
                 type: "status_page_announcements";
                 attributes: {
@@ -23843,6 +25727,8 @@ export interface components {
         };
         update_status_page_component_group: {
             data: {
+                /** @description Accepted for JSON:API client compatibility, but ignored. The resource to update is identified by the id in the path. */
+                id?: string;
                 /** @enum {string} */
                 type: "status_page_component_groups";
                 attributes: {
@@ -23925,6 +25811,8 @@ export interface components {
         };
         update_status_page_component: {
             data: {
+                /** @description Accepted for JSON:API client compatibility, but ignored. The resource to update is identified by the id in the path. */
+                id?: string;
                 /** @enum {string} */
                 type: "status_page_components";
                 attributes: {
@@ -23991,6 +25879,85 @@ export interface components {
             meta: components["schemas"]["meta"];
             included?: components["schemas"]["jsonapi_included_resource"][];
         };
+        new_status_page_team: {
+            data: {
+                /** @enum {string} */
+                type: "status_page_groups";
+                attributes: {
+                    /**
+                     * Format: uuid
+                     * @description ID of the team granted access to the status page. Teams are listed by GET /v1/teams. A status page accepts at most 50 teams
+                     */
+                    group_id: string;
+                    /**
+                     * @description publish_only lets team members post status page updates and announcements. edit_and_publish also lets them edit the page, its components, templates, and subscribers. Defaults to edit_and_publish
+                     * @enum {string}
+                     */
+                    permission_level?: "edit_and_publish" | "publish_only";
+                };
+            };
+        };
+        update_status_page_team: {
+            data: {
+                /** @description Accepted for JSON:API client compatibility, but ignored. The resource to update is identified by the id in the path. */
+                id?: string;
+                /** @enum {string} */
+                type: "status_page_groups";
+                attributes: {
+                    /**
+                     * @description publish_only lets team members post status page updates and announcements. edit_and_publish also lets them edit the page, its components, templates, and subscribers
+                     * @enum {string}
+                     */
+                    permission_level?: "edit_and_publish" | "publish_only";
+                };
+            };
+        };
+        status_page_team: {
+            /** @description ID of the status page the team is assigned to */
+            status_page_id: string;
+            /**
+             * Format: uuid
+             * @description ID of the team granted access to the status page
+             */
+            group_id: string;
+            /**
+             * @description Access level granted to members of the team
+             * @enum {string}
+             */
+            permission_level: "edit_and_publish" | "publish_only";
+            /**
+             * Format: date-time
+             * @description Date of creation
+             */
+            created_at: string;
+            /**
+             * Format: date-time
+             * @description Date of last update
+             */
+            updated_at: string;
+        };
+        status_page_team_response: {
+            data: {
+                /** @description Unique ID of the status page team assignment */
+                id: string;
+                /** @enum {string} */
+                type: "status_page_groups";
+                attributes: components["schemas"]["status_page_team"];
+            };
+            included?: components["schemas"]["jsonapi_included_resource"][];
+        };
+        status_page_team_list: {
+            data: {
+                /** @description Unique ID of the status page team assignment */
+                id: string;
+                /** @enum {string} */
+                type: "status_page_groups";
+                attributes: components["schemas"]["status_page_team"];
+            }[];
+            links: components["schemas"]["links"];
+            meta: components["schemas"]["meta"];
+            included?: components["schemas"]["jsonapi_included_resource"][];
+        };
         new_status_page_template: {
             data: {
                 /** @enum {string} */
@@ -24024,6 +25991,8 @@ export interface components {
         };
         update_status_page_template: {
             data: {
+                /** @description Accepted for JSON:API client compatibility, but ignored. The resource to update is identified by the id in the path. */
+                id?: string;
                 /** @enum {string} */
                 type: "status_page_templates";
                 attributes: {
@@ -24197,6 +26166,8 @@ export interface components {
         };
         update_status_page: {
             data: {
+                /** @description Accepted for JSON:API client compatibility, but ignored. The resource to update is identified by the id in the path. */
+                id?: string;
                 /** @enum {string} */
                 type: "status_pages";
                 attributes: {
@@ -24436,6 +26407,10 @@ export interface components {
                     cortex_id?: string | null;
                     /** @description The Service Now CI sys id associated to this team */
                     service_now_ci_sys_id?: string | null;
+                    /** @description The SCIM group id linked to this team. Membership syncs from the SCIM group while the team keeps its own name. */
+                    scim_group_id?: string | null;
+                    /** @description Link by the SCIM group's externalId from your identity provider instead of scim_group_id. Write-only. Rejected when it names a different SCIM group than scim_group_id. */
+                    scim_group_external_id?: string | null;
                     /** @description The user ids of the members of this team. */
                     user_ids?: number[] | null;
                     /** @description The user ids of the admins of this team. These users must also be present in user_ids attribute. */
@@ -24483,6 +26458,11 @@ export interface components {
                      * @enum {string|null}
                      */
                     auto_add_members_scope?: "off" | "public_only" | "public_and_test" | "all" | null;
+                    /**
+                     * @description Who can create and update overrides for schedules owned by this team: `everyone` in the organization, only team `members`, or only team `admins`. Users still need override permission from their on-call role. Only available when the team-level schedule override policy feature is enabled for the organization. Requests that set it while that feature is disabled are rejected.
+                     * @enum {string}
+                     */
+                    schedule_override_policy?: "everyone" | "members" | "admins";
                     /** @description Array of property values for this team. */
                     properties?: {
                         /** @description Catalog property ID */
@@ -24495,6 +26475,8 @@ export interface components {
         };
         update_team: {
             data: {
+                /** @description Accepted for JSON:API client compatibility, but ignored. The resource to update is identified by the id in the path. */
+                id?: string;
                 /** @enum {string} */
                 type: "groups";
                 attributes: {
@@ -24533,6 +26515,10 @@ export interface components {
                     cortex_id?: string | null;
                     /** @description The Service Now CI sys id associated to this team */
                     service_now_ci_sys_id?: string | null;
+                    /** @description The SCIM group id linked to this team. Membership syncs from the SCIM group while the team keeps its own name. Set to null to unlink. Sending the current id is a no-op; to pin a name-linked group, unlink then link. */
+                    scim_group_id?: string | null;
+                    /** @description Link by the SCIM group's externalId from your identity provider instead of scim_group_id. Write-only. Rejected when it names a different SCIM group than scim_group_id. */
+                    scim_group_external_id?: string | null;
                     /** @description The user ids of the members of this team. */
                     user_ids?: number[] | null;
                     /** @description The user ids of the admins of this team. These users must also be present in user_ids attribute. */
@@ -24580,6 +26566,11 @@ export interface components {
                      * @enum {string|null}
                      */
                     auto_add_members_scope?: "off" | "public_only" | "public_and_test" | "all" | null;
+                    /**
+                     * @description Who can create and update overrides for schedules owned by this team: `everyone` in the organization, only team `members`, or only team `admins`. Users still need override permission from their on-call role. Only available when the team-level schedule override policy feature is enabled for the organization. Requests that set it while that feature is disabled are rejected.
+                     * @enum {string}
+                     */
+                    schedule_override_policy?: "everyone" | "members" | "admins";
                     /** @description Array of property values for this team. */
                     properties?: {
                         /** @description Catalog property ID */
@@ -24627,6 +26618,8 @@ export interface components {
             cortex_id?: string | null;
             /** @description The Service Now CI sys id associated to this team */
             service_now_ci_sys_id?: string | null;
+            /** @description The SCIM group id linked to this team */
+            scim_group_id?: string | null;
             /** @description The user ids of the members of this team. */
             user_ids?: number[] | null;
             /** @description The user ids of the admins of this team. These users must also be present in user_ids attribute. */
@@ -24676,6 +26669,11 @@ export interface components {
              * @enum {string|null}
              */
             auto_add_members_scope?: "off" | "public_only" | "public_and_test" | "all" | null;
+            /**
+             * @description Who can create and update overrides for schedules owned by this team: `everyone` in the organization, only team `members`, or only team `admins`. Users still need override permission from their on-call role. Only available when the team-level schedule override policy feature is enabled for the organization. Requests that set it while that feature is disabled are rejected.
+             * @enum {string}
+             */
+            schedule_override_policy?: "everyone" | "members" | "admins";
             /** @description Array of property values for this team. */
             properties?: {
                 /** @description Catalog property ID */
@@ -24719,6 +26717,11 @@ export interface components {
                 name?: string;
                 description?: string | null;
                 public_description?: string | null;
+                /**
+                 * @description Who can create and update overrides for schedules owned by this team: `everyone` in the organization, only team `members`, or only team `admins`. Users still need override permission from their on-call role. Only available when the team-level schedule override policy feature is enabled for the organization. Requests that set it while that feature is disabled are rejected.
+                 * @enum {string}
+                 */
+                schedule_override_policy?: "everyone" | "members" | "admins";
                 color?: string | null;
                 position?: number | null;
                 notify_emails?: string[] | null;
@@ -24806,6 +26809,8 @@ export interface components {
         };
         update_user_notification_rule: {
             data: {
+                /** @description Accepted for JSON:API client compatibility, but ignored. The resource to update is identified by the id in the path. */
+                id?: string;
                 /** @enum {string} */
                 type: "user_notification_rules";
                 attributes: {
@@ -24886,6 +26891,8 @@ export interface components {
         };
         update_user_phone_number: {
             data: {
+                /** @description Accepted for JSON:API client compatibility, but ignored. The resource to update is identified by the id in the path. */
+                id?: string;
                 /** @enum {string} */
                 type: "user_phone_numbers";
                 attributes: {
@@ -24956,6 +26963,8 @@ export interface components {
         };
         update_user_email_address: {
             data: {
+                /** @description Accepted for JSON:API client compatibility, but ignored. The resource to update is identified by the id in the path. */
+                id?: string;
                 /** @enum {string} */
                 type: "user_email_addresses";
                 attributes: {
@@ -25066,6 +27075,8 @@ export interface components {
         };
         update_user: {
             data: {
+                /** @description Accepted for JSON:API client compatibility, but ignored. The resource to update is identified by the id in the path. */
+                id?: string;
                 /** @enum {string} */
                 type: "users";
                 attributes: {
@@ -25158,7 +27169,7 @@ export interface components {
                     url: string;
                     /** @description The webhook signing secret used to verify webhook requests. */
                     secret?: string;
-                    event_types?: ("incident.created" | "incident.updated" | "incident.in_triage" | "incident.mitigated" | "incident.resolved" | "incident.cancelled" | "incident.deleted" | "incident.scheduled.created" | "incident.scheduled.updated" | "incident.scheduled.in_progress" | "incident.scheduled.completed" | "incident.scheduled.deleted" | "incident_post_mortem.created" | "incident_post_mortem.updated" | "incident_post_mortem.published" | "incident_post_mortem.deleted" | "incident_status_page_event.created" | "incident_status_page_event.updated" | "incident_status_page_event.deleted" | "incident_event.created" | "incident_event.updated" | "incident_event.deleted" | "alert.created" | "alert.updated" | "pulse.created" | "shift.started" | "genius_workflow_run.queued" | "genius_workflow_run.started" | "genius_workflow_run.completed" | "genius_workflow_run.failed" | "genius_workflow_run.canceled" | "audit_log.created")[];
+                    event_types?: ("incident.created" | "incident.updated" | "incident.in_triage" | "incident.mitigated" | "incident.resolved" | "incident.cancelled" | "incident.deleted" | "incident.scheduled.created" | "incident.scheduled.updated" | "incident.scheduled.in_progress" | "incident.scheduled.completed" | "incident.scheduled.deleted" | "incident_post_mortem.created" | "incident_post_mortem.updated" | "incident_post_mortem.published" | "incident_post_mortem.deleted" | "incident_status_page_event.created" | "incident_status_page_event.updated" | "incident_status_page_event.deleted" | "incident_event.created" | "incident_event.updated" | "incident_event.deleted" | "alert.created" | "alert.updated" | "pulse.created" | "shift.started" | "shift.ended" | "genius_workflow_run.queued" | "genius_workflow_run.started" | "genius_workflow_run.completed" | "genius_workflow_run.failed" | "genius_workflow_run.canceled" | "audit_log.created")[];
                     enabled?: boolean;
                     /** @description Custom HTTP headers sent with each delivery. Max 10. Reserved names (Content-Type, X-Rootly-Signature, Host, etc.) are rejected. */
                     custom_headers?: {
@@ -25170,6 +27181,8 @@ export interface components {
         };
         update_webhooks_endpoint: {
             data: {
+                /** @description Accepted for JSON:API client compatibility, but ignored. The resource to update is identified by the id in the path. */
+                id?: string;
                 /** @enum {string} */
                 type: "webhooks_endpoints";
                 attributes: {
@@ -25180,7 +27193,7 @@ export interface components {
                     slug?: string | null;
                     /** @description The name of the endpoint */
                     name?: string;
-                    event_types?: ("incident.created" | "incident.updated" | "incident.in_triage" | "incident.mitigated" | "incident.resolved" | "incident.cancelled" | "incident.deleted" | "incident.scheduled.created" | "incident.scheduled.updated" | "incident.scheduled.in_progress" | "incident.scheduled.completed" | "incident.scheduled.deleted" | "incident_post_mortem.created" | "incident_post_mortem.updated" | "incident_post_mortem.published" | "incident_post_mortem.deleted" | "incident_status_page_event.created" | "incident_status_page_event.updated" | "incident_status_page_event.deleted" | "incident_event.created" | "incident_event.updated" | "incident_event.deleted" | "alert.created" | "alert.updated" | "pulse.created" | "shift.started" | "genius_workflow_run.queued" | "genius_workflow_run.started" | "genius_workflow_run.completed" | "genius_workflow_run.failed" | "genius_workflow_run.canceled" | "audit_log.created")[];
+                    event_types?: ("incident.created" | "incident.updated" | "incident.in_triage" | "incident.mitigated" | "incident.resolved" | "incident.cancelled" | "incident.deleted" | "incident.scheduled.created" | "incident.scheduled.updated" | "incident.scheduled.in_progress" | "incident.scheduled.completed" | "incident.scheduled.deleted" | "incident_post_mortem.created" | "incident_post_mortem.updated" | "incident_post_mortem.published" | "incident_post_mortem.deleted" | "incident_status_page_event.created" | "incident_status_page_event.updated" | "incident_status_page_event.deleted" | "incident_event.created" | "incident_event.updated" | "incident_event.deleted" | "alert.created" | "alert.updated" | "pulse.created" | "shift.started" | "shift.ended" | "genius_workflow_run.queued" | "genius_workflow_run.started" | "genius_workflow_run.completed" | "genius_workflow_run.failed" | "genius_workflow_run.canceled" | "audit_log.created")[];
                     enabled?: boolean;
                     /** @description Custom HTTP headers sent with each delivery. Max 10. Reserved names (Content-Type, X-Rootly-Signature, Host, etc.) are rejected. */
                     custom_headers?: {
@@ -25197,7 +27210,7 @@ export interface components {
             readonly slug?: string;
             /** @description The URL of the endpoint. */
             url: string;
-            event_types: ("incident.created" | "incident.updated" | "incident.in_triage" | "incident.mitigated" | "incident.resolved" | "incident.cancelled" | "incident.deleted" | "incident.scheduled.created" | "incident.scheduled.updated" | "incident.scheduled.in_progress" | "incident.scheduled.completed" | "incident.scheduled.deleted" | "incident_post_mortem.created" | "incident_post_mortem.updated" | "incident_post_mortem.published" | "incident_post_mortem.deleted" | "incident_status_page_event.created" | "incident_status_page_event.updated" | "incident_status_page_event.deleted" | "incident_event.created" | "incident_event.updated" | "incident_event.deleted" | "alert.created" | "alert.updated" | "pulse.created" | "shift.started" | "genius_workflow_run.queued" | "genius_workflow_run.started" | "genius_workflow_run.completed" | "genius_workflow_run.failed" | "genius_workflow_run.canceled" | "audit_log.created")[];
+            event_types: ("incident.created" | "incident.updated" | "incident.in_triage" | "incident.mitigated" | "incident.resolved" | "incident.cancelled" | "incident.deleted" | "incident.scheduled.created" | "incident.scheduled.updated" | "incident.scheduled.in_progress" | "incident.scheduled.completed" | "incident.scheduled.deleted" | "incident_post_mortem.created" | "incident_post_mortem.updated" | "incident_post_mortem.published" | "incident_post_mortem.deleted" | "incident_status_page_event.created" | "incident_status_page_event.updated" | "incident_status_page_event.deleted" | "incident_event.created" | "incident_event.updated" | "incident_event.deleted" | "alert.created" | "alert.updated" | "pulse.created" | "shift.started" | "shift.ended" | "genius_workflow_run.queued" | "genius_workflow_run.started" | "genius_workflow_run.completed" | "genius_workflow_run.failed" | "genius_workflow_run.canceled" | "audit_log.created")[];
             /** @description The webhook signing secret used to verify webhook requests. */
             secret: string;
             enabled: boolean;
@@ -25284,6 +27297,8 @@ export interface components {
         };
         update_sub_status: {
             data: {
+                /** @description Accepted for JSON:API client compatibility, but ignored. The resource to update is identified by the id in the path. */
+                id?: string;
                 /** @enum {string} */
                 type: "sub_statuses";
                 attributes: {
@@ -25344,6 +27359,8 @@ export interface components {
         };
         update_incident_sub_status: {
             data: {
+                /** @description Accepted for JSON:API client compatibility, but ignored. The resource to update is identified by the id in the path. */
+                id?: string;
                 /** @enum {string} */
                 type: "incident_sub_statuses";
                 attributes: {
@@ -25395,6 +27412,8 @@ export interface components {
         };
         update_retrospective_process_group: {
             data: {
+                /** @description Accepted for JSON:API client compatibility, but ignored. The resource to update is identified by the id in the path. */
+                id?: string;
                 /** @enum {string} */
                 type: "retrospective_process_groups";
                 attributes: {
@@ -25442,6 +27461,8 @@ export interface components {
         };
         update_retrospective_process_group_step: {
             data: {
+                /** @description Accepted for JSON:API client compatibility, but ignored. The resource to update is identified by the id in the path. */
+                id?: string;
                 /** @enum {string} */
                 type: "retrospective_process_group_steps";
                 attributes: {
@@ -25577,6 +27598,8 @@ export interface components {
         };
         update_sla: {
             data: {
+                /** @description Accepted for JSON:API client compatibility, but ignored. The resource to update is identified by the id in the path. */
+                id?: string;
                 /** @enum {string} */
                 type: "slas";
                 attributes: {
@@ -26017,6 +28040,86 @@ export interface operations {
             };
         };
     };
+    getAlertConfiguration: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description alert configuration found */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/vnd.api+json": components["schemas"]["alert_configuration_response"];
+                };
+            };
+            /** @description team has no alert configuration */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/vnd.api+json": components["schemas"]["errors_list"];
+                };
+            };
+        };
+    };
+    updateAlertConfiguration: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/vnd.api+json": components["schemas"]["update_alert_configuration"];
+            };
+        };
+        responses: {
+            /** @description alert configuration updated */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/vnd.api+json": components["schemas"]["alert_configuration_response"];
+                };
+            };
+            /** @description an attribute's feature is not enabled for the team */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/vnd.api+json": components["schemas"]["errors_list"];
+                };
+            };
+            /** @description team has no alert configuration */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/vnd.api+json": components["schemas"]["errors_list"];
+                };
+            };
+            /** @description the settings are invalid */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/vnd.api+json": components["schemas"]["errors_list"];
+                };
+            };
+        };
+    };
     listAlertEvents: {
         parameters: {
             query?: {
@@ -26091,7 +28194,7 @@ export interface operations {
                 /** @description Sort by `created_at`. Defaults to `created_at` (oldest-first). Use `-created_at` for newest-first. */
                 sort?: "created_at" | "-created_at";
                 "filter[kind]"?: "informational" | "notification" | "action" | "status_update" | "recording" | "alert_grouping" | "alert_urgency" | "alert_routing" | "note" | "noise" | "maintenance" | "deferral";
-                "filter[action]"?: "created" | "escalation_policy_paged" | "ignored_alert_request" | "call_lifecycle" | "level_skipped" | "emailed" | "slacked" | "ms_teams_messaged" | "google_chat_messaged" | "called" | "texted" | "notified" | "skipped" | "opened" | "retriggered" | "ack_timeout_retriggered" | "answered" | "acknowledged" | "escalated" | "paged" | "resolved" | "attached" | "snoozed" | "retrigger_suppressed" | "triggered" | "open" | "updated" | "added" | "removed" | "marked" | "not_marked" | "cleared" | "muted" | "deferred";
+                "filter[action]"?: "created" | "escalation_policy_paged" | "ignored_alert_request" | "call_lifecycle" | "level_skipped" | "team_attached_from_payload" | "user_paged" | "emailed" | "slacked" | "ms_teams_messaged" | "google_chat_messaged" | "called" | "texted" | "notified" | "skipped" | "opened" | "retriggered" | "ack_timeout_retriggered" | "answered" | "acknowledged" | "escalated" | "paged" | "resolved" | "attached" | "snoozed" | "retrigger_suppressed" | "retrigger_cancelled" | "triggered" | "open" | "updated" | "added" | "removed" | "marked" | "not_marked" | "cleared" | "muted" | "deferred";
                 "filter[alert_id]"?: string;
                 "filter[created_at][gt]"?: string;
                 "filter[created_at][gte]"?: string;
@@ -26564,127 +28667,6 @@ export interface operations {
                 content: {
                     "application/vnd.api+json": components["schemas"]["errors_list"];
                 };
-            };
-        };
-    };
-    listAlertRetriggerRules: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description alert re-trigger rules listed */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/vnd.api+json": components["schemas"]["alert_retrigger_rule_list"];
-                };
-            };
-        };
-    };
-    createAlertRetriggerRule: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/vnd.api+json": components["schemas"]["new_alert_retrigger_rule"];
-            };
-        };
-        responses: {
-            /** @description alert re-trigger rule created */
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/vnd.api+json": components["schemas"]["alert_retrigger_rule_response"];
-                };
-            };
-            /** @description invalid request */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/vnd.api+json": components["schemas"]["errors_list"];
-                };
-            };
-        };
-    };
-    getAlertRetriggerRule: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description alert re-trigger rule found */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/vnd.api+json": components["schemas"]["alert_retrigger_rule_response"];
-                };
-            };
-        };
-    };
-    updateAlertRetriggerRule: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/vnd.api+json": components["schemas"]["update_alert_retrigger_rule"];
-            };
-        };
-        responses: {
-            /** @description alert re-trigger rule updated */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/vnd.api+json": components["schemas"]["alert_retrigger_rule_response"];
-                };
-            };
-        };
-    };
-    deleteAlertRetriggerRule: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description alert re-trigger rule deleted */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
             };
         };
     };
@@ -27455,6 +29437,15 @@ export interface operations {
                     "application/vnd.api+json": components["schemas"]["errors_list"];
                 };
             };
+            /** @description built-in alert fields cannot be unbound */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/vnd.api+json": components["schemas"]["errors_list"];
+                };
+            };
         };
     };
     deleteAlertsSource: {
@@ -27741,7 +29732,11 @@ export interface operations {
             };
             cookie?: never;
         };
-        requestBody?: never;
+        requestBody?: {
+            content: {
+                "application/vnd.api+json": components["schemas"]["acknowledge_alert"];
+            };
+        };
         responses: {
             /** @description alert acknowledged */
             200: {
@@ -27761,8 +29756,26 @@ export interface operations {
                     "application/vnd.api+json": components["schemas"]["errors_list"];
                 };
             };
+            /** @description actor not supported for this API key */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/vnd.api+json": components["schemas"]["errors_list"];
+                };
+            };
             /** @description resource not found */
             404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/vnd.api+json": components["schemas"]["errors_list"];
+                };
+            };
+            /** @description actor could not be resolved */
+            422: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -28378,77 +30391,6 @@ export interface operations {
             };
         };
     };
-    createBulkImport: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/vnd.api+json": components["schemas"]["new_bulk_import"];
-            };
-        };
-        responses: {
-            /** @description bulk import created */
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description unauthorized - user lacks incident create permission */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description invalid parameters */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    getBulkImport: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @description Bulk import ID returned from the create endpoint */
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description success */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description organization API keys feature not enabled */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description not found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
     listCatalogChecklistTemplates: {
         parameters: {
             query?: {
@@ -28658,7 +30600,7 @@ export interface operations {
                 /** @description comma separated if needed. eg: catalog,properties */
                 include?: "catalog" | "properties";
                 /** @description comma separated if needed. eg: created_at,updated_at */
-                sort?: "created_at" | "-created_at" | "updated_at" | "-updated_at" | "position" | "-position";
+                sort?: "created_at" | "-created_at" | "updated_at" | "-updated_at" | "position" | "-position" | "name" | "-name";
                 "page[number]"?: number;
                 "page[size]"?: number;
                 "filter[search]"?: string;
@@ -30987,6 +32929,15 @@ export interface operations {
                     "application/vnd.api+json": components["schemas"]["errors_list"];
                 };
             };
+            /** @description rejects a group_by on a field that cannot be grouped */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/vnd.api+json": components["schemas"]["errors_list"];
+                };
+            };
         };
     };
     duplicateDashboardPanel: {
@@ -31542,6 +33493,8 @@ export interface operations {
                             status?: "active" | "paused";
                             /** @description Array of event types to subscribe to */
                             subscriptions?: string[];
+                            /** @description IDs of the teams (groups) that own this connector */
+                            owner_group_ids?: string[];
                             /** @description Event filters. OR within dimension, AND across dimensions. */
                             filters?: {
                                 /** @description Filter by group UUIDs */
@@ -31647,6 +33600,8 @@ export interface operations {
                             /** @enum {string} */
                             status?: "active" | "paused";
                             subscriptions?: string[];
+                            /** @description IDs of the teams (groups) that own this connector */
+                            owner_group_ids?: string[];
                             /** @description Event filters */
                             filters?: Record<string, never>;
                         };
@@ -33113,6 +35068,15 @@ export interface operations {
             };
             /** @description resource not found */
             404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/vnd.api+json": components["schemas"]["errors_list"];
+                };
+            };
+            /** @description fixed problem gate placement rejected */
+            422: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -37405,6 +39369,24 @@ export interface operations {
                     "application/vnd.api+json": components["schemas"]["errors_list"];
                 };
             };
+            /** @description retrospective body owned by the collaborative editor */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/vnd.api+json": components["schemas"]["errors_list"];
+                };
+            };
+            /** @description collaborative document state could not be verified */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/vnd.api+json": components["schemas"]["errors_list"];
+                };
+            };
         };
     };
     getIncidentRetrospectiveStep: {
@@ -37950,6 +39932,15 @@ export interface operations {
             };
             /** @description resource not found */
             404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/vnd.api+json": components["schemas"]["errors_list"];
+                };
+            };
+            /** @description moving a private incident's event to a public status page is rejected */
+            422: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -38600,7 +40591,10 @@ export interface operations {
     createIncident: {
         parameters: {
             query?: never;
-            header?: never;
+            header?: {
+                /** @description Optional client-generated key that makes creation safe to retry. Within 24 hours, a repeat request carrying the same key returns the incident created by the first request with status 200 instead of creating a duplicate. Keys are scoped to the team. Keys longer than 255 characters are rejected with 422. */
+                "Idempotency-Key"?: string;
+            };
             path?: never;
             cookie?: never;
         };
@@ -38610,6 +40604,15 @@ export interface operations {
             };
         };
         responses: {
+            /** @description incident already created for this Idempotency-Key */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/vnd.api+json": components["schemas"]["incident_response"];
+                };
+            };
             /** @description incident created */
             201: {
                 headers: {
@@ -39537,7 +41540,7 @@ export interface operations {
                     "application/vnd.api+json": components["schemas"]["start_session_response"];
                 };
             };
-            /** @description invalid platform */
+            /** @description Scribe is disabled for the organization */
             422: {
                 headers: {
                     [name: string]: unknown;
@@ -41044,6 +43047,716 @@ export interface operations {
                 };
             };
             /** @description resource not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/vnd.api+json": components["schemas"]["errors_list"];
+                };
+            };
+        };
+    };
+    createPrivateAgentEnrollmentToken: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Enrollment token issued */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/vnd.api+json": components["schemas"]["private_agent_enrollment_token_response"];
+                };
+            };
+            /** @description Invalid or missing API credential */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Not authorized or feature disabled */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    listPrivateAgents: {
+        parameters: {
+            query?: {
+                "page[number]"?: number;
+                "page[size]"?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Agents listed */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/vnd.api+json": components["schemas"]["private_agent_list"];
+                };
+            };
+            /** @description Invalid or missing API credential */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    getPrivateAgent: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Agent details */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/vnd.api+json": components["schemas"]["private_agent_response"];
+                };
+            };
+            /** @description Invalid or missing API credential */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Not found or unauthorized */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    updatePrivateAgent: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/vnd.api+json": components["schemas"]["private_agent_update"];
+            };
+        };
+        responses: {
+            /** @description Agent metadata updated */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Invalid or missing API credential */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Not found or unauthorized */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Agent update is busy */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/vnd.api+json": components["schemas"]["errors_list"];
+                };
+            };
+            /** @description Invalid metadata */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    revokePrivateAgent: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Agent revoked */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/vnd.api+json": components["schemas"]["private_agent_response"];
+                };
+            };
+            /** @description Invalid or missing API credential */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Not found or unauthorized */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    listProblemActionItems: {
+        parameters: {
+            query?: {
+                "page[number]"?: number;
+                "page[size]"?: number;
+                sort?: string;
+                "filter[search]"?: string;
+                "filter[due_date][gt]"?: string;
+                "filter[due_date][gte]"?: string;
+                "filter[due_date][lt]"?: string;
+                "filter[due_date][lte]"?: string;
+                "filter[created_at][gt]"?: string;
+                "filter[created_at][gte]"?: string;
+                "filter[created_at][lt]"?: string;
+                "filter[created_at][lte]"?: string;
+                "filter[status][eq]"?: string;
+                "filter[status][not_eq]"?: string;
+                "filter[status][in]"?: string;
+                "filter[status][not_in]"?: string;
+                "filter[priority][eq]"?: string;
+                "filter[priority][not_eq]"?: string;
+                "filter[priority][in]"?: string;
+                "filter[priority][not_in]"?: string;
+                "filter[assigned_to_user_id][eq]"?: string;
+                "filter[assigned_to_user_id][not_eq]"?: string;
+                "filter[assigned_to_user_id][in]"?: string;
+                "filter[assigned_to_user_id][not_in]"?: string;
+            };
+            header?: never;
+            path: {
+                problem_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/vnd.api+json": components["schemas"]["problem_action_item_list"];
+                };
+            };
+        };
+    };
+    createProblemActionItem: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                problem_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/vnd.api+json": components["schemas"]["new_problem_action_item"];
+            };
+        };
+        responses: {
+            /** @description problem action item created */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/vnd.api+json": components["schemas"]["problem_action_item_response"];
+                };
+            };
+            /** @description responds with unauthorized for invalid token */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/vnd.api+json": components["schemas"]["errors_list"];
+                };
+            };
+            /** @description invalid request */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/vnd.api+json": components["schemas"]["errors_list"];
+                };
+            };
+        };
+    };
+    getProblemActionItem: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description assignee without problems.read can view their assigned item */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/vnd.api+json": components["schemas"]["problem_action_item_response"];
+                };
+            };
+            /** @description problem action item not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/vnd.api+json": components["schemas"]["errors_list"];
+                };
+            };
+        };
+    };
+    updateProblemActionItem: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/vnd.api+json": components["schemas"]["update_problem_action_item"];
+            };
+        };
+        responses: {
+            /** @description problem action item updated */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/vnd.api+json": components["schemas"]["problem_action_item_response"];
+                };
+            };
+        };
+    };
+    deleteProblemActionItem: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description problem action item deleted */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/vnd.api+json": components["schemas"]["problem_action_item_response"];
+                };
+            };
+            /** @description problem action item not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/vnd.api+json": components["schemas"]["errors_list"];
+                };
+            };
+        };
+    };
+    listAllProblemActionItems: {
+        parameters: {
+            query?: {
+                "page[number]"?: number;
+                "page[size]"?: number;
+                sort?: string;
+                problem_id?: string;
+                "filter[search]"?: string;
+                "filter[due_date][gt]"?: string;
+                "filter[due_date][gte]"?: string;
+                "filter[due_date][lt]"?: string;
+                "filter[due_date][lte]"?: string;
+                "filter[created_at][gt]"?: string;
+                "filter[created_at][gte]"?: string;
+                "filter[created_at][lt]"?: string;
+                "filter[created_at][lte]"?: string;
+                "filter[status][eq]"?: string;
+                "filter[status][not_eq]"?: string;
+                "filter[status][in]"?: string;
+                "filter[status][not_in]"?: string;
+                "filter[priority][eq]"?: string;
+                "filter[priority][not_eq]"?: string;
+                "filter[priority][in]"?: string;
+                "filter[priority][not_in]"?: string;
+                "filter[assigned_to_user_id][eq]"?: string;
+                "filter[assigned_to_user_id][not_eq]"?: string;
+                "filter[assigned_to_user_id][in]"?: string;
+                "filter[assigned_to_user_id][not_in]"?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description excludes items from other teams */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/vnd.api+json": components["schemas"]["problem_action_item_list"];
+                };
+            };
+            /** @description problem-management feature flag disabled */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/vnd.api+json": components["schemas"]["errors_list"];
+                };
+            };
+        };
+    };
+    listProblems: {
+        parameters: {
+            query?: {
+                "page[number]"?: number;
+                "page[size]"?: number;
+                sort?: string;
+                "filter[search]"?: string;
+                "filter[owner_user_id]"?: number;
+                "filter[owner_group_id]"?: string;
+                "filter[created_by_user_id]"?: number;
+                "filter[created_at][gt]"?: string;
+                "filter[created_at][gte]"?: string;
+                "filter[created_at][lt]"?: string;
+                "filter[created_at][lte]"?: string;
+                "filter[due_date][gt]"?: string;
+                "filter[due_date][gte]"?: string;
+                "filter[due_date][lt]"?: string;
+                "filter[due_date][lte]"?: string;
+                "filter[status][eq]"?: string;
+                "filter[status][not_eq]"?: string;
+                "filter[status][in]"?: string;
+                "filter[status][not_in]"?: string;
+                "filter[priority][eq]"?: string;
+                "filter[priority][not_eq]"?: string;
+                "filter[priority][in]"?: string;
+                "filter[priority][not_in]"?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description sorted by incidents_count with incident read permission */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/vnd.api+json": components["schemas"]["problem_list"];
+                };
+            };
+            /** @description incidents_count sort rejected without incident read permission */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/vnd.api+json": components["schemas"]["errors_list"];
+                };
+            };
+            /** @description problem-management feature flag disabled */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/vnd.api+json": components["schemas"]["errors_list"];
+                };
+            };
+        };
+    };
+    createProblem: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/vnd.api+json": components["schemas"]["new_problem"];
+            };
+        };
+        responses: {
+            /** @description problem created */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/vnd.api+json": components["schemas"]["problem_response"];
+                };
+            };
+            /** @description responds with unauthorized for invalid token */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/vnd.api+json": components["schemas"]["errors_list"];
+                };
+            };
+            /** @description invalid request */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/vnd.api+json": components["schemas"]["errors_list"];
+                };
+            };
+        };
+    };
+    getProblem: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description linked incidents hidden without incident read permission */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/vnd.api+json": components["schemas"]["problem_response"];
+                };
+            };
+            /** @description problem belongs to another team */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/vnd.api+json": components["schemas"]["errors_list"];
+                };
+            };
+        };
+    };
+    updateProblem: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/vnd.api+json": components["schemas"]["update_problem"];
+            };
+        };
+        responses: {
+            /** @description status transition applies other fields atomically */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/vnd.api+json": components["schemas"]["problem_response"];
+                };
+            };
+            /** @description problem not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/vnd.api+json": components["schemas"]["errors_list"];
+                };
+            };
+            /** @description failed transition does not persist other fields */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/vnd.api+json": components["schemas"]["errors_list"];
+                };
+            };
+        };
+    };
+    deleteProblem: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description problem deleted */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/vnd.api+json": components["schemas"]["problem_response"];
+                };
+            };
+            /** @description problem not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/vnd.api+json": components["schemas"]["errors_list"];
+                };
+            };
+        };
+    };
+    linkProblemIncidents: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/vnd.api+json": components["schemas"]["link_incidents"];
+            };
+        };
+        responses: {
+            /** @description incident linked */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/vnd.api+json": components["schemas"]["problem_response"];
+                };
+            };
+            /** @description incident_id missing */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/vnd.api+json": components["schemas"]["errors_list"];
+                };
+            };
+            /** @description incident not found or inaccessible */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/vnd.api+json": components["schemas"]["errors_list"];
+                };
+            };
+        };
+    };
+    unlinkProblemIncident: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+                incident_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description incident unlinked */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/vnd.api+json": components["schemas"]["problem_response"];
+                };
+            };
+            /** @description incident not linked */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -43742,9 +46455,9 @@ export interface operations {
             query?: {
                 /** @description comma separated if needed. eg: shift_override,user. Note: `user` is deprecated, use `assignee` instead. */
                 include?: "shift_override" | "user" | "assignee" | "shift_shadow";
-                /** @description Start range for shifts in ISO-8601 format (e.g., 2025-01-01T00:00:00Z or 2025-01-01T00:00:00+00:00) */
+                /** @description Start range for shifts in ISO-8601 format. When omitted with `to`, defaults to `to` for a point-in-time lookup; when both bounds are omitted, defaults to the current time through one month ahead. */
                 from?: string;
-                /** @description End range for shifts in ISO-8601 format (e.g., 2025-01-01T00:00:00Z or 2025-01-01T00:00:00+00:00) */
+                /** @description End range for shifts in ISO-8601 format. When omitted with `from`, defaults to `from`; when both bounds are omitted, defaults to the current time through one month ahead. */
                 to?: string;
                 "user_ids[]"?: number[];
                 "schedule_ids[]"?: string[];
@@ -44440,6 +47153,185 @@ export interface operations {
             };
         };
     };
+    listStatusPageTeams: {
+        parameters: {
+            query?: {
+                include?: string;
+                "page[number]"?: number;
+                "page[size]"?: number;
+            };
+            header?: never;
+            path: {
+                status_page_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/vnd.api+json": components["schemas"]["status_page_team_list"];
+                };
+            };
+        };
+    };
+    createStatusPageTeam: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                status_page_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/vnd.api+json": components["schemas"]["new_status_page_team"];
+            };
+        };
+        responses: {
+            /** @description status page team assignment created */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/vnd.api+json": components["schemas"]["status_page_team_response"];
+                };
+            };
+            /** @description responds with unauthorized for invalid token */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/vnd.api+json": components["schemas"]["errors_list"];
+                };
+            };
+            /** @description caller is not an owner or admin */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/vnd.api+json": components["schemas"]["errors_list"];
+                };
+            };
+            /** @description team is already assigned */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/vnd.api+json": components["schemas"]["errors_list"];
+                };
+            };
+        };
+    };
+    getStatusPageTeam: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                status_page_id: string;
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description status page team assignment found */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/vnd.api+json": components["schemas"]["status_page_team_response"];
+                };
+            };
+            /** @description resource not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/vnd.api+json": components["schemas"]["errors_list"];
+                };
+            };
+        };
+    };
+    updateStatusPageTeam: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                status_page_id: string;
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/vnd.api+json": components["schemas"]["update_status_page_team"];
+            };
+        };
+        responses: {
+            /** @description status page team assignment updated */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/vnd.api+json": components["schemas"]["status_page_team_response"];
+                };
+            };
+            /** @description resource not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/vnd.api+json": components["schemas"]["errors_list"];
+                };
+            };
+        };
+    };
+    deleteStatusPageTeam: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                status_page_id: string;
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description status page team assignment deleted */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/vnd.api+json": components["schemas"]["status_page_team_response"];
+                };
+            };
+            /** @description resource not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/vnd.api+json": components["schemas"]["errors_list"];
+                };
+            };
+        };
+    };
     listStatusPageTemplates: {
         parameters: {
             query?: {
@@ -45127,6 +48019,15 @@ export interface operations {
                     "application/vnd.api+json": components["schemas"]["errors_list"];
                 };
             };
+            /** @description feature not enabled for the organization */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/vnd.api+json": components["schemas"]["errors_list"];
+                };
+            };
             /** @description invalid association */
             422: {
                 headers: {
@@ -45194,6 +48095,15 @@ export interface operations {
                 };
                 content: {
                     "application/vnd.api+json": components["schemas"]["team_response"];
+                };
+            };
+            /** @description feature not enabled for the organization */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/vnd.api+json": components["schemas"]["errors_list"];
                 };
             };
             /** @description resource not found */
@@ -45371,6 +48281,15 @@ export interface operations {
             };
             /** @description unauthorized */
             401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/vnd.api+json": components["schemas"]["errors_list"];
+                };
+            };
+            /** @description feature not enabled for the organization */
+            403: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -46138,6 +49057,91 @@ export interface operations {
                 };
                 content: {
                     "application/vnd.api+json": components["schemas"]["errors_list"];
+                };
+            };
+        };
+    };
+    verifyUserPhoneNumber: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description verification code sent */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        message: string;
+                    };
+                };
+            };
+            /** @description application verification rate limit */
+            429: {
+                headers: {
+                    /** @description Seconds until the recipient can request another SMS verification code */
+                    "Retry-After"?: number;
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: string;
+                    };
+                };
+            };
+            /** @description verification rate limiter unavailable */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: string;
+                    };
+                };
+            };
+        };
+    };
+    resendVerificationUserPhoneNumber: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description verification code resent */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        message: string;
+                    };
+                };
+            };
+            /** @description application resend rate limit */
+            429: {
+                headers: {
+                    /** @description Seconds until the recipient can request another SMS verification code */
+                    "Retry-After"?: number;
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: string;
+                    };
                 };
             };
         };
