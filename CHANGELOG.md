@@ -28,6 +28,7 @@
   - `GET`, `PUT`, and `DELETE /v1/problems/{id}` — Get, update, or delete a problem
   - `POST /v1/problems/{id}/incidents` and `DELETE /v1/problems/{id}/incidents/{incident_id}` — Link or unlink an incident
   - `GET` and `POST /v1/problems/{problem_id}/action_items` — List or create a problem action item
+  - `GET /v1/problem_action_items` — List all accessible problem action items
   - `GET`, `PUT`, and `DELETE /v1/problem_action_items/{id}` — Get, update, or delete a problem action item
 - **Status Page Teams API**
   - `GET` and `POST /v1/status-pages/{status_page_id}/teams` — List or add a team
