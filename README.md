@@ -145,7 +145,7 @@ client.use(createAuthMiddleware("your-token"));
 
 ## Requirements
 
-- Node.js >= 20 (native `fetch` required)
+- Node.js >= 22 (native `fetch` required)
 
 ## Development
 
