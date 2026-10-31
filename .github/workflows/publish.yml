@@ -32,3 +32,19 @@ jobs:
       - run: make build
       - run: npm publish --provenance --access public
 
+
+  release:
+    if: github.event_name == 'push'
+    needs:
+      - publish
+    runs-on: blacksmith-2vcpu-ubuntu-2404
+    permissions:
+      contents: write
+    steps:
+      - name: Create GitHub release if missing
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG: ${{ github.ref_name }}
+        # Manual `git push origin v*` tags have no release yet; release-please
+        # dispatch never reaches this job (it only runs on push).
+        run: gh release view "$TAG" > /dev/null 2>&1 || gh release create "$TAG" --generate-notes --verify-tag
